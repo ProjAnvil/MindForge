@@ -13,6 +13,19 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Detect OS
+detect_os() {
+    if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+        echo "windows"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    else
+        echo "linux"
+    fi
+}
+
+OS_TYPE=$(detect_os)
+
 # Default language
 LANG_CODE="en"
 
@@ -87,12 +100,21 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  AITK Claude Code Setup${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
+echo -e "${GREEN}OS Detected:${NC} $OS_TYPE"
 echo -e "${GREEN}Language:${NC} $LANG_CODE"
 echo -e "${GREEN}Source:${NC}"
 echo "  Agents: $AITK_AGENTS_DIR"
 echo "  Skills: $AITK_SKILLS_DIR"
 echo -e "${GREEN}Target:${NC} $CLAUDE_DIR/"
 echo ""
+
+# Windows-specific warnings
+if [ "$OS_TYPE" = "windows" ]; then
+    echo -e "${YELLOW}⚠ Windows Detected${NC}"
+    echo -e "${YELLOW}Note: On Windows, files will be copied instead of linked.${NC}"
+    echo -e "${YELLOW}You'll need to re-run this script after making changes to agents/skills.${NC}"
+    echo -e ""
+fi
 
 # Function to create directory if it doesn't exist
 create_dir() {
@@ -110,26 +132,85 @@ create_symlink() {
     local source=$1
     local target=$2
     local name=$3
+    local source_win="$source"
+    local target_win="$target"
 
-    if [ -L "$target" ]; then
-        # Symlink exists
-        local current_target=$(readlink "$target")
-        if [ "$current_target" = "$source" ]; then
-            echo -e "${GREEN}✓${NC} $name (already linked)"
+    # Convert path for Windows if needed
+    if [ "$OS_TYPE" = "windows" ]; then
+        # Convert Unix path to Windows path for mklink
+        if command -v cygpath &> /dev/null; then
+            source_win=$(cygpath -w "$source")
+            target_win=$(cygpath -w "$target")
         else
-            echo -e "${YELLOW}⟳${NC} $name (updating link)"
-            rm "$target"
+            # Fallback: manual conversion for GitBash
+            source_win="${source//\//\\}"
+            target_win="${target//\//\\}"
+            # Handle /c/ -> C:\ style paths
+            source_win=$(echo "$source_win" | sed 's/^\\c\\/C:\\/i')
+            target_win=$(echo "$target_win" | sed 's/^\\c\\/C:\\/i')
+        fi
+    fi
+
+    if [ "$OS_TYPE" = "windows" ]; then
+        # Windows: always remove and re-copy to ensure latest version
+        if [ -e "$target" ]; then
+            echo -e "${YELLOW}⟳${NC} $name (updating)"
+            rm -rf "$target"
+        else
+            echo -e "${GREEN}+${NC} $name (copying)"
+        fi
+        create_link_windows "$source" "$target" "$name"
+    else
+        # Unix/Mac: use symbolic links
+        if [ -L "$target" ]; then
+            # Symlink exists
+            local current_target=$(readlink "$target")
+            if [ "$current_target" = "$source" ]; then
+                echo -e "${GREEN}✓${NC} $name (already linked)"
+            else
+                echo -e "${YELLOW}⟳${NC} $name (updating link)"
+                rm "$target"
+                ln -s "$source" "$target"
+            fi
+        elif [ -e "$target" ]; then
+            # File/directory exists but is not a symlink
+            echo -e "${RED}✗${NC} $name (conflict: $target exists and is not a symlink)"
+            echo -e "${YELLOW}  Please manually remove or backup:${NC} $target"
+            return 1
+        else
+            # Create new symlink
+            echo -e "${GREEN}+${NC} $name (creating link)"
             ln -s "$source" "$target"
         fi
-    elif [ -e "$target" ]; then
-        # File/directory exists but is not a symlink
-        echo -e "${RED}✗${NC} $name (conflict: $target exists and is not a symlink)"
-        echo -e "${YELLOW}  Please manually remove or backup:${NC} $target"
-        return 1
+    fi
+}
+
+# Function to create symlink on Windows (uses copy instead)
+create_link_windows() {
+    local source=$1
+    local target=$2
+    local name=$3
+
+    if [ -d "$source" ]; then
+        # Directory - copy recursively
+        cp -r "$source" "$target"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}  Copied directory${NC}"
+            return 0
+        else
+            echo -e "${RED}  Failed to copy directory${NC}"
+            return 1
+        fi
     else
-        # Create new symlink
-        echo -e "${GREEN}+${NC} $name (creating link)"
-        ln -s "$source" "$target"
+        # File - copy file
+        cp "$source" "$target"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}  Copied file${NC}"
+            return 0
+        else
+            echo -e "${RED}  Failed to copy file${NC}"
+            return 1
+        fi
     fi
 }
 
@@ -222,9 +303,14 @@ echo "2. Use agents with: ${BLUE}@agent-name${NC} in Claude Code"
 echo "3. Skills are automatically loaded when referenced in agents"
 echo ""
 echo -e "${YELLOW}Important notes:${NC}"
-echo "- Changes to agents/skills in your project are immediately available"
+if [ "$OS_TYPE" = "windows" ]; then
+    echo "- ${RED}Windows: Files are copied, not linked. Re-run this script after making changes!${NC}"
+    echo "- To remove: ${RED}rm -rf ~/.claude/agents/* ~/.claude/skills/*${NC}"
+else
+    echo "- Changes to agents/skills in your project are immediately available"
+    echo "- To remove links: ${RED}rm ~/.claude/agents/* ~/.claude/skills/*${NC}"
+fi
 echo "- To switch language, run: ${BLUE}$0 --lang=<lang>${NC}"
-echo "- To remove links: ${RED}rm ~/.claude/agents/* ~/.claude/skills/*${NC}"
 echo ""
 echo -e "${GREEN}Available languages:${NC}"
 ls -d "$AITK_DIR/agents/"*/ 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
