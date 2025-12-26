@@ -32,6 +32,25 @@ MindForge integrates seamlessly with Claude Code. Run the setup script to automa
 
 This creates symbolic links to your `~/.claude/` directory, allowing Claude Code to automatically load all agents and skills.
 
+### 🎛️ User-Level Configuration
+
+For personalized behavior across all your projects, you can configure user-level instructions:
+
+```bash
+# Copy user-level instructions to your Claude directory
+cp user_claude_md/en/CLAUDE.md ~/.claude/CLAUDE.md    # English
+cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
+```
+
+**What user-level configuration provides:**
+- **Global principles**: Default behavior applied across all conversations
+- **Language preference**: Set your preferred response language (English or Chinese)
+- **Search priority**: Instructions for handling uncertain questions
+- **Safety rules**: Confirmation requirements for destructive operations
+- **Built-in capability priority**: Guidance on when to use agents/skills vs external tools
+
+**Note:** User-level configuration is optional. If not configured, Claude Code will use its default behavior.
+
 ### 🌍 Supported Languages
 
 - **en** - English
@@ -39,6 +58,7 @@ This creates symbolic links to your `~/.claude/` directory, allowing Claude Code
 
 ## 🤖 Available Agents
 
+- **@java-backend-engineer** - Professional Java backend engineer (Spring Boot, Mumble SDK, MyBatis, Clean Architecture)
 - **@java-unit-test** - Professional Java unit test generator (JUnit, Mockito, AssertJ)
 - **@python-test-engineer** - Professional Python testing engineer (pytest, unittest, pytest-asyncio)
 - **@system-architect** - System architecture design expert (patterns, tech selection, ADR docs)
@@ -57,6 +77,7 @@ This creates symbolic links to your `~/.claude/` directory, allowing Claude Code
 - **database-design** - Database design and optimization
 - **tech-documentation** - Technical documentation writing
 - **frontend-development** - Frontend development (Svelte, SvelteKit, shadcn-svelte, Tailwind CSS)
+- **git-guru** - Advanced Git operations and version control mastery
 
 ## 📁 Project Structure
 
@@ -64,12 +85,14 @@ This creates symbolic links to your `~/.claude/` directory, allowing Claude Code
 mindforge/
 ├── agents/              # Claude Code format Agents (multi-language)
 │   ├── en/             # English versions
+│   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
 │   │   ├── python-test-engineer.md
 │   │   ├── system-architect.md
 │   │   ├── golang-backend-engineer.md
 │   │   └── frontend-engineer.md
 │   └── zh-cn/          # Chinese versions
+│       ├── java-backend-engineer.md
 │       ├── java-unit-test.md
 │       ├── python-test-engineer.md
 │       ├── system-architect.md
@@ -86,7 +109,8 @@ mindforge/
 │   │   ├── api-design/SKILL.md
 │   │   ├── database-design/SKILL.md
 │   │   ├── tech-documentation/SKILL.md
-│   │   └── frontend-development/SKILL.md
+│   │   ├── frontend-development/SKILL.md
+│   │   └── git-guru/SKILL.md
 │   └── zh-cn/          # Chinese versions
 │       ├── testing/SKILL.md
 │       ├── enterprise-java/SKILL.md
@@ -97,7 +121,13 @@ mindforge/
 │       ├── api-design/SKILL.md
 │       ├── database-design/SKILL.md
 │       ├── tech-documentation/SKILL.md
-│       └── frontend-development/SKILL.md
+│       ├── frontend-development/SKILL.md
+│       └── git-guru/SKILL.md
+├── user_claude_md/      # User-level Claude instructions (multi-language)
+│   ├── en/
+│   │   └── CLAUDE.md   # English user-level instructions
+│   └── zh-cn/
+│       └── CLAUDE.md   # Chinese user-level instructions
 ├── templates/           # Templates for creating new resources
 │   ├── agent-template-en.md      # English agent template
 │   ├── agent-template-zhcn.md    # Chinese agent template
@@ -106,10 +136,25 @@ mindforge/
 ├── mcp/                 # MCP services collection
 │   ├── _template/
 │   └── mcp-*/
+├── docs/                # Documentation
+│   ├── README-zhcn.md   # Chinese README
+│   └── agents-detail/   # Detailed agent documentation
+│       ├── en/          # English detailed guides
+│       │   ├── java-backend-engineer/README.md
+│       │   ├── java-unit-test/README.md
+│       │   ├── python-test-engineer/README.md
+│       │   ├── system-architect/README.md
+│       │   ├── golang-backend-engineer/README.md
+│       │   └── frontend-engineer/README.md
+│       └── zh-cn/       # Chinese detailed guides
+│           ├── java-backend-engineer/README.md
+│           ├── java-unit-test/README.md
+│           ├── python-test-engineer/README.md
+│           ├── system-architect/README.md
+│           ├── golang-backend-engineer/README.md
+│           └── frontend-engineer/README.md
 ├── Makefile             # Build and resource management
-├── setup-claude.sh      # Claude Code setup script (supports --lang parameter)
-└── docs/               # Documentation
-    └── README-zhcn.md  # Chinese README
+└── setup-claude.sh      # Claude Code setup script (supports --lang parameter)
 ```
 
 ## 🛠️ Usage

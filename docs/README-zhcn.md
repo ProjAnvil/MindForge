@@ -32,6 +32,25 @@ MindForge 与 Claude Code 无缝集成。运行设置脚本自动配置所有 ag
 
 这将创建符号链接到 `~/.claude/` 目录，使 Claude Code 自动加载所有 agents 和 skills。
 
+### 🎛️ 用户级别配置
+
+为了在所有项目中获得个性化的行为，你可以配置用户级别指令：
+
+```bash
+# 复制用户级别指令到 Claude 目录
+cp user_claude_md/en/CLAUDE.md ~/.claude/CLAUDE.md    # 英文
+cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
+```
+
+**用户级别配置提供：**
+- **全局原则**：应用于所有对话的默认行为
+- **语言偏好**：设置你偏好的响应语言（中文或英文）
+- **搜索优先**：处理不确定问题时的指导
+- **安全规则**：破坏性操作的确认要求
+- **内置能力优先**：关于何时使用 agents/skills 与外部工具的指导
+
+**注意：** 用户级别配置是可选的。如果未配置，Claude Code 将使用其默认行为。
+
 ### 🌍 支持的语言
 
 - **en** - English（英文）
@@ -39,6 +58,7 @@ MindForge 与 Claude Code 无缝集成。运行设置脚本自动配置所有 ag
 
 ## 🤖 可用的 Agents
 
+- **@java-backend-engineer** - 专业 Java 后端工程师（Spring Boot, Mumble SDK, MyBatis, Clean Architecture）
 - **@java-unit-test** - 专业的 Java 单元测试生成器（JUnit, Mockito, AssertJ）
 - **@python-test-engineer** - 专业的 Python 测试工程师（pytest, unittest, pytest-asyncio）
 - **@system-architect** - 系统架构设计专家（架构模式、技术选型、ADR 文档）
@@ -57,6 +77,7 @@ MindForge 与 Claude Code 无缝集成。运行设置脚本自动配置所有 ag
 - **database-design** - 数据库设计与优化
 - **tech-documentation** - 技术文档编写
 - **frontend-development** - 前端开发（Svelte, SvelteKit, shadcn-svelte, Tailwind CSS）
+- **git-guru** - 高级 Git 操作和版本控制精通
 
 ## 📁 项目结构
 
@@ -64,12 +85,14 @@ MindForge 与 Claude Code 无缝集成。运行设置脚本自动配置所有 ag
 mindforge/
 ├── agents/              # Claude Code 格式的 Agents（多语言支持）
 │   ├── en/             # 英文版本
+│   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
 │   │   ├── python-test-engineer.md
 │   │   ├── system-architect.md
 │   │   ├── golang-backend-engineer.md
 │   │   └── frontend-engineer.md
 │   └── zh-cn/          # 中文版本
+│       ├── java-backend-engineer.md
 │       ├── java-unit-test.md
 │       ├── python-test-engineer.md
 │       ├── system-architect.md
@@ -86,7 +109,8 @@ mindforge/
 │   │   ├── api-design/SKILL.md
 │   │   ├── database-design/SKILL.md
 │   │   ├── tech-documentation/SKILL.md
-│   │   └── frontend-development/SKILL.md
+│   │   ├── frontend-development/SKILL.md
+│   │   └── git-guru/SKILL.md
 │   └── zh-cn/          # 中文版本
 │       ├── testing/SKILL.md
 │       ├── enterprise-java/SKILL.md
@@ -97,7 +121,13 @@ mindforge/
 │       ├── api-design/SKILL.md
 │       ├── database-design/SKILL.md
 │       ├── tech-documentation/SKILL.md
-│       └── frontend-development/SKILL.md
+│       ├── frontend-development/SKILL.md
+│       └── git-guru/SKILL.md
+├── user_claude_md/      # 用户级别 Claude 指令（多语言支持）
+│   ├── en/
+│   │   └── CLAUDE.md   # 英文用户级别指令
+│   └── zh-cn/
+│       └── CLAUDE.md   # 中文用户级别指令
 ├── templates/           # 创建新资源的模板
 │   ├── agent-template-en.md      # 英文 agent 模板
 │   ├── agent-template-zhcn.md    # 中文 agent 模板
@@ -106,10 +136,25 @@ mindforge/
 ├── mcp/                 # MCP 服务集合
 │   ├── _template/
 │   └── mcp-*/
+├── docs/                # 文档
+│   ├── README-zhcn.md   # 中文 README
+│   └── agents-detail/   # 详细 agent 文档
+│       ├── en/          # 英文详细指南
+│       │   ├── java-backend-engineer/README.md
+│       │   ├── java-unit-test/README.md
+│       │   ├── python-test-engineer/README.md
+│       │   ├── system-architect/README.md
+│       │   ├── golang-backend-engineer/README.md
+│       │   └── frontend-engineer/README.md
+│       └── zh-cn/       # 中文详细指南
+│           ├── java-backend-engineer/README.md
+│           ├── java-unit-test/README.md
+│           ├── python-test-engineer/README.md
+│           ├── system-architect/README.md
+│           ├── golang-backend-engineer/README.md
+│           └── frontend-engineer/README.md
 ├── Makefile             # 构建和资源管理
-├── setup-claude.sh      # Claude Code 设置脚本（支持 --lang 参数）
-└── docs/                # 文档
-    └── README-zhcn.md   # 中文 README
+└── setup-claude.sh      # Claude Code 设置脚本（支持 --lang 参数）
 ```
 
 ## 🛠️ 使用方法
