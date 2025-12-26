@@ -1,6 +1,6 @@
 # Java 后端工程师 Agent - 详细指南
 
-本文档包含使用 Spring Boot 和 Mumble SDK 进行 Java 后端开发的综合示例、模板和最佳实践。
+本文档包含使用 Spring Boot 进行 Java 后端开发的综合示例、模板和最佳实践。
 
 ## 目录
 
@@ -59,32 +59,33 @@ project/
 
 ## RESTful API 开发
 
-### 使用 Mumble SDK 的标准控制器
+### 标准控制器
 
 ```java
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
-public class UserController extends MumbleAbstractBaseController<UserRequest, UserResponse> {
+public class UserController {
 
     private final UserService userService;
 
     @PostMapping("/query")
-    public DeferredResult<BaseMessage> queryUsers(@RequestBody UserRequest request) {
-        return super.doAsyncService(request);
+    public ResponseEntity<UserResponse> queryUsers(@RequestBody UserRequest request) {
+        UserResponse response = userService.queryUsers(request);
+        return ResponseEntity.ok(response);
     }
 
-    @Override
-    public UserResponse execute(UserRequest request) {
-        return userService.queryUsers(request);
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+        userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Override
-    public BizErrors validate(UserRequest request) {
-        BizErrors errors = new BizErrors();
-        // Mumble 自动验证注解
-        return errors;
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDO> getUserById(@PathVariable Long id) {
+        UserDO user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 }
 ```
@@ -160,23 +161,16 @@ public class UserResponse implements Serializable {
 
 ## 分布式调度
 
-### Mumble 定时任务
+### 使用 Spring 的定时任务
 
 ```java
 @Component
-@MumbleScheduled("User Data Sync Task")
 @Slf4j
 public class UserSyncSchedule {
 
     private final UserService userService;
 
-    @MumbleCron(
-        lock = "USER_SYNC_LOCK",
-        cron = "0 0 2 * * ?",  // 每天凌晨 2 点
-        desc = "从外部系统同步用户数据",
-        retry = 3,
-        timeoutInMs = 300000
-    )
+    @Scheduled(cron = "0 0 2 * * ?")  // 每天凌晨 2 点
     public void syncUserData() {
         log.info("Starting user data synchronization...");
         try {
@@ -184,7 +178,7 @@ public class UserSyncSchedule {
             log.info("User data sync completed successfully");
         } catch (Exception e) {
             log.error("User data sync failed", e);
-            throw e;  // 触发重试机制
+            throw e;
         }
     }
 }

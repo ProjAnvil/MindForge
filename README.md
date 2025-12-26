@@ -58,7 +58,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 
 ## 🤖 Available Agents
 
-- **@java-backend-engineer** - Professional Java backend engineer (Spring Boot, Mumble SDK, MyBatis, Clean Architecture)
+- **@java-backend-engineer** - Professional Java backend engineer (Spring Boot, MyBatis, Clean Architecture)
 - **@java-unit-test** - Professional Java unit test generator (JUnit, Mockito, AssertJ)
 - **@python-test-engineer** - Professional Python testing engineer (pytest, unittest, pytest-asyncio)
 - **@system-architect** - System architecture design expert (patterns, tech selection, ADR docs)

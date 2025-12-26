@@ -58,7 +58,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 
 ## 🤖 可用的 Agents
 
-- **@java-backend-engineer** - 专业 Java 后端工程师（Spring Boot, Mumble SDK, MyBatis, Clean Architecture）
+- **@java-backend-engineer** - 专业 Java 后端工程师（Spring Boot, MyBatis, Clean Architecture）
 - **@java-unit-test** - 专业的 Java 单元测试生成器（JUnit, Mockito, AssertJ）
 - **@python-test-engineer** - 专业的 Python 测试工程师（pytest, unittest, pytest-asyncio）
 - **@system-architect** - 系统架构设计专家（架构模式、技术选型、ADR 文档）

@@ -1,6 +1,6 @@
 # Java Backend Engineer Agent - Detailed Guide
 
-This document contains comprehensive examples, templates, and best practices for Java backend development with Spring Boot and Mumble SDK.
+This document contains comprehensive examples, templates, and best practices for Java backend development with Spring Boot.
 
 ## Table of Contents
 
@@ -59,32 +59,33 @@ project/
 
 ## RESTful API Development
 
-### Standard Controller with Mumble SDK
+### Standard Controller
 
 ```java
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
-public class UserController extends MumbleAbstractBaseController<UserRequest, UserResponse> {
+public class UserController {
 
     private final UserService userService;
 
     @PostMapping("/query")
-    public DeferredResult<BaseMessage> queryUsers(@RequestBody UserRequest request) {
-        return super.doAsyncService(request);
+    public ResponseEntity<UserResponse> queryUsers(@RequestBody UserRequest request) {
+        UserResponse response = userService.queryUsers(request);
+        return ResponseEntity.ok(response);
     }
 
-    @Override
-    public UserResponse execute(UserRequest request) {
-        return userService.queryUsers(request);
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest request) {
+        userService.createUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Override
-    public BizErrors validate(UserRequest request) {
-        BizErrors errors = new BizErrors();
-        // Mumble auto-validates annotations
-        return errors;
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDO> getUserById(@PathVariable Long id) {
+        UserDO user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 }
 ```
@@ -160,23 +161,16 @@ public class UserResponse implements Serializable {
 
 ## Distributed Scheduling
 
-### Mumble Scheduled Task
+### Scheduled Task with Spring
 
 ```java
 @Component
-@MumbleScheduled("User Data Sync Task")
 @Slf4j
 public class UserSyncSchedule {
 
     private final UserService userService;
 
-    @MumbleCron(
-        lock = "USER_SYNC_LOCK",
-        cron = "0 0 2 * * ?",  // Daily at 2 AM
-        desc = "Sync user data from external system",
-        retry = 3,
-        timeoutInMs = 300000
-    )
+    @Scheduled(cron = "0 0 2 * * ?")  // Daily at 2 AM
     public void syncUserData() {
         log.info("Starting user data synchronization...");
         try {
@@ -184,7 +178,7 @@ public class UserSyncSchedule {
             log.info("User data sync completed successfully");
         } catch (Exception e) {
             log.error("User data sync failed", e);
-            throw e;  // Trigger retry mechanism
+            throw e;
         }
     }
 }
