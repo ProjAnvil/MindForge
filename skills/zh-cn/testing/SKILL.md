@@ -1,6 +1,6 @@
 ---
 name: testing
-description: 综合软件测试技能，涵盖单元测试、集成测试、TDD/BDD、Mock 策略和跨多种语言的测试自动化。
+description: 综合软件测试技能，涵盖单元测试、集成测试、TDD/BDD、Mock 策略和跨多种语言的测试自动化。使用此技能编写测试用例、设计测试策略、实现测试自动化，或需要测试框架和最佳实践指导时使用。适合通过综合测试方法确保代码质量。
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 

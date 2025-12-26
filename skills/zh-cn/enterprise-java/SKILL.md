@@ -1,6 +1,6 @@
 ---
 name: enterprise-java
-description: 企业级 Java 开发技能，涵盖 Spring 生态系统、微服务、设计模式、性能优化和 Java 最佳实践。
+description: 企业级 Java 开发技能，涵盖 Spring 生态系统、微服务、设计模式、性能优化和 Java 最佳实践。使用此技能构建企业级 Java 应用、使用 Spring Boot、实现微服务，或需要 Java 架构和性能调优指导时使用。
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: database-design
-description: 数据库设计和优化技能，涵盖 ER 图、规范化、索引、分片、查询优化和数据库最佳实践。
+description: 数据库设计和优化技能，涵盖 ER 图、规范化、索引、分片、查询优化和数据库最佳实践。使用此技能设计数据库架构、优化查询、规划数据架构，或需要数据库扩展和性能调优指导时使用。
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 

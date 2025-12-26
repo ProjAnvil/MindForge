@@ -6,117 +6,117 @@ allowed-tools: Read, Grep, Glob, Edit, Write
 
 # Tech Documentation Skill
 
-技术文档编写技能库，提供全面的技术文档写作方法论和模板。
+Technical documentation writing expertise, providing comprehensive methodology and templates for producing high-quality technical documentation.
 
-## 概述
+## Overview
 
-这是一个专注于技术文档编写的综合性技能模块，涵盖各类技术文档的编写规范、模板和最佳实践，帮助团队产出高质量、易理解、易维护的技术文档。
+This is a comprehensive skill module focused on technical documentation writing, covering standards, templates, and best practices for various types of technical documentation to help teams produce high-quality, easy-to-understand, and maintainable documentation.
 
-## 核心能力
+## Core Capabilities
 
-### 1. API文档
-- **OpenAPI/Swagger规范**
-- **RESTful API文档**
-- **GraphQL文档**
-- **gRPC接口文档**
-- **API变更日志**
-- **认证授权说明**
+### 1. API Documentation
+- **OpenAPI/Swagger Specifications**
+- **RESTful API Documentation**
+- **GraphQL Documentation**
+- **gRPC Interface Documentation**
+- **API Change Logs**
+- **Authentication and Authorization Documentation**
 
-### 2. 架构文档
-- **架构设计文档** (Architecture Design Document)
-- **架构决策记录** (Architecture Decision Records, ADR)
-- **系统架构图** (C4模型、UML)
-- **技术选型报告**
-- **架构演进路线图**
+### 2. Architecture Documentation
+- **Architecture Design Documents (ADD)**
+- **Architecture Decision Records (ADR)**
+- **System Architecture Diagrams** (C4 Model, UML)
+- **Technology Selection Reports**
+- **Architecture Evolution Roadmaps**
 
-### 3. 详细设计文档
-- **模块设计文档**
-- **数据库设计文档**
-- **接口设计文档**
-- **算法设计说明**
-- **时序图/流程图**
+### 3. Detailed Design Documents
+- **Module Design Documents**
+- **Database Design Documents**
+- **Interface Design Documents**
+- **Algorithm Design Specifications**
+- **Sequence Diagrams/Flowcharts**
 
-### 4. 部署运维文档
-- **部署手册**
-- **运维手册**
-- **故障处理手册**
-- **监控告警配置**
-- **性能优化指南**
-- **备份恢复流程**
+### 4. Deployment and Operations Documentation
+- **Deployment Manuals**
+- **Operations Manuals**
+- **Incident Response Manuals**
+- **Monitoring and Alerting Configuration**
+- **Performance Optimization Guides**
+- **Backup and Recovery Procedures**
 
-### 5. 用户手册
-- **产品使用手册**
-- **快速开始指南**
-- **常见问题FAQ**
-- **故障排查指南**
-- **最佳实践**
+### 5. User Manuals
+- **Product User Manuals**
+- **Quick Start Guides**
+- **Frequently Asked Questions (FAQ)**
+- **Troubleshooting Guides**
+- **Best Practices**
 
-### 6. 开发者文档
-- **贡献指南** (CONTRIBUTING.md)
-- **代码规范**
-- **开发环境搭建**
-- **测试指南**
-- **发布流程**
+### 6. Developer Documentation
+- **Contributing Guidelines** (CONTRIBUTING.md)
+- **Coding Standards**
+- **Development Environment Setup**
+- **Testing Guides**
+- **Release Processes**
 
-### 7. 项目管理文档
-- **项目计划**
-- **需求文档**
-- **测试计划**
-- **发布说明** (Release Notes)
-- **变更日志** (CHANGELOG)
+### 7. Project Management Documentation
+- **Project Plans**
+- **Requirements Documents**
+- **Test Plans**
+- **Release Notes**
+- **Change Logs** (CHANGELOG)
 
-### 8. 知识库文档
-- **技术博客**
-- **案例分析**
-- **问题总结**
-- **学习笔记**
+### 8. Knowledge Base Documentation
+- **Technical Blog Posts**
+- **Case Studies**
+- **Problem Summaries**
+- **Learning Notes**
 
-## 文档编写原则
+## Documentation Principles
 
-### 1. 5C原则
-- **Clear (清晰)**: 语言简洁，逻辑清晰
-- **Concise (简洁)**: 避免冗余，直击要点
-- **Complete (完整)**: 信息全面，覆盖所需
-- **Correct (正确)**: 内容准确，经过验证
-- **Consistent (一致)**: 风格统一，术语规范
+### 1. The 5C Principles
+- **Clear**: Concise language, clear logic
+- **Concise**: Avoid redundancy, get to the point
+- **Complete**: Comprehensive information covering all needs
+- **Correct**: Accurate content, verified and tested
+- **Consistent**: Unified style, standardized terminology
 
-### 2. 读者导向
-- 了解目标读者（开发者、运维、产品、用户）
-- 使用读者熟悉的语言和概念
-- 提供不同层次的信息（概览→详细）
-- 包含实际示例和最佳实践
+### 2. Audience-Oriented
+- Understand target audience (developers, operations, product, users)
+- Use language and concepts familiar to the audience
+- Provide information at different levels (overview → detailed)
+- Include practical examples and best practices
 
-### 3. 结构化
-- 清晰的层次结构
-- 统一的格式和风格
-- 目录和导航
-- 交叉引用
+### 3. Structured Organization
+- Clear hierarchical structure
+- Unified format and style
+- Table of contents and navigation
+- Cross-references
 
-### 4. 可维护性
-- 版本控制
-- 变更记录
-- 定期审查和更新
-- 反馈机制
+### 4. Maintainability
+- Version control
+- Change records
+- Regular review and updates
+- Feedback mechanisms
 
-## 文档模板
+## Documentation Templates
 
-### API文档模板
+### API Documentation Template
 
 ````markdown
-# API文档
+# API Documentation
 
-## 概述
-简要描述API的用途和功能
+## Overview
+Briefly describe the purpose and functionality of the API
 
-## 基础信息
+## Basic Information
 - **Base URL**: `https://api.example.com/v1`
-- **认证方式**: Bearer Token
-- **数据格式**: JSON
-- **字符编码**: UTF-8
+- **Authentication**: Bearer Token
+- **Data Format**: JSON
+- **Character Encoding**: UTF-8
 
-## 认证
+## Authentication
 
-### 获取Token
+### Get Token
 ```http
 POST /auth/token
 Content-Type: application/json
@@ -127,7 +127,7 @@ Content-Type: application/json
 }
 ```
 
-**响应**:
+**Response**:
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIs...",
@@ -136,13 +136,13 @@ Content-Type: application/json
 }
 ```
 
-## 接口列表
+## API Endpoints
 
-### 用户管理
+### User Management
 
-#### 创建用户
+#### Create User
 
-**请求**:
+**Request**:
 ```http
 POST /users
 Authorization: Bearer {token}
@@ -155,15 +155,15 @@ Content-Type: application/json
 }
 ```
 
-**请求参数**:
+**Request Parameters**:
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| email | string | 是 | 用户邮箱，需唯一 |
-| name | string | 是 | 用户姓名 |
-| role | string | 否 | 用户角色，默认user |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| email | string | Yes | User email, must be unique |
+| name | string | Yes | User name |
+| role | string | No | User role, defaults to 'user' |
 
-**响应**: `201 Created`
+**Response**: `201 Created`
 ```json
 {
   "id": 123,
@@ -174,10 +174,10 @@ Content-Type: application/json
 }
 ```
 
-**错误响应**:
-- `400 Bad Request` - 参数错误
-- `401 Unauthorized` - 未认证
-- `409 Conflict` - 邮箱已存在
+**Error Responses**:
+- `400 Bad Request` - Invalid parameters
+- `401 Unauthorized` - Not authenticated
+- `409 Conflict` - Email already exists
 
 ```json
 {
@@ -189,81 +189,81 @@ Content-Type: application/json
 }
 ```
 
-## 错误码
+## Error Codes
 
-| 错误码 | HTTP状态 | 说明 |
-|--------|----------|------|
-| EMAIL_EXISTS | 409 | 邮箱已注册 |
-| INVALID_TOKEN | 401 | Token无效 |
-| RATE_LIMIT_EXCEEDED | 429 | 请求过于频繁 |
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| EMAIL_EXISTS | 409 | Email already registered |
+| INVALID_TOKEN | 401 | Invalid token |
+| RATE_LIMIT_EXCEEDED | 429 | Too many requests |
 
-## 限流规则
-- 每用户 100 请求/分钟
-- 超限返回 429 状态码
+## Rate Limiting
+- 100 requests/minute per user
+- Returns 429 status code when exceeded
 
-## 变更日志
+## Changelog
 
 ### v1.1.0 (2024-12-16)
-- 新增用户角色管理接口
-- 优化Token过期机制
+- Added user role management endpoints
+- Improved token expiration mechanism
 
 ### v1.0.0 (2024-12-01)
-- 初始版本发布
+- Initial release
 ````
 
-### 架构设计文档模板
+### Architecture Design Document Template
 
 ````markdown
-# 架构设计文档
+# Architecture Design Document
 
-## 文档信息
-- **项目名称**: [项目名]
-- **文档版本**: 1.0
-- **编写日期**: 2024-12-16
-- **作者**: [姓名]
-- **审阅者**: [姓名]
+## Document Information
+- **Project Name**: [Project Name]
+- **Document Version**: 1.0
+- **Date**: 2024-12-16
+- **Author**: [Name]
+- **Reviewer**: [Name]
 
-## 1. 概述
+## 1. Overview
 
-### 1.1 背景
-[项目背景和目标]
+### 1.1 Background
+[Project background and objectives]
 
-### 1.2 目标读者
-- 开发团队
-- 架构师
-- 运维团队
+### 1.2 Target Audience
+- Development team
+- Architects
+- Operations team
 
-### 1.3 术语表
-| 术语 | 说明 |
-|------|------|
+### 1.3 Glossary
+| Term | Description |
+|------|-------------|
 | API | Application Programming Interface |
 | QPS | Queries Per Second |
 
-## 2. 需求分析
+## 2. Requirements Analysis
 
-### 2.1 功能性需求
-1. [需求1]
-2. [需求2]
+### 2.1 Functional Requirements
+1. [Requirement 1]
+2. [Requirement 2]
 
-### 2.2 非功能性需求
-- **性能**: API响应时间 < 200ms
-- **可用性**: 99.9% SLA
-- **扩展性**: 支持水平扩展
+### 2.2 Non-Functional Requirements
+- **Performance**: API response time < 200ms
+- **Availability**: 99.9% SLA
+- **Scalability**: Support horizontal scaling
 
-### 2.3 约束条件
-- 预算: $10,000/月
-- 时间: 3个月开发周期
-- 团队: 5人开发团队
+### 2.3 Constraints
+- Budget: $10,000/month
+- Timeline: 3-month development cycle
+- Team: 5-person development team
 
-## 3. 架构设计
+## 3. Architecture Design
 
-### 3.1 架构风格
-选择微服务架构，原因：
-- 独立部署需求
-- 不同模块有不同的扩展需求
-- 多团队并行开发
+### 3.1 Architecture Style
+Selected microservices architecture for the following reasons:
+- Independent deployment requirements
+- Different modules have different scaling needs
+- Multiple teams developing in parallel
 
-### 3.2 系统架构图
+### 3.2 System Architecture Diagram
 
 ```
 ┌─────────┐
@@ -286,27 +286,27 @@ Content-Type: application/json
 └─────┘ └─────┘  └─────┘
 ```
 
-### 3.3 组件说明
+### 3.3 Component Description
 
 #### API Gateway
-- **技术**: Kong
-- **职责**: 
-  - 请求路由
-  - 认证授权
-  - 限流
-- **部署**: 2个实例
+- **Technology**: Kong
+- **Responsibilities**:
+  - Request routing
+  - Authentication and authorization
+  - Rate limiting
+- **Deployment**: 2 instances
 
-## 4. 技术选型
+## 4. Technology Selection
 
-| 组件 | 技术 | 理由 |
-|------|------|------|
-| 后端框架 | Spring Boot | 团队熟悉，生态完善 |
-| 数据库 | PostgreSQL | 需要ACID，复杂查询 |
-| 缓存 | Redis | 高性能，持久化选项 |
+| Component | Technology | Rationale |
+|-----------|------------|-----------|
+| Backend Framework | Spring Boot | Team familiarity, mature ecosystem |
+| Database | PostgreSQL | ACID required, complex queries |
+| Cache | Redis | High performance, persistence options |
 
-## 5. 数据设计
+## 5. Data Design
 
-### 5.1 数据模型
+### 5.1 Data Model
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -316,119 +316,119 @@ CREATE TABLE users (
 );
 ```
 
-### 5.2 数据流
+### 5.2 Data Flow
 ```
 Write: Client → Service → DB → Cache (async)
 Read:  Client → Service → Cache → DB (if miss)
 ```
 
-## 6. 接口设计
+## 6. Interface Design
 
-### 6.1 内部接口
-- gRPC用于服务间通信
-- Protocol Buffers定义接口
+### 6.1 Internal Interfaces
+- gRPC for inter-service communication
+- Protocol Buffers for interface definitions
 
-### 6.2 外部接口
+### 6.2 External Interfaces
 - RESTful API
-- OpenAPI 3.0规范
+- OpenAPI 3.0 specification
 
-## 7. 安全设计
+## 7. Security Design
 
-### 7.1 认证授权
+### 7.1 Authentication and Authorization
 - OAuth 2.0 + JWT
-- RBAC权限模型
+- RBAC permission model
 
-### 7.2 数据安全
-- TLS 1.3传输加密
-- AES-256存储加密
+### 7.2 Data Security
+- TLS 1.3 for transport encryption
+- AES-256 for storage encryption
 
-## 8. 部署架构
+## 8. Deployment Architecture
 
-### 8.1 环境规划
-- Dev: 单节点
-- Test: 小规模集群
-- Prod: 多AZ部署
+### 8.1 Environment Planning
+- Dev: Single node
+- Test: Small-scale cluster
+- Prod: Multi-AZ deployment
 
-### 8.2 容器化
-- Docker容器
-- Kubernetes编排
+### 8.2 Containerization
+- Docker containers
+- Kubernetes orchestration
 
-## 9. 监控运维
+## 9. Monitoring and Operations
 
-### 9.1 监控指标
-- 系统指标: CPU, Memory, Disk
-- 应用指标: QPS, 响应时间, 错误率
-- 业务指标: 订单量, 活跃用户
+### 9.1 Monitoring Metrics
+- System metrics: CPU, Memory, Disk
+- Application metrics: QPS, Response Time, Error Rate
+- Business metrics: Order volume, Active users
 
-### 9.2 日志
+### 9.2 Logging
 - ELK Stack
-- 日志保留30天
+- 30-day log retention
 
-## 10. 风险评估
+## 10. Risk Assessment
 
-| 风险 | 概率 | 影响 | 应对措施 |
-|------|------|------|----------|
-| 性能瓶颈 | 中 | 高 | 压测验证，缓存优化 |
-| 安全漏洞 | 低 | 高 | 安全审计，渗透测试 |
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| Performance bottleneck | Medium | High | Load testing, cache optimization |
+| Security vulnerability | Low | High | Security audit, penetration testing |
 
-## 11. 架构演进
+## 11. Architecture Evolution
 
-### Phase 1: MVP (2个月)
-- 核心功能
-- 单region部署
+### Phase 1: MVP (2 months)
+- Core functionality
+- Single-region deployment
 
-### Phase 2: 优化 (1个月)
-- 性能优化
-- 监控完善
+### Phase 2: Optimization (1 month)
+- Performance optimization
+- Monitoring enhancement
 
-### Phase 3: 扩展
-- 多region
-- 高级功能
+### Phase 3: Expansion
+- Multi-region
+- Advanced features
 
-## 附录
+## Appendix
 
-### A. 参考文档
-- [技术选型报告](./tech-selection.md)
-- [API文档](./api-docs.md)
+### A. Reference Documents
+- [Technology Selection Report](./tech-selection.md)
+- [API Documentation](./api-docs.md)
 
-### B. 变更记录
+### B. Change Record
 
-| 版本 | 日期 | 变更内容 | 作者 |
-|------|------|----------|------|
-| 1.0 | 2024-12-16 | 初始版本 | John |
+| Version | Date | Changes | Author |
+|---------|------|---------|--------|
+| 1.0 | 2024-12-16 | Initial version | John |
 ````
 
-### 部署文档模板
+### Deployment Documentation Template
 
 ````markdown
-# 部署文档
+# Deployment Documentation
 
-## 概述
-本文档描述 [系统名] 的部署流程和配置说明。
+## Overview
+This document describes the deployment process and configuration for [System Name].
 
-## 环境要求
+## Prerequisites
 
-### 硬件要求
-- CPU: 4核及以上
-- 内存: 8GB及以上
-- 磁盘: 100GB SSD
+### Hardware Requirements
+- CPU: 4 cores or more
+- Memory: 8GB or more
+- Disk: 100GB SSD
 
-### 软件要求
-- 操作系统: Ubuntu 20.04 LTS
+### Software Requirements
+- Operating System: Ubuntu 20.04 LTS
 - Docker: 20.10+
 - Kubernetes: 1.25+
 - Helm: 3.10+
 
-## 部署步骤
+## Deployment Steps
 
-### 1. 准备工作
+### 1. Preparation
 
-#### 1.1 创建命名空间
+#### 1.1 Create Namespace
 ```bash
 kubectl create namespace myapp-prod
 ```
 
-#### 1.2 配置镜像仓库密钥
+#### 1.2 Configure Image Registry Secret
 ```bash
 kubectl create secret docker-registry regcred \
   --docker-server=registry.example.com \
@@ -437,9 +437,9 @@ kubectl create secret docker-registry regcred \
   -n myapp-prod
 ```
 
-### 2. 数据库部署
+### 2. Database Deployment
 
-#### 2.1 部署MySQL
+#### 2.1 Deploy MySQL
 ```bash
 helm install mysql bitnami/mysql \
   --set auth.rootPassword=secretpassword \
@@ -447,13 +447,13 @@ helm install mysql bitnami/mysql \
   -n myapp-prod
 ```
 
-#### 2.2 初始化数据库
+#### 2.2 Initialize Database
 ```bash
 kubectl exec -it mysql-0 -n myapp-prod -- \
   mysql -uroot -psecretpassword < schema.sql
 ```
 
-### 3. Redis部署
+### 3. Redis Deployment
 
 ```bash
 helm install redis bitnami/redis \
@@ -462,10 +462,10 @@ helm install redis bitnami/redis \
   -n myapp-prod
 ```
 
-### 4. 应用部署
+### 4. Application Deployment
 
-#### 4.1 部署配置
-创建 `values.yaml`:
+#### 4.1 Deployment Configuration
+Create `values.yaml`:
 ```yaml
 image:
   repository: registry.example.com/myapp
@@ -491,14 +491,14 @@ env:
     value: redis-master.myapp-prod
 ```
 
-#### 4.2 执行部署
+#### 4.2 Execute Deployment
 ```bash
 helm install myapp ./helm-chart \
   -f values.yaml \
   -n myapp-prod
 ```
 
-### 5. 配置Ingress
+### 5. Configure Ingress
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -530,17 +530,17 @@ spec:
 kubectl apply -f ingress.yaml
 ```
 
-## 配置说明
+## Configuration
 
-### 环境变量
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
+### Environment Variables
+| Variable | Description | Default |
+|----------|-------------|---------|
 | SPRING_PROFILES_ACTIVE | Spring Profile | prod |
-| DB_HOST | 数据库地址 | localhost |
-| REDIS_HOST | Redis地址 | localhost |
+| DB_HOST | Database address | localhost |
+| REDIS_HOST | Redis address | localhost |
 
-### 配置文件
-应用配置文件位于 `/app/config/application.yml`
+### Configuration Files
+Application configuration located at `/app/config/application.yml`
 
 ```yaml
 server:
@@ -553,14 +553,14 @@ spring:
     password: ${DB_PASSWORD}
 ```
 
-## 验证部署
+## Verify Deployment
 
-### 检查Pod状态
+### Check Pod Status
 ```bash
 kubectl get pods -n myapp-prod
 ```
 
-预期输出:
+Expected output:
 ```
 NAME                     READY   STATUS    RESTARTS   AGE
 myapp-6d4f7b5c9-abc12    1/1     Running   0          2m
@@ -568,45 +568,45 @@ myapp-6d4f7b5c9-def34    1/1     Running   0          2m
 myapp-6d4f7b5c9-ghi56    1/1     Running   0          2m
 ```
 
-### 健康检查
+### Health Check
 ```bash
 curl https://api.example.com/actuator/health
 ```
 
-预期响应:
+Expected response:
 ```json
 {
   "status": "UP"
 }
 ```
 
-### 查看日志
+### View Logs
 ```bash
 kubectl logs -f deployment/myapp -n myapp-prod
 ```
 
-## 升级部署
+## Upgrade Deployment
 
-### 滚动更新
+### Rolling Update
 ```bash
 helm upgrade myapp ./helm-chart \
   --set image.tag=v1.0.1 \
   -n myapp-prod
 ```
 
-### 回滚
+### Rollback
 ```bash
-# 查看历史
+# View history
 helm history myapp -n myapp-prod
 
-# 回滚到上一版本
+# Rollback to previous version
 helm rollback myapp -n myapp-prod
 
-# 回滚到指定版本
+# Rollback to specific version
 helm rollback myapp 3 -n myapp-prod
 ```
 
-## 监控配置
+## Monitoring Configuration
 
 ### Prometheus
 ```yaml
@@ -625,126 +625,126 @@ spec:
 ```
 
 ### Grafana Dashboard
-导入Dashboard ID: 12345
+Import Dashboard ID: 12345
 
-## 故障排查
+## Troubleshooting
 
-### Pod无法启动
-1. 查看Pod状态: `kubectl describe pod <pod-name> -n myapp-prod`
-2. 查看日志: `kubectl logs <pod-name> -n myapp-prod`
-3. 常见原因:
-   - 镜像拉取失败
-   - 配置错误
-   - 资源不足
+### Pod Fails to Start
+1. Check pod status: `kubectl describe pod <pod-name> -n myapp-prod`
+2. View logs: `kubectl logs <pod-name> -n myapp-prod`
+3. Common causes:
+   - Image pull failure
+   - Configuration errors
+   - Insufficient resources
 
-### 数据库连接失败
-1. 检查数据库Pod状态
-2. 验证网络连接: `kubectl exec -it myapp-xxx -- nc -zv mysql 3306`
-3. 检查密码配置
+### Database Connection Failure
+1. Check database pod status
+2. Verify network connectivity: `kubectl exec -it myapp-xxx -- nc -zv mysql 3306`
+3. Verify password configuration
 
-### 服务无法访问
-1. 检查Service: `kubectl get svc -n myapp-prod`
-2. 检查Ingress: `kubectl get ingress -n myapp-prod`
-3. 检查DNS解析
-4. 检查证书状态
+### Service Inaccessible
+1. Check service: `kubectl get svc -n myapp-prod`
+2. Check ingress: `kubectl get ingress -n myapp-prod`
+3. Check DNS resolution
+4. Check certificate status
 
-## 维护操作
+## Maintenance Operations
 
-### 备份数据库
+### Backup Database
 ```bash
 kubectl exec mysql-0 -n myapp-prod -- \
   mysqldump -uroot -p$MYSQL_ROOT_PASSWORD myapp > backup.sql
 ```
 
-### 扩缩容
+### Scaling
 ```bash
 kubectl scale deployment myapp --replicas=5 -n myapp-prod
 ```
 
-### 重启应用
+### Restart Application
 ```bash
 kubectl rollout restart deployment/myapp -n myapp-prod
 ```
 
-## 安全检查清单
+## Security Checklist
 
-- [ ] 使用非root用户运行容器
-- [ ] 配置资源限制
-- [ ] 启用网络策略
-- [ ] 敏感信息使用Secret
-- [ ] 定期更新镜像
-- [ ] 配置RBAC权限
-- [ ] 启用Pod安全策略
+- [ ] Run container as non-root user
+- [ ] Configure resource limits
+- [ ] Enable network policies
+- [ ] Use secrets for sensitive data
+- [ ] Regularly update images
+- [ ] Configure RBAC permissions
+- [ ] Enable Pod security policies
 
-## 附录
+## Appendix
 
-### A. 常用命令
+### A. Common Commands
 ```bash
-# 查看所有资源
+# View all resources
 kubectl get all -n myapp-prod
 
-# 进入容器
+# Exec into container
 kubectl exec -it <pod-name> -n myapp-prod -- /bin/bash
 
-# 端口转发
+# Port forwarding
 kubectl port-forward svc/myapp 8080:80 -n myapp-prod
 
-# 查看事件
+# View events
 kubectl get events -n myapp-prod --sort-by='.lastTimestamp'
 ```
 
-### B. 联系方式
-- 技术支持: support@example.com
-- 紧急联系: +86-xxx-xxxx-xxxx
+### B. Contact Information
+- Technical Support: support@example.com
+- Emergency Contact: +1-xxx-xxx-xxxx
 
-### C. 变更记录
-| 版本 | 日期 | 变更内容 | 作者 |
-|------|------|----------|------|
-| 1.0 | 2024-12-16 | 初始版本 | DevOps Team |
+### C. Change Record
+| Version | Date | Changes | Author |
+|---------|------|---------|--------|
+| 1.0 | 2024-12-16 | Initial version | DevOps Team |
 ````
 
-## 使用场景
+## Use Cases
 
-### 新项目启动
+### New Project Launch
 ```
-为新项目创建完整的文档体系：
+Create complete documentation system for new project:
 - README.md
-- API文档
-- 架构设计文档
-- 部署文档
-- 贡献指南
+- API documentation
+- Architecture design document
+- Deployment documentation
+- Contributing guidelines
 ```
 
-### API设计评审
+### API Design Review
 ```
-编写API设计文档，包括：
-- 接口定义
-- 数据模型
-- 错误处理
-- 安全认证
-```
-
-### 系统交付
-```
-准备系统交付文档包：
-- 系统架构文档
-- 部署运维手册
-- 用户使用手册
-- 故障处理手册
+Write API design documentation, including:
+- Interface definitions
+- Data models
+- Error handling
+- Security authentication
 ```
 
-### 知识沉淀
+### System Delivery
 ```
-技术方案总结：
-- 问题分析
-- 解决方案
-- 技术决策
-- 经验教训
+Prepare system delivery documentation package:
+- System architecture documentation
+- Deployment and operations manual
+- User manual
+- Incident response manual
 ```
 
-## 集成示例
+### Knowledge Management
+```
+Technical solution summary:
+- Problem analysis
+- Solutions
+- Technical decisions
+- Lessons learned
+```
 
-### 在Agent中使用
+## Integration Examples
+
+### Using in Agent
 ```json
 {
   "agent": "tech-writer",
@@ -756,69 +756,69 @@ kubectl get events -n myapp-prod --sort-by='.lastTimestamp'
 }
 ```
 
-### 在对话中引用
+### Referencing in Conversation
 ```
-@tech-documentation 请为这个API创建完整的文档
+@tech-documentation Please create complete documentation for this API
 ```
 
-## 文档质量检查清单
+## Documentation Quality Checklist
 
-### 内容质量
-- [ ] 信息准确完整
-- [ ] 逻辑清晰连贯
-- [ ] 示例真实可用
-- [ ] 术语统一规范
+### Content Quality
+- [ ] Information is accurate and complete
+- [ ] Logic is clear and coherent
+- [ ] Examples are realistic and usable
+- [ ] Terminology is consistent and standardized
 
-### 可读性
-- [ ] 语言简洁明了
-- [ ] 结构层次分明
-- [ ] 格式统一美观
-- [ ] 配图清晰易懂
+### Readability
+- [ ] Language is concise and clear
+- [ ] Structure is well-organized
+- [ ] Formatting is unified and attractive
+- [ ] Diagrams are clear and easy to understand
 
-### 可维护性
-- [ ] 版本信息明确
-- [ ] 变更记录完整
-- [ ] 联系方式准确
-- [ ] 定期审查更新
+### Maintainability
+- [ ] Version information is clear
+- [ ] Change records are complete
+- [ ] Contact information is accurate
+- [ ] Regular review and updates
 
-### 可访问性
-- [ ] 目录导航清晰
-- [ ] 搜索功能完善
-- [ ] 链接有效准确
-- [ ] 支持多种格式
+### Accessibility
+- [ ] Table of contents navigation is clear
+- [ ] Search functionality is complete
+- [ ] Links are valid and accurate
+- [ ] Multiple formats are supported
 
-## 工具推荐
+## Recommended Tools
 
-### 文档编写
-- **Markdown编辑器**: Typora, VS Code
-- **API文档**: Swagger Editor, Postman
-- **图表工具**: Draw.io, PlantUML, Mermaid
-- **截图工具**: Snipaste, Xnip
+### Documentation Writing
+- **Markdown Editors**: Typora, VS Code
+- **API Documentation**: Swagger Editor, Postman
+- **Diagram Tools**: Draw.io, PlantUML, Mermaid
+- **Screenshot Tools**: Snipaste, Xnip
 
-### 文档托管
-- **静态站点**: GitBook, Docusaurus, VuePress
-- **团队协作**: Confluence, Notion
-- **版本控制**: Git, GitHub/GitLab
+### Documentation Hosting
+- **Static Sites**: GitBook, Docusaurus, VuePress
+- **Team Collaboration**: Confluence, Notion
+- **Version Control**: Git, GitHub/GitLab
 
-### 文档生成
-- **API文档**: Swagger/OpenAPI, ApiDoc
-- **代码文档**: JavaDoc, JSDoc, Sphinx
-- **README生成**: readme-md-generator
+### Documentation Generation
+- **API Documentation**: Swagger/OpenAPI, ApiDoc
+- **Code Documentation**: JavaDoc, JSDoc, Sphinx
+- **README Generation**: readme-md-generator
 
-## 学习资源
+## Learning Resources
 
-### 推荐书籍
-- 《技术写作手册》
-- 《Docs for Developers》
-- 《The Documentation Compendium》
+### Recommended Books
+- "Technical Writing: A Practical Guide"
+- "Docs for Developers"
+- "The Documentation Compendium"
 
-### 在线资源
+### Online Resources
 - [Google Developer Documentation Style Guide](https://developers.google.com/style)
 - [Microsoft Writing Style Guide](https://docs.microsoft.com/style-guide/)
 - [Write the Docs](https://www.writethedocs.org/)
 
 ---
 
-**版本**: 1.0.0  
-**最后更新**: 2024-12  
-**维护者**: AI Toolkit Team
+**Version**: 1.0.0
+**Last Updated**: December 2024
+**Maintainer**: MindForge Team

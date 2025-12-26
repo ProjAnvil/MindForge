@@ -1,6 +1,6 @@
 ---
 name: frontend-development
-description: 现代前端开发综合技能，涵盖 Svelte、SvelteKit、shadcn-svelte 和 Bun 生态系统。
+description: 现代前端开发综合技能，涵盖 Svelte、SvelteKit、shadcn-svelte 和 Bun 生态系统。使用此技能构建现代 Web 应用、创建 UI 组件、实现状态管理、处理表单，或使用基于 TypeScript 的前端架构时使用。适用于需要响应式框架、服务端渲染或类型安全组件开发的项目。
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
