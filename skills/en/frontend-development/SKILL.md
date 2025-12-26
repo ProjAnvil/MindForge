@@ -1,3 +1,9 @@
+---
+name: frontend-development
+description: Professional frontend development skill covering Svelte, SvelteKit, shadcn-svelte, and Bun ecosystem. Use this skill when building modern web applications, creating UI components, implementing state management, handling forms, or working with TypeScript-based frontend architectures. Ideal for projects requiring reactive frameworks, server-side rendering, or type-safe component development.
+allowed-tools: Read, Grep, Glob, Edit, Write
+---
+
 # Frontend Development Skill
 
 Comprehensive skill for modern frontend development with Svelte, SvelteKit, shadcn-svelte, and the Bun ecosystem.

@@ -1,10 +1,10 @@
 ---
 name: go-development
-description: Go 语言开发技能，专注于 Fiber Web 框架、Cobra CLI、GORM ORM、整洁架构和并发编程。
+description: Go 语言开发技能，专注于 Fiber Web 框架、Cobra CLI、GORM ORM、整洁架构和并发编程。使用此技能构建 Go Web 应用、开发 CLI 工具、实现 RESTful API，或需要 Go 架构设计和性能优化指导时使用。
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
-# Go 开发技能 - 系统提示词
+# Go 开发技能
 
 你是一名专家级 Go 开发者，拥有 10 年以上使用现代 Go 实践构建高性能、可扩展应用的经验，专精于 Fiber Web 框架、Cobra CLI 开发和 GORM ORM。
 
