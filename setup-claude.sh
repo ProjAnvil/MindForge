@@ -75,11 +75,13 @@ AITK_DIR="$SCRIPT_DIR"
 # Source directories (with language)
 AITK_AGENTS_DIR="$AITK_DIR/agents/$LANG_CODE"
 AITK_SKILLS_DIR="$AITK_DIR/skills/$LANG_CODE"
+AITK_DOCS_SRC_DIR="$AITK_DIR/docs/agents-detail/$LANG_CODE"
 
 # Target directories
 CLAUDE_DIR="$HOME/.claude"
 CLAUDE_AGENTS_DIR="$CLAUDE_DIR/agents"
 CLAUDE_SKILLS_DIR="$CLAUDE_DIR/skills"
+CLAUDE_DOCS_DIR="$CLAUDE_DIR/docs"
 
 # Verify source directories exist
 if [ ! -d "$AITK_AGENTS_DIR" ]; then
@@ -96,6 +98,13 @@ if [ ! -d "$AITK_SKILLS_DIR" ]; then
     exit 1
 fi
 
+if [ ! -d "$AITK_DOCS_SRC_DIR" ]; then
+    echo -e "${RED}Error: Docs source directory not found: $AITK_DOCS_SRC_DIR${NC}"
+    echo "Available languages:"
+    ls -d "$AITK_DIR/docs/agents-detail/"*/ 2>/dev/null | xargs -n 1 basename
+    exit 1
+fi
+
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}  AITK Claude Code Setup${NC}"
 echo -e "${BLUE}========================================${NC}"
@@ -105,7 +114,10 @@ echo -e "${GREEN}Language:${NC} $LANG_CODE"
 echo -e "${GREEN}Source:${NC}"
 echo "  Agents: $AITK_AGENTS_DIR"
 echo "  Skills: $AITK_SKILLS_DIR"
-echo -e "${GREEN}Target:${NC} $CLAUDE_DIR/"
+echo "  Docs: $AITK_DOCS_SRC_DIR"
+echo -e "${GREEN}Target:${NC}"
+echo "  Claude: $CLAUDE_DIR/"
+echo "  Docs: $CLAUDE_DOCS_DIR/"
 echo ""
 
 # Windows-specific warnings
@@ -219,6 +231,7 @@ echo -e "\n${BLUE}Step 1: Creating Claude directories${NC}"
 create_dir "$CLAUDE_DIR"
 create_dir "$CLAUDE_AGENTS_DIR"
 create_dir "$CLAUDE_SKILLS_DIR"
+create_dir "$CLAUDE_DOCS_DIR"
 
 # Step 2: Link agents
 echo -e "\n${BLUE}Step 2: Linking agents${NC}"
@@ -261,8 +274,28 @@ else
     done
 fi
 
-# Step 4: Verification
-echo -e "\n${BLUE}Step 4: Verification${NC}"
+# Step 4: Link docs
+echo -e "\n${BLUE}Step 4: Linking docs${NC}"
+
+# Auto-discover all doc directories
+shopt -s nullglob
+DOC_DIRS=("$AITK_DOCS_SRC_DIR"/*/)
+shopt -u nullglob
+
+if [ ${#DOC_DIRS[@]} -eq 0 ]; then
+    echo -e "${YELLOW}No doc directories found in $AITK_DOCS_SRC_DIR${NC}"
+else
+    for doc_dir in "${DOC_DIRS[@]}"; do
+        doc_name=$(basename "$doc_dir")
+
+        target_dir="$CLAUDE_DOCS_DIR/$doc_name"
+
+        create_symlink "$doc_dir" "$target_dir" "$doc_name"
+    done
+fi
+
+# Step 5: Verification
+echo -e "\n${BLUE}Step 5: Verification${NC}"
 echo -e "\n${YELLOW}Agents in ~/.claude/agents/:${NC}"
 if [ -d "$CLAUDE_AGENTS_DIR" ]; then
     agent_count=$(ls -lh "$CLAUDE_AGENTS_DIR" 2>/dev/null | grep -E "^l" | wc -l | tr -d ' ')
@@ -287,7 +320,19 @@ else
     echo -e "${RED}  No skills directory${NC}"
 fi
 
-# Step 5: Summary
+echo -e "\n${YELLOW}Docs in ~/.claude/docs/:${NC}"
+if [ -d "$CLAUDE_DOCS_DIR" ]; then
+    doc_count=$(ls -lh "$CLAUDE_DOCS_DIR" 2>/dev/null | grep -E "^l" | wc -l | tr -d ' ')
+    if [ "$doc_count" -eq 0 ]; then
+        echo -e "${YELLOW}  No docs linked${NC}"
+    else
+        ls -lh "$CLAUDE_DOCS_DIR" | grep -E "^l" | awk '{print "  " $9 " -> " $11}'
+    fi
+else
+    echo -e "${RED}  No docs directory${NC}"
+fi
+
+# Step 6: Summary
 echo -e "\n${BLUE}========================================${NC}"
 echo -e "${GREEN}Setup complete!${NC}"
 echo -e "${BLUE}========================================${NC}"
@@ -296,6 +341,7 @@ echo -e "${GREEN}Configuration:${NC}"
 echo "  Language: $LANG_CODE"
 echo "  Agents linked: $(ls -lh "$CLAUDE_AGENTS_DIR" 2>/dev/null | grep -E "^l" | wc -l | tr -d ' ')"
 echo "  Skills linked: $(ls -lh "$CLAUDE_SKILLS_DIR" 2>/dev/null | grep -E "^l" | wc -l | tr -d ' ')"
+echo "  Docs linked: $(ls -lh "$CLAUDE_DOCS_DIR" 2>/dev/null | grep -E "^l" | wc -l | tr -d ' ')"
 echo ""
 echo -e "${GREEN}Next steps:${NC}"
 echo "1. Claude Code will now automatically discover these agents and skills"
@@ -305,10 +351,10 @@ echo ""
 echo -e "${YELLOW}Important notes:${NC}"
 if [ "$OS_TYPE" = "windows" ]; then
     echo "- ${RED}Windows: Files are copied, not linked. Re-run this script after making changes!${NC}"
-    echo "- To remove: ${RED}rm -rf ~/.claude/agents/* ~/.claude/skills/*${NC}"
+    echo "- To remove: ${RED}rm -rf ~/.claude/agents/* ~/.claude/skills/* ~/.claude/docs/*${NC}"
 else
-    echo "- Changes to agents/skills in your project are immediately available"
-    echo "- To remove links: ${RED}rm ~/.claude/agents/* ~/.claude/skills/*${NC}"
+    echo "- Changes to agents/skills/docs in your project are immediately available"
+    echo "- To remove links: ${RED}rm ~/.claude/agents/* ~/.claude/skills/* ~/.claude/docs/*${NC}"
 fi
 echo "- To switch language, run: ${BLUE}$0 --lang=<lang>${NC}"
 echo ""
