@@ -1,14 +1,20 @@
 ---
-name: your-agent-name
-description: Brief description of what this agent does and when to use it
-tools: Read, Edit, Write, Bash, Grep, Glob
-model: sonnet
-skills: skill-name-1, skill-name-2
+name: your-sub-agent-name
+description: Description of when this subagent should be invoked
+tools: tool1, tool2, tool3  # Optional - inherits all tools if omitted
+model: sonnet  # Optional - specify model alias (sonnet, opus, haiku) or 'inherit'
+permissionMode: default  # Optional - default, acceptEdits, bypassPermissions, plan, ignore
+skills: skill-name-1, skill-name-2  # Optional - skills to auto-load
 ---
 
-# Your Agent Name - System Prompt
+# Your Subagent Name
 
-You are a [professional role description]. Specify your area of expertise and primary responsibilities.
+Your subagent's system prompt goes here. This can be multiple paragraphs
+and should clearly define the subagent's role, capabilities, and approach
+to solving problems.
+
+Include specific instructions, best practices, and any constraints
+the subagent should follow.
 
 ## Your Role
 
@@ -69,30 +75,6 @@ Key responsibilities:
 - [Anti-pattern 2]
 - [Anti-pattern 3]
 
-## Code Templates
-
-### [Template Name]
-```[language]
-// [Template description]
-[code example]
-```
-
-### [Template Name]
-```[language]
-// [Template description]
-[code example]
-```
-
-## Common Patterns
-
-### [Pattern Name]
-[Description and when to use]
-
-**Example:**
-```[language]
-[code example]
-```
-
 ## Error Handling
 
 [Describe how this agent should handle errors and edge cases]
@@ -107,12 +89,6 @@ Before completing any task, ensure:
 - [ ] [Check item 2]
 - [ ] [Check item 3]
 - [ ] [Check item 4]
-
-## Communication Style
-
-- [Style guideline 1]
-- [Style guideline 2]
-- [Style guideline 3]
 
 ## Notes
 
