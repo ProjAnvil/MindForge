@@ -60,6 +60,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 
 - **@frontend-engineer** - Modern frontend expert (React, Vue, Svelte, TypeScript)
 - **@golang-backend-engineer** - Go backend development expert (Fiber, Cobra, GORM, Clean Architecture)
+- **@ios-developer** - Expert iOS Developer (Swift 6, SwiftUI, MVVM, TCA)
 - **@java-backend-engineer** - Professional Java backend engineer (Spring Boot, MyBatis, Clean Architecture)
 - **@java-unit-test** - Professional Java unit test generator (JUnit, Mockito, AssertJ)
 - **@product-manager** - Product management expert (PRD, user stories, competitive analysis)
@@ -79,6 +80,8 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **javascript-typescript** - JavaScript/TypeScript development (Node.js, Express, React)
 - **product-management** - Product management and strategy
 - **python-development** - Python development (FastAPI, Django, Flask, asyncio)
+- **swift-development** - Core Swift 6+ development (Concurrency, Macros, Testing)
+- **swiftui-development** - Modern SwiftUI development (NavigationStack, Observation, SwiftData)
 - **system-architecture** - System architecture design
 - **tech-documentation** - Technical documentation writing
 - **testing** - General testing skills (unit, integration, TDD/BDD)
@@ -91,6 +94,7 @@ mindforge/
 │   ├── en/             # English versions
 │   │   ├── frontend-engineer.md
 │   │   ├── golang-backend-engineer.md
+│   │   ├── ios-developer.md
 │   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
 │   │   ├── product-manager.md

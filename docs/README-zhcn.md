@@ -60,6 +60,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 
 - **@frontend-engineer** - 现代前端开发专家（React, Vue, Svelte, TypeScript）
 - **@golang-backend-engineer** - Go 后端开发专家（Fiber, Cobra, GORM, Clean Architecture）
+- **@ios-developer** - 专业的 iOS 开发者（Swift 6, SwiftUI, MVVM, TCA）
 - **@java-backend-engineer** - 专业 Java 后端工程师（Spring Boot, MyBatis, Clean Architecture）
 - **@java-unit-test** - 专业的 Java 单元测试生成器（JUnit, Mockito, AssertJ）
 - **@product-manager** - 资深产品经理（PRD 撰写、用户故事、竞品分析）
@@ -79,6 +80,8 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 - **javascript-typescript** - JavaScript/TypeScript 开发（Node.js, Express, React）
 - **product-management** - 产品管理与策略
 - **python-development** - Python 开发（FastAPI, Django, Flask, asyncio）
+- **swift-development** - Swift 6+ 核心开发能力（并发编程、宏、测试）
+- **swiftui-development** - 现代 SwiftUI 开发（NavigationStack, Observation, SwiftData）
 - **system-architecture** - 系统架构设计
 - **tech-documentation** - 技术文档编写
 - **testing** - 通用测试技能（单元、集成、TDD/BDD）
