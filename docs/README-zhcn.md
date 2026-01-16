@@ -58,26 +58,30 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 
 ## 🤖 可用的 Agents
 
+- **@frontend-engineer** - 现代前端开发专家（React, Vue, Svelte, TypeScript）
+- **@golang-backend-engineer** - Go 后端开发专家（Fiber, Cobra, GORM, Clean Architecture）
 - **@java-backend-engineer** - 专业 Java 后端工程师（Spring Boot, MyBatis, Clean Architecture）
 - **@java-unit-test** - 专业的 Java 单元测试生成器（JUnit, Mockito, AssertJ）
+- **@product-manager** - 资深产品经理（PRD 撰写、用户故事、竞品分析）
 - **@python-test-engineer** - 专业的 Python 测试工程师（pytest, unittest, pytest-asyncio）
 - **@system-architect** - 系统架构设计专家（架构模式、技术选型、ADR 文档）
-- **@golang-backend-engineer** - Go 后端开发专家（Fiber, Cobra, GORM, Clean Architecture）
-- **@frontend-engineer** - 前端开发专家（Svelte, SvelteKit, shadcn-svelte, Bun）
 
 ## 🎯 可用的 Skills
 
-- **testing** - 通用测试技能（单元、集成、TDD/BDD）
-- **enterprise-java** - 企业级 Java 开发（Spring Boot, 微服务）
-- **go-development** - Go 开发（Fiber, Cobra, GORM）
-- **python-development** - Python 开发（FastAPI, Django, Flask, asyncio）
-- **javascript-typescript** - JavaScript/TypeScript 开发（Node.js, Express, React）
-- **system-architecture** - 系统架构设计
 - **api-design** - API 设计（REST, GraphQL, gRPC）
 - **database-design** - 数据库设计与优化
-- **tech-documentation** - 技术文档编写
-- **frontend-development** - 前端开发（Svelte, SvelteKit, shadcn-svelte, Tailwind CSS）
+- **enterprise-java** - 企业级 Java 开发（Spring Boot, 微服务）
+- **frontend-react** - React 生态系统（Next.js, Server Components, Tailwind）
+- **frontend-svelte** - Svelte 生态系统（SvelteKit, shadcn-svelte）
+- **frontend-vue** - Vue 生态系统（Nuxt, Composition API, Pinia）
 - **git-guru** - 高级 Git 操作和版本控制精通
+- **go-development** - Go 开发（Fiber, Cobra, GORM）
+- **javascript-typescript** - JavaScript/TypeScript 开发（Node.js, Express, React）
+- **product-management** - 产品管理与策略
+- **python-development** - Python 开发（FastAPI, Django, Flask, asyncio）
+- **system-architecture** - 系统架构设计
+- **tech-documentation** - 技术文档编写
+- **testing** - 通用测试技能（单元、集成、TDD/BDD）
 
 ## 📁 项目结构
 
@@ -85,19 +89,21 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 mindforge/
 ├── agents/              # Claude Code 格式的 Agents（多语言支持）
 │   ├── en/             # 英文版本
+│   │   ├── frontend-engineer.md
+│   │   ├── golang-backend-engineer.md
 │   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
+│   │   ├── product-manager.md
 │   │   ├── python-test-engineer.md
-│   │   ├── system-architect.md
-│   │   ├── golang-backend-engineer.md
-│   │   └── frontend-engineer.md
+│   │   └── system-architect.md
 │   └── zh-cn/          # 中文版本
+│       ├── frontend-engineer.md
+│       ├── golang-backend-engineer.md
 │       ├── java-backend-engineer.md
 │       ├── java-unit-test.md
+│       ├── product-manager.md
 │       ├── python-test-engineer.md
-│       ├── system-architect.md
-│       ├── golang-backend-engineer.md
-│       └── frontend-engineer.md
+│       └── system-architect.md
 ├── skills/              # Claude Code 格式的 Skills（多语言支持）
 │   ├── en/             # 英文版本
 │   │   ├── testing/SKILL.md

@@ -58,26 +58,30 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 
 ## 🤖 Available Agents
 
+- **@frontend-engineer** - Modern frontend expert (React, Vue, Svelte, TypeScript)
+- **@golang-backend-engineer** - Go backend development expert (Fiber, Cobra, GORM, Clean Architecture)
 - **@java-backend-engineer** - Professional Java backend engineer (Spring Boot, MyBatis, Clean Architecture)
 - **@java-unit-test** - Professional Java unit test generator (JUnit, Mockito, AssertJ)
+- **@product-manager** - Product management expert (PRD, user stories, competitive analysis)
 - **@python-test-engineer** - Professional Python testing engineer (pytest, unittest, pytest-asyncio)
 - **@system-architect** - System architecture design expert (patterns, tech selection, ADR docs)
-- **@golang-backend-engineer** - Go backend development expert (Fiber, Cobra, GORM, Clean Architecture)
-- **@frontend-engineer** - Frontend development expert (Svelte, SvelteKit, shadcn-svelte, Bun)
 
 ## 🎯 Available Skills
 
-- **testing** - General testing skills (unit, integration, TDD/BDD)
-- **enterprise-java** - Enterprise Java development (Spring Boot, microservices)
-- **go-development** - Go development (Fiber, Cobra, GORM)
-- **python-development** - Python development (FastAPI, Django, Flask, asyncio)
-- **javascript-typescript** - JavaScript/TypeScript development (Node.js, Express, React)
-- **system-architecture** - System architecture design
 - **api-design** - API design (REST, GraphQL, gRPC)
 - **database-design** - Database design and optimization
-- **tech-documentation** - Technical documentation writing
-- **frontend-development** - Frontend development (Svelte, SvelteKit, shadcn-svelte, Tailwind CSS)
+- **enterprise-java** - Enterprise Java development (Spring Boot, microservices)
+- **frontend-react** - React ecosystem (Next.js, Server Components, Tailwind)
+- **frontend-svelte** - Svelte ecosystem (SvelteKit, shadcn-svelte)
+- **frontend-vue** - Vue ecosystem (Nuxt, Composition API, Pinia)
 - **git-guru** - Advanced Git operations and version control mastery
+- **go-development** - Go development (Fiber, Cobra, GORM)
+- **javascript-typescript** - JavaScript/TypeScript development (Node.js, Express, React)
+- **product-management** - Product management and strategy
+- **python-development** - Python development (FastAPI, Django, Flask, asyncio)
+- **system-architecture** - System architecture design
+- **tech-documentation** - Technical documentation writing
+- **testing** - General testing skills (unit, integration, TDD/BDD)
 
 ## 📁 Project Structure
 
@@ -85,19 +89,21 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 mindforge/
 ├── agents/              # Claude Code format Agents (multi-language)
 │   ├── en/             # English versions
+│   │   ├── frontend-engineer.md
+│   │   ├── golang-backend-engineer.md
 │   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
+│   │   ├── product-manager.md
 │   │   ├── python-test-engineer.md
-│   │   ├── system-architect.md
-│   │   ├── golang-backend-engineer.md
-│   │   └── frontend-engineer.md
+│   │   └── system-architect.md
 │   └── zh-cn/          # Chinese versions
+│       ├── frontend-engineer.md
+│       ├── golang-backend-engineer.md
 │       ├── java-backend-engineer.md
 │       ├── java-unit-test.md
+│       ├── product-manager.md
 │       ├── python-test-engineer.md
-│       ├── system-architect.md
-│       ├── golang-backend-engineer.md
-│       └── frontend-engineer.md
+│       └── system-architect.md
 ├── skills/              # Claude Code format Skills (multi-language)
 │   ├── en/             # English versions
 │   │   ├── testing/SKILL.md
