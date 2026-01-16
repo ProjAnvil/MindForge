@@ -1,93 +1,93 @@
 ---
-name: frontend-development
-description: 现代前端开发综合技能，涵盖 Svelte、SvelteKit、shadcn-svelte 和 Bun 生态系统。使用此技能构建现代 Web 应用、创建 UI 组件、实现状态管理、处理表单，或使用基于 TypeScript 的前端架构时使用。适用于需要响应式框架、服务端渲染或类型安全组件开发的项目。
+name: frontend-svelte
+description: Professional frontend development skill covering Svelte, SvelteKit, shadcn-svelte, and Bun ecosystem. Use this skill when building modern web applications, creating UI components, implementing state management, handling forms, or working with TypeScript-based frontend architectures. Ideal for projects requiring reactive frameworks, server-side rendering, or type-safe component development.
 allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
-# 前端开发技能
+# Frontend Development Skill
 
-现代前端开发的综合技能，包含 Svelte、SvelteKit、shadcn-svelte 和 Bun 生态系统。
+Comprehensive skill for modern frontend development with Svelte, SvelteKit, shadcn-svelte, and the Bun ecosystem.
 
-## 技术栈
+## Technology Stack
 
-### 核心框架：Svelte + SvelteKit
+### Core Framework: Svelte + SvelteKit
 
-#### Svelte 基础
-- **响应式框架**：编译时框架，将组件转换为高效的命令式代码
-- **真正的响应式**：自动依赖跟踪，无需虚拟 DOM
-- **小包体积**：最小的运行时开销
-- **内置动画**：过渡和动画指令
-- **作用域样式**：组件样式默认作用域
+#### Svelte Fundamentals
+- **Reactive Framework**: Compile-time framework that converts components into highly efficient imperative code
+- **True Reactivity**: Automatic dependency tracking without virtual DOM
+- **Small Bundle Size**: Minimal runtime overhead
+- **Built-in Animations**: Transition and animation directives
+- **Scoped Styles**: Component styles are scoped by default
 
-#### SvelteKit 特性
-- **全栈框架**：服务端渲染（SSR）、静态站点生成（SSG）和客户端渲染（CSR）
-- **基于文件的路由**：路由由文件系统结构定义
-- **API 路由**：在前端代码旁构建 API 端点
-- **表单操作**：服务端表单处理，渐进式增强
-- **钩子**：拦截和修改请求/响应
-- **适配器**：部署到任何平台（Node、Vercel、Netlify、Cloudflare 等）
+#### SvelteKit Features
+- **Full-Stack Framework**: Server-side rendering (SSR), static site generation (SSG), and client-side rendering (CSR)
+- **File-Based Routing**: Routes defined by file system structure
+- **API Routes**: Build API endpoints alongside frontend code
+- **Form Actions**: Server-side form handling with progressive enhancement
+- **Hooks**: Intercept and modify requests/responses
+- **Adapters**: Deploy to any platform (Node, Vercel, Netlify, Cloudflare, etc.)
 
-### UI 组件库：shadcn-svelte
+### UI Component Library: shadcn-svelte
 
-#### 概览
-- shadcn/ui 的 Svelte 版本
-- 基于 Radix Svelte（Melt UI）构建的可访问、可定制组件
-- 复制粘贴组件方式（不是 npm 包）
-- 使用 Tailwind CSS 构建
-- TypeScript 支持
+#### Overview
+- Port of shadcn/ui for Svelte
+- Accessible, customizable components built on Radix Svelte (Melt UI)
+- Copy-paste component approach (not an npm package)
+- Built with Tailwind CSS
+- TypeScript support
 
-#### 关键组件
-- **表单**：Input、Textarea、Select、Checkbox、Radio、Switch
-- **反馈**：Alert、Toast（Sonner）、Dialog、Alert Dialog
-- **导航**：Button、Dropdown Menu、Tabs、Command Menu
-- **布局**：Card、Separator、Accordion、Collapsible
-- **数据展示**：Table、Badge、Avatar、Skeleton
-- **覆盖层**：Popover、Tooltip、Sheet、Drawer
+#### Key Components
+- **Forms**: Input, Textarea, Select, Checkbox, Radio, Switch
+- **Feedback**: Alert, Toast (Sonner), Dialog, Alert Dialog
+- **Navigation**: Button, Dropdown Menu, Tabs, Command Menu
+- **Layout**: Card, Separator, Accordion, Collapsible
+- **Data Display**: Table, Badge, Avatar, Skeleton
+- **Overlays**: Popover, Tooltip, Sheet, Drawer
 
-#### 安装和使用
+#### Installation & Usage
 ```bash
-# 初始化 shadcn-svelte
+# Initialize shadcn-svelte
 bunx shadcn-svelte@latest init
 
-# 按需添加组件
+# Add components as needed
 bunx shadcn-svelte@latest add button
 bunx shadcn-svelte@latest add card
 bunx shadcn-svelte@latest add form
 ```
 
-### 包管理器：Bun
+### Package Manager: Bun
 
-#### 为什么选择 Bun？
-- **性能**：比 npm 快 25 倍，比 pnpm 快 4 倍
-- **一体化**：运行时、打包器、测试运行器、包管理器
-- **直接替换**：兼容 npm/Node.js 生态系统
-- **内置测试**：兼容 Vitest 的测试运行器
-- **原生 TypeScript**：原生 TypeScript 支持，无需编译
+#### Why Bun?
+- **Performance**: 25x faster than npm, 4x faster than pnpm
+- **All-in-One**: Runtime, bundler, test runner, package manager
+- **Drop-in Replacement**: Compatible with npm/Node.js ecosystem
+- **Built-in Testing**: Vitest-compatible test runner
+- **TypeScript Native**: Native TypeScript support, no compilation needed
 
-#### npm 兼容性
-- 读取 package.json 和 package-lock.json/bun.lockb
-- 与大多数 npm 包兼容
-- 可以通过 `bun run` 运行 npm 脚本
-- 特定包需要时可回退到 npm
+#### npm Compatibility
+- Reads package.json and package-lock.json/bun.lockb
+- Works with most npm packages
+- Can run npm scripts via `bun run`
+- Falls back to npm when needed for specific packages
 
-## 项目架构
+## Project Architecture
 
-### 推荐的目录结构
+### Recommended Directory Structure
 
 ```
 project-root/
 ├── src/
 │   ├── lib/
 │   │   ├── components/
-│   │   │   ├── ui/              # shadcn-svelte 组件
+│   │   │   ├── ui/              # shadcn-svelte components
 │   │   │   │   ├── button/
 │   │   │   │   ├── card/
 │   │   │   │   └── ...
-│   │   │   ├── layout/          # 布局组件
+│   │   │   ├── layout/          # Layout components
 │   │   │   │   ├── Header.svelte
 │   │   │   │   ├── Footer.svelte
 │   │   │   │   └── Sidebar.svelte
-│   │   │   └── features/        # 功能特定组件
+│   │   │   └── features/        # Feature-specific components
 │   │   │       ├── auth/
 │   │   │       ├── dashboard/
 │   │   │       └── ...
@@ -95,42 +95,42 @@ project-root/
 │   │   │   ├── user.ts
 │   │   │   ├── theme.ts
 │   │   │   └── notifications.ts
-│   │   ├── utils/               # 工具函数
+│   │   ├── utils/               # Utility functions
 │   │   │   ├── api.ts
 │   │   │   ├── validation.ts
 │   │   │   └── formatting.ts
-│   │   ├── types/               # TypeScript 类型
+│   │   ├── types/               # TypeScript types
 │   │   │   ├── api.ts
 │   │   │   └── models.ts
-│   │   ├── server/              # 服务端工具
+│   │   ├── server/              # Server-side utilities
 │   │   │   ├── db.ts
 │   │   │   └── auth.ts
-│   │   └── config/              # 配置
+│   │   └── config/              # Configuration
 │   │       ├── constants.ts
 │   │       └── env.ts
-│   ├── routes/                  # SvelteKit 路由
-│   │   ├── +page.svelte         # 首页
-│   │   ├── +layout.svelte       # 根布局
-│   │   ├── +error.svelte        # 错误页面
-│   │   ├── api/                 # API 路由
+│   ├── routes/                  # SvelteKit routes
+│   │   ├── +page.svelte         # Home page
+│   │   ├── +layout.svelte       # Root layout
+│   │   ├── +error.svelte        # Error page
+│   │   ├── api/                 # API routes
 │   │   │   └── users/
 │   │   │       └── +server.ts
-│   │   ├── (auth)/              # 路由组
+│   │   ├── (auth)/              # Route group
 │   │   │   ├── login/
 │   │   │   └── register/
 │   │   └── dashboard/
 │   │       ├── +page.svelte
 │   │       └── +page.server.ts
-│   ├── app.html                 # HTML 模板
-│   ├── app.css                  # 全局样式
-│   └── hooks.server.ts          # 服务器钩子
-├── static/                      # 静态资源
+│   ├── app.html                 # HTML template
+│   ├── app.css                  # Global styles
+│   └── hooks.server.ts          # Server hooks
+├── static/                      # Static assets
 │   ├── images/
 │   └── fonts/
-├── tests/                       # 测试
+├── tests/                       # Tests
 │   ├── unit/
 │   └── integration/
-├── bun.lockb                    # Bun 锁文件
+├── bun.lockb                    # Bun lockfile
 ├── package.json
 ├── svelte.config.js
 ├── vite.config.ts
@@ -138,44 +138,44 @@ project-root/
 └── tsconfig.json
 ```
 
-## 核心模式和最佳实践
+## Core Patterns & Best Practices
 
-### 1. 组件开发
+### 1. Component Development
 
-#### 组件结构最佳实践
+#### Component Structure Best Practices
 ```svelte
 <script lang="ts">
-  // 1. 导入（外部，然后内部）
+  // 1. Imports (external, then internal)
   import { onMount, createEventDispatcher } from 'svelte';
   import { fade } from 'svelte/transition';
   import type { User } from '$lib/types';
   import { Button } from '$lib/components/ui/button';
 
-  // 2. 类型定义（如果不在单独文件中）
+  // 2. Type definitions (if not in separate file)
   interface $$Props {
     user: User;
     variant?: 'default' | 'compact';
   }
 
-  // 3. 带默认值的 Props
+  // 3. Props with defaults
   export let user: User;
   export let variant: $$Props['variant'] = 'default';
 
-  // 4. 事件调度器
+  // 4. Event dispatcher
   const dispatch = createEventDispatcher<{
     edit: { userId: string };
     delete: { userId: string };
   }>();
 
-  // 5. 本地状态
+  // 5. Local state
   let isEditing = false;
   let formData = { ...user };
 
-  // 6. 响应式声明
+  // 6. Reactive declarations
   $: fullName = `${user.firstName} ${user.lastName}`;
   $: hasChanges = JSON.stringify(formData) !== JSON.stringify(user);
 
-  // 7. 函数
+  // 7. Functions
   function handleEdit() {
     isEditing = true;
   }
@@ -185,33 +185,33 @@ project-root/
     isEditing = false;
   }
 
-  // 8. 生命周期钩子
+  // 8. Lifecycle hooks
   onMount(() => {
-    console.log('组件已挂载');
+    console.log('Component mounted');
 
     return () => {
-      console.log('组件将卸载');
+      console.log('Component will unmount');
     };
   });
 </script>
 
-<!-- 具有清晰层次结构的模板 -->
+<!-- Template with clear hierarchy -->
 <div class="user-card" class:compact={variant === 'compact'}>
   {#if isEditing}
     <form on:submit|preventDefault={handleSave}>
-      <!-- 编辑模式 -->
+      <!-- Edit mode -->
     </form>
   {:else}
-    <!-- 查看模式 -->
+    <!-- View mode -->
     <div class="user-info" transition:fade>
       <h3>{fullName}</h3>
       <p>{user.email}</p>
     </div>
-    <Button on:click={handleEdit}>编辑</Button>
+    <Button on:click={handleEdit}>Edit</Button>
   {/if}
 </div>
 
-<!-- 作用域样式 -->
+<!-- Scoped styles -->
 <style lang="postcss">
   .user-card {
     @apply rounded-lg border p-4;
@@ -227,9 +227,9 @@ project-root/
 </style>
 ```
 
-#### TypeScript Props 模式
+#### TypeScript Props Pattern
 ```typescript
-// 对于复杂的 props，使用 interface
+// For complex props, use interface
 interface $$Props {
   items: Item[];
   selectedId?: string;
@@ -241,16 +241,16 @@ export let items: $$Props['items'];
 export let selectedId: $$Props['selectedId'] = undefined;
 export let onSelect: $$Props['onSelect'] = undefined;
 
-// 用于 class prop 转发
+// For class prop forwarding
 let className: $$Props['class'] = '';
 export { className as class };
 ```
 
-### 2. 状态管理
+### 2. State Management
 
 #### Svelte Stores
 
-**可写 Store**
+**Writable Store**
 ```typescript
 // stores/user.ts
 import { writable } from 'svelte/store';
@@ -272,9 +272,9 @@ function createUserStore() {
 export const user = createUserStore();
 ```
 
-**派生 Store**
+**Derived Store**
 ```typescript
-// stores/user.ts (续)
+// stores/user.ts (continued)
 import { derived } from 'svelte/store';
 
 export const isAuthenticated = derived(
@@ -288,7 +288,7 @@ export const userPermissions = derived(
 );
 ```
 
-**可读 Store（用于外部数据）**
+**Readable Store (for external data)**
 ```typescript
 import { readable } from 'svelte/store';
 
@@ -301,7 +301,7 @@ export const time = readable(new Date(), (set) => {
 });
 ```
 
-**带持久化的自定义 Store**
+**Custom Store with Persistence**
 ```typescript
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
@@ -321,11 +321,11 @@ export function persistedStore<T>(key: string, initialValue: T) {
   return store;
 }
 
-// 使用
+// Usage
 export const theme = persistedStore<'light' | 'dark'>('theme', 'light');
 ```
 
-#### Context API（组件树状态）
+#### Context API (Component Tree State)
 ```svelte
 <!-- Parent.svelte -->
 <script lang="ts">
@@ -348,18 +348,18 @@ export const theme = persistedStore<'light' | 'dark'>('theme', 'light');
 <input bind:value={$formData.name} />
 ```
 
-### 3. SvelteKit 路由和数据加载
+### 3. SvelteKit Routing & Data Loading
 
-#### 页面结构
+#### Page Structure
 ```typescript
 // routes/blog/[slug]/+page.ts
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ params, fetch, parent }) => {
-  // 访问父布局数据
+  // Access parent layout data
   const parentData = await parent();
 
-  // 获取数据
+  // Fetch data
   const response = await fetch(`/api/posts/${params.slug}`);
   const post = await response.json();
 
@@ -392,14 +392,14 @@ export const load: PageLoad = async ({ params, fetch, parent }) => {
 </article>
 ```
 
-#### 服务端数据加载
+#### Server-Side Data Loading
 ```typescript
 // routes/dashboard/+page.server.ts
 import type { PageServerLoad, Actions } from './$types';
 import { error, fail, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ locals, depends }) => {
-  // depends() 为失效创建依赖
+  // depends() creates a dependency for invalidation
   depends('app:dashboard');
 
   if (!locals.user) {
@@ -410,7 +410,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
     const stats = await fetchUserStats(locals.user.id);
     return { stats };
   } catch (err) {
-    throw error(500, '加载仪表板数据失败');
+    throw error(500, 'Failed to load dashboard data');
   }
 };
 
@@ -429,7 +429,7 @@ export const actions: Actions = {
 };
 ```
 
-#### 渐进式增强的表单操作
+#### Form Actions with Progressive Enhancement
 ```svelte
 <script lang="ts">
   import { enhance } from '$app/forms';
@@ -451,7 +451,7 @@ export const actions: Actions = {
       loading = false;
 
       if (result.type === 'success') {
-        // 处理成功
+        // Handle success
       }
     };
   }}
@@ -463,18 +463,18 @@ export const actions: Actions = {
   />
 
   {#if form?.missing}
-    <p class="error">姓名是必填项</p>
+    <p class="error">Name is required</p>
   {/if}
 
   <button disabled={loading}>
-    {loading ? '保存中...' : '保存'}
+    {loading ? 'Saving...' : 'Save'}
   </button>
 </form>
 ```
 
-### 4. API 开发
+### 4. API Development
 
-#### REST API 端点
+#### REST API Endpoints
 ```typescript
 // routes/api/users/+server.ts
 import { json, error } from '@sveltejs/kit';
@@ -499,20 +499,20 @@ export const GET: RequestHandler = async ({ url, locals }) => {
       }
     });
   } catch (err) {
-    throw error(500, '获取用户失败');
+    throw error(500, 'Failed to fetch users');
   }
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user?.isAdmin) {
-    throw error(403, '未授权');
+    throw error(403, 'Unauthorized');
   }
 
   const body = await request.json();
 
-  // 验证
+  // Validate
   if (!body.email || !body.name) {
-    throw error(400, '缺少必填字段');
+    throw error(400, 'Missing required fields');
   }
 
   const user = await db.users.create({ data: body });
@@ -521,7 +521,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 };
 ```
 
-#### 类型安全的 API 客户端
+#### Type-Safe API Client
 ```typescript
 // lib/utils/api.ts
 import { error } from '@sveltejs/kit';
@@ -545,15 +545,15 @@ export async function apiClient<T>(
   return response.json();
 }
 
-// 使用
+// Usage
 import type { User } from '$lib/types';
 
 const users = await apiClient<User[]>('/api/users');
 ```
 
-### 5. 表单处理和验证
+### 5. Form Handling & Validation
 
-#### 使用 shadcn-svelte 表单
+#### Using shadcn-svelte Forms
 ```svelte
 <script lang="ts">
   import { z } from 'zod';
@@ -567,11 +567,11 @@ const users = await apiClient<User[]>('/api/users');
   export let data: PageData;
 
   const schema = z.object({
-    email: z.string().email('无效的邮箱地址'),
-    password: z.string().min(8, '密码至少需要 8 个字符'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string()
   }).refine(data => data.password === data.confirmPassword, {
-    message: "密码不匹配",
+    message: "Passwords don't match",
     path: ['confirmPassword']
   });
 
@@ -580,8 +580,8 @@ const users = await apiClient<User[]>('/api/users');
     resetForm: false,
     onUpdated: ({ form }) => {
       if (form.valid) {
-        // 处理成功
-        toast.success('注册成功！');
+        // Handle success
+        toast.success('Registration successful!');
       }
     }
   });
@@ -590,7 +590,7 @@ const users = await apiClient<User[]>('/api/users');
 <form method="POST" use:enhance>
   <div class="space-y-4">
     <div>
-      <Label for="email">邮箱</Label>
+      <Label for="email">Email</Label>
       <Input
         id="email"
         type="email"
@@ -604,7 +604,7 @@ const users = await apiClient<User[]>('/api/users');
     </div>
 
     <div>
-      <Label for="password">密码</Label>
+      <Label for="password">Password</Label>
       <Input
         id="password"
         type="password"
@@ -618,7 +618,7 @@ const users = await apiClient<User[]>('/api/users');
     </div>
 
     <div>
-      <Label for="confirmPassword">确认密码</Label>
+      <Label for="confirmPassword">Confirm Password</Label>
       <Input
         id="confirmPassword"
         type="password"
@@ -632,15 +632,15 @@ const users = await apiClient<User[]>('/api/users');
     </div>
 
     <Button type="submit" disabled={$delayed}>
-      {$delayed ? '注册中...' : '注册'}
+      {$delayed ? 'Registering...' : 'Register'}
     </Button>
   </div>
 </form>
 ```
 
-### 6. 使用 Tailwind CSS 样式化
+### 6. Styling with Tailwind CSS
 
-#### 配置
+#### Configuration
 ```javascript
 // tailwind.config.js
 export default {
@@ -657,7 +657,7 @@ export default {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))'
         },
-        // ... 更多颜色
+        // ... more colors
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -670,7 +670,7 @@ export default {
 };
 ```
 
-#### 组件样式模式
+#### Component Styling Patterns
 ```svelte
 <script lang="ts">
   import { cn } from '$lib/utils';
@@ -704,9 +704,9 @@ export default {
 </button>
 ```
 
-### 7. 测试
+### 7. Testing
 
-#### 使用 Vitest 进行单元测试
+#### Unit Tests with Vitest
 ```typescript
 // Button.test.ts
 import { render, screen, fireEvent } from '@testing-library/svelte';
@@ -714,12 +714,12 @@ import { expect, test, describe, vi } from 'vitest';
 import Button from './Button.svelte';
 
 describe('Button', () => {
-  test('渲染文本', () => {
-    render(Button, { props: { children: '点击我' } });
-    expect(screen.getByRole('button')).toHaveTextContent('点击我');
+  test('renders with text', () => {
+    render(Button, { props: { children: 'Click me' } });
+    expect(screen.getByRole('button')).toHaveTextContent('Click me');
   });
 
-  test('点击时调用 onClick', async () => {
+  test('calls onClick when clicked', async () => {
     const onClick = vi.fn();
     render(Button, { props: { onclick: onClick } });
 
@@ -727,21 +727,21 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  test('当 disabled prop 为 true 时被禁用', () => {
+  test('is disabled when disabled prop is true', () => {
     render(Button, { props: { disabled: true } });
     expect(screen.getByRole('button')).toBeDisabled();
   });
 });
 ```
 
-#### 集成测试
+#### Integration Tests
 ```typescript
 // login.test.ts
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { expect, test, vi } from 'vitest';
 import LoginPage from './+page.svelte';
 
-test('登录流程', async () => {
+test('login flow', async () => {
   const mockFetch = vi.fn(() =>
     Promise.resolve({
       ok: true,
@@ -753,15 +753,15 @@ test('登录流程', async () => {
 
   render(LoginPage);
 
-  await fireEvent.input(screen.getByLabelText('邮箱'), {
+  await fireEvent.input(screen.getByLabelText('Email'), {
     target: { value: 'user@example.com' }
   });
 
-  await fireEvent.input(screen.getByLabelText('密码'), {
+  await fireEvent.input(screen.getByLabelText('Password'), {
     target: { value: 'password123' }
   });
 
-  await fireEvent.click(screen.getByRole('button', { name: '登录' }));
+  await fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
   await waitFor(() => {
     expect(mockFetch).toHaveBeenCalledWith('/api/auth/login', expect.any(Object));
@@ -769,9 +769,9 @@ test('登录流程', async () => {
 });
 ```
 
-### 8. 性能优化
+### 8. Performance Optimization
 
-#### 代码分割
+#### Code Splitting
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte';
@@ -787,11 +787,11 @@ test('登录流程', async () => {
 {#if HeavyComponent}
   <svelte:component this={HeavyComponent} />
 {:else}
-  <div>加载中...</div>
+  <div>Loading...</div>
 {/if}
 ```
 
-#### 图片优化
+#### Image Optimization
 ```svelte
 <script lang="ts">
   import { browser } from '$app/environment';
@@ -837,7 +837,17 @@ test('登录流程', async () => {
 </div>
 ```
 
-### 9. 无障碍访问最佳实践
+#### Preloading Data
+```typescript
+// routes/+layout.ts
+export const preload = () => {
+  return {
+    // Preload critical data
+  };
+};
+```
+
+### 9. Accessibility Best Practices
 
 ```svelte
 <script lang="ts">
@@ -849,7 +859,7 @@ test('登录流程', async () => {
   } = createDialog();
 </script>
 
-<button use:trigger>打开对话框</button>
+<button use:trigger>Open Dialog</button>
 
 {#if $open}
   <div use:overlay class="fixed inset-0 bg-black/50" />
@@ -860,32 +870,32 @@ test('登录流程', async () => {
     aria-describedby="dialog-description"
     class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
   >
-    <h2 use:title id="dialog-title">对话框标题</h2>
-    <p use:description id="dialog-description">对话框描述</p>
+    <h2 use:title id="dialog-title">Dialog Title</h2>
+    <p use:description id="dialog-description">Dialog description</p>
 
-    <button use:close aria-label="关闭对话框">
+    <button use:close aria-label="Close dialog">
       <X class="h-4 w-4" />
     </button>
   </div>
 {/if}
 ```
 
-### 10. 部署
+### 10. Deployment
 
-#### Bun 构建和部署
+#### Bun Build & Deploy
 ```bash
-# 生产构建
+# Build for production
 bun run build
 
-# 预览生产构建
+# Preview production build
 bun run preview
 
-# 使用适配器部署（示例：Node）
-# svelte.config.js 应该有：adapter: adapter-node()
+# Deploy with adapter (example: Node)
+# svelte.config.js should have: adapter: adapter-node()
 node build/index.js
 ```
 
-#### 环境变量
+#### Environment Variables
 ```typescript
 // lib/config/env.ts
 import { PUBLIC_API_URL } from '$env/static/public';
@@ -893,13 +903,13 @@ import { PRIVATE_API_KEY } from '$env/static/private';
 
 export const config = {
   apiUrl: PUBLIC_API_URL,
-  apiKey: PRIVATE_API_KEY // 仅服务器端可用
+  apiKey: PRIVATE_API_KEY // Only available server-side
 };
 ```
 
-## 常见模式和解决方案
+## Common Patterns & Solutions
 
-### 1. 使用 shadcn-svelte 的深色模式
+### 1. Dark Mode with shadcn-svelte
 ```typescript
 // stores/theme.ts
 import { persistedStore } from '$lib/utils/stores';
@@ -910,7 +920,7 @@ export function toggleTheme() {
   theme.update(t => t === 'light' ? 'dark' : 'light');
 }
 
-// 应用主题
+// Apply theme
 if (browser) {
   theme.subscribe(value => {
     document.documentElement.classList.toggle('dark', value === 'dark');
@@ -918,7 +928,7 @@ if (browser) {
 }
 ```
 
-### 2. Toast 通知
+### 2. Toast Notifications
 ```typescript
 // lib/components/ui/sonner.ts
 import { toast as sonnerToast } from 'svelte-sonner';
@@ -933,7 +943,7 @@ export const toast = {
 };
 ```
 
-### 3. 认证流程
+### 3. Authentication Flow
 ```typescript
 // hooks.server.ts
 import type { Handle } from '@sveltejs/kit';
@@ -957,7 +967,7 @@ const authHandler: Handle = async ({ event, resolve }) => {
 export const handle = sequence(authHandler);
 ```
 
-### 4. 使用 SSE 的实时更新
+### 4. Real-time Updates with SSE
 ```typescript
 // routes/api/events/+server.ts
 import type { RequestHandler } from './$types';
@@ -984,33 +994,33 @@ export const GET: RequestHandler = async () => {
 };
 ```
 
-## 故障排查
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **Bun 兼容性问题**：某些包可能不适用于 Bun。使用 npm/pnpm 作为回退
-2. **水合不匹配**：确保 SSR 和客户端渲染相同的内容
-3. **内存泄漏**：始终在 `onDestroy` 中清理或从 `onMount` 返回清理函数
-4. **shadcn-svelte 的类型错误**：确保已安装 `@melt-ui/svelte` 类型
+1. **Bun compatibility issues**: Some packages may not work with Bun. Use npm/pnpm as fallback
+2. **Hydration mismatches**: Ensure SSR and client render the same content
+3. **Memory leaks**: Always cleanup in `onDestroy` or return cleanup functions from `onMount`
+4. **Type errors with shadcn-svelte**: Ensure `@melt-ui/svelte` types are installed
 
-### 调试工具
+### Debug Tools
 
 ```svelte
 <script lang="ts">
   import { dev } from '$app/environment';
 
-  // 仅在开发环境
+  // Only in development
   $: if (dev) {
-    console.log('组件状态:', { /* ... */ });
+    console.log('Component state:', { /* ... */ });
   }
 </script>
 ```
 
-## 资源
+## Resources
 
-- **Svelte**：https://svelte.dev/docs
-- **SvelteKit**：https://kit.svelte.dev/docs
-- **shadcn-svelte**：https://www.shadcn-svelte.com/docs
-- **Bun**：https://bun.sh/docs
-- **Melt UI**：https://melt-ui.com/docs
-- **Tailwind CSS**：https://tailwindcss.com/docs
+- **Svelte**: https://svelte.dev/docs
+- **SvelteKit**: https://kit.svelte.dev/docs
+- **shadcn-svelte**: https://www.shadcn-svelte.com/docs
+- **Bun**: https://bun.sh/docs
+- **Melt UI**: https://melt-ui.com/docs
+- **Tailwind CSS**: https://tailwindcss.com/docs
