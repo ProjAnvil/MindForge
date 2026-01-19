@@ -281,6 +281,14 @@ else
         target_dir="$CLAUDE_SKILLS_DIR/$skill_name"
 
         create_symlink "$skill_dir" "$target_dir" "$skill_name"
+        
+        # Check if there are shared scripts for this skill
+        shared_scripts_dir="$AITK_DIR/skills/scripts/$skill_name"
+        if [ -d "$shared_scripts_dir" ]; then
+            target_scripts_dir="$target_dir/scripts"
+            echo -e "${GREEN}  └─${NC} Found shared scripts for $skill_name"
+            create_symlink "$shared_scripts_dir" "$target_scripts_dir" "$skill_name/scripts"
+        fi
     done
 fi
 

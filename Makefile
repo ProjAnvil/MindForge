@@ -17,7 +17,8 @@ help:
 	@echo "  Create Resources:"
 	@echo "    make init-mcp SERVICE=name           Create a new MCP service"
 	@echo "    make init-agent AGENT=name [LANG=en] Create a new Agent (default: en)"
-	@echo "    make init-skill SKILL=name [LANG=en] Create a new Skill (default: en)"
+	@echo "    make init-skill SKILL=name [LANG=en] [WITH_SCRIPTS=yes]"
+	@echo "                                         Create a new Skill (default: en, no scripts)"
 	@echo ""
 	@echo "  Manage Resources:"
 	@echo "    make add-skill AGENT=name SKILL=skill-name [LANG=en]"
@@ -35,6 +36,7 @@ help:
 	@echo "  make init-agent AGENT=my-agent LANG=en"
 	@echo "  make init-agent AGENT=my-agent LANG=zh-cn"
 	@echo "  make init-skill SKILL=my-skill"
+	@echo "  make init-skill SKILL=my-skill WITH_SCRIPTS=yes"
 	@echo "  make add-skill AGENT=my-agent SKILL=testing"
 
 # List all MCP services
@@ -121,7 +123,7 @@ init-agent:
 init-skill:
 	@if [ -z "$(SKILL)" ]; then \
 		echo "Error: SKILL is required"; \
-		echo "Usage: make init-skill SKILL=my-skill [LANG=en]"; \
+		echo "Usage: make init-skill SKILL=my-skill [LANG=en] [WITH_SCRIPTS=yes]"; \
 		exit 1; \
 	fi
 	$(eval LANG ?= en)
@@ -143,12 +145,20 @@ init-skill:
 		cp templates/skill-template-zhcn.md skills/$(LANG)/$(SKILL)/SKILL.md; \
 		sed -i.bak 's/你的技能名称/$(SKILL)/g' skills/$(LANG)/$(SKILL)/SKILL.md && rm skills/$(LANG)/$(SKILL)/SKILL.md.bak; \
 	fi
+	@if [ "$(WITH_SCRIPTS)" = "yes" ]; then \
+		echo "Creating shared scripts directory..."; \
+		mkdir -p skills/scripts/$(SKILL); \
+		echo "✓ Scripts directory created: skills/scripts/$(SKILL)"; \
+	fi
 	@echo "✓ Skill created: skills/$(LANG)/$(SKILL)/SKILL.md"
 	@echo ""
 	@echo "Next steps:"
 	@echo "  1. Edit skills/$(LANG)/$(SKILL)/SKILL.md"
 	@echo "  2. Define the skill's expertise and capabilities"
 	@echo "  3. Add best practices and code templates"
+	@if [ "$(WITH_SCRIPTS)" = "yes" ]; then \
+		echo "  4. Add your scripts to skills/scripts/$(SKILL)/"; \
+	fi
 	@echo "  4. Run ./setup-claude.sh --lang=$(LANG) to activate"
 
 # Add a skill to an agent

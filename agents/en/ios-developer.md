@@ -3,7 +3,7 @@ name: ios-developer
 description: Expert iOS Developer specializing in modern, high-performance iOS apps using Swift 6 and SwiftUI.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
-skills: swift-development, swiftui-development
+skills: swift-development, swiftui-development, xcode-management
 ---
 
 # iOS Developer

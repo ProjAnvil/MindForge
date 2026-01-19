@@ -85,6 +85,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **system-architecture** - System architecture design
 - **tech-documentation** - Technical documentation writing
 - **testing** - General testing skills (unit, integration, TDD/BDD)
+- **xcode-management** - Xcode project management (automated file addition, project.pbxproj handling)
 
 ## 📁 Project Structure
 
@@ -120,19 +121,24 @@ mindforge/
 │   │   ├── database-design/SKILL.md
 │   │   ├── tech-documentation/SKILL.md
 │   │   ├── frontend-development/SKILL.md
-│   │   └── git-guru/SKILL.md
-│   └── zh-cn/          # Chinese versions
-│       ├── testing/SKILL.md
-│       ├── enterprise-java/SKILL.md
-│       ├── go-development/SKILL.md
-│       ├── python-development/SKILL.md
-│       ├── javascript-typescript/SKILL.md
-│       ├── system-architecture/SKILL.md
-│       ├── api-design/SKILL.md
-│       ├── database-design/SKILL.md
-│       ├── tech-documentation/SKILL.md
-│       ├── frontend-development/SKILL.md
-│       └── git-guru/SKILL.md
+│   │   ├── git-guru/SKILL.md
+│   │   └── xcode-management/SKILL.md
+│   ├── zh-cn/          # Chinese versions
+│   │   ├── testing/SKILL.md
+│   │   ├── enterprise-java/SKILL.md
+│   │   ├── go-development/SKILL.md
+│   │   ├── python-development/SKILL.md
+│   │   ├── javascript-typescript/SKILL.md
+│   │   ├── system-architecture/SKILL.md
+│   │   ├── api-design/SKILL.md
+│   │   ├── database-design/SKILL.md
+│   │   ├── tech-documentation/SKILL.md
+│   │   ├── frontend-development/SKILL.md
+│   │   ├── git-guru/SKILL.md
+│   │   └── xcode-management/SKILL.md
+│   └── scripts/        # Shared executable scripts for skills
+│       └── xcode-management/
+│           └── add_files_to_xcode.py  # Automated Xcode file addition
 ├── user_claude_md/      # User-level Claude instructions (multi-language)
 │   ├── en/
 │   │   └── CLAUDE.md   # English user-level instructions
@@ -221,14 +227,17 @@ make init-agent AGENT=my-agent LANG=en
 #### Create a New Skill
 
 ```bash
-# Create an English skill (default)
+# Create an English skill (default, no scripts)
 make init-skill SKILL=my-skill
+
+# Create a skill with executable scripts
+make init-skill SKILL=my-skill WITH_SCRIPTS=yes
 
 # Create a Chinese skill
 make init-skill SKILL=my-skill LANG=zh-cn
 
-# Create an English skill (explicit)
-make init-skill SKILL=my-skill LANG=en
+# Create a Chinese skill with scripts
+make init-skill SKILL=my-skill LANG=zh-cn WITH_SCRIPTS=yes
 ```
 
 **What you get:**
@@ -236,13 +245,21 @@ make init-skill SKILL=my-skill LANG=en
 - Structured sections for expertise, principles, and best practices
 - Code patterns, templates, and troubleshooting guides
 - Quality checklists and decision frameworks
+- (Optional) A shared `skills/scripts/{skill-name}/` directory for executable scripts
 - Ready to use across multiple agents
 
 **After creation:**
 1. Edit `skills/{lang}/{skill-name}/SKILL.md` to define capabilities
 2. Add domain-specific knowledge and best practices
 3. Include code templates and common patterns
-4. Run `./setup-claude.sh --lang={lang}` to activate
+4. (Optional) Add executable scripts to `skills/scripts/{skill-name}/`
+5. Run `./setup-claude.sh --lang={lang}` to activate
+
+**Scripts Support:**
+When `WITH_SCRIPTS=yes` is used, a shared scripts directory is created at `skills/scripts/{skill-name}/`. This allows:
+- Multi-language skills to share the same executable scripts
+- Scripts referenced via relative path `scripts/` in skill documentation
+- Automatic linking/copying of scripts during setup for both Unix/Mac (symlink) and Windows (copy)
 
 #### Create a New MCP Service
 

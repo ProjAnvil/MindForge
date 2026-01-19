@@ -85,6 +85,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 - **system-architecture** - 系统架构设计
 - **tech-documentation** - 技术文档编写
 - **testing** - 通用测试技能（单元、集成、TDD/BDD）
+- **xcode-management** - Xcode 项目管理（自动添加文件、project.pbxproj 处理）
 
 ## 📁 项目结构
 
@@ -119,19 +120,24 @@ mindforge/
 │   │   ├── database-design/SKILL.md
 │   │   ├── tech-documentation/SKILL.md
 │   │   ├── frontend-development/SKILL.md
-│   │   └── git-guru/SKILL.md
-│   └── zh-cn/          # 中文版本
-│       ├── testing/SKILL.md
-│       ├── enterprise-java/SKILL.md
-│       ├── go-development/SKILL.md
-│       ├── python-development/SKILL.md
-│       ├── javascript-typescript/SKILL.md
-│       ├── system-architecture/SKILL.md
-│       ├── api-design/SKILL.md
-│       ├── database-design/SKILL.md
-│       ├── tech-documentation/SKILL.md
-│       ├── frontend-development/SKILL.md
-│       └── git-guru/SKILL.md
+│   │   ├── git-guru/SKILL.md
+│   │   └── xcode-management/SKILL.md
+│   ├── zh-cn/          # 中文版本
+│   │   ├── testing/SKILL.md
+│   │   ├── enterprise-java/SKILL.md
+│   │   ├── go-development/SKILL.md
+│   │   ├── python-development/SKILL.md
+│   │   ├── javascript-typescript/SKILL.md
+│   │   ├── system-architecture/SKILL.md
+│   │   ├── api-design/SKILL.md
+│   │   ├── database-design/SKILL.md
+│   │   ├── tech-documentation/SKILL.md
+│   │   ├── frontend-development/SKILL.md
+│   │   ├── git-guru/SKILL.md
+│   │   └── xcode-management/SKILL.md
+│   └── scripts/        # 技能共享的可执行脚本
+│       └── xcode-management/
+│           └── add_files_to_xcode.py  # 自动化 Xcode 文件添加
 ├── user_claude_md/      # 用户级别 Claude 指令（多语言支持）
 │   ├── en/
 │   │   └── CLAUDE.md   # 英文用户级别指令
@@ -220,14 +226,17 @@ make init-agent AGENT=my-agent LANG=en
 #### 创建新的 Skill
 
 ```bash
-# 创建英文 skill（默认）
+# 创建英文 skill（默认，不带脚本）
 make init-skill SKILL=my-skill
+
+# 创建带有可执行脚本的 skill
+make init-skill SKILL=my-skill WITH_SCRIPTS=yes
 
 # 创建中文 skill
 make init-skill SKILL=my-skill LANG=zh-cn
 
-# 创建英文 skill（显式指定）
-make init-skill SKILL=my-skill LANG=en
+# 创建带脚本的中文 skill
+make init-skill SKILL=my-skill LANG=zh-cn WITH_SCRIPTS=yes
 ```
 
 **你将得到:**
@@ -235,13 +244,21 @@ make init-skill SKILL=my-skill LANG=en
 - 结构化的章节：专业知识、原则、最佳实践
 - 代码模式、模板和故障排查指南
 - 质量检查清单和决策框架
+- （可选）共享的 `skills/scripts/{skill-name}/` 目录用于可执行脚本
 - 可跨多个 agents 使用
 
 **创建后的步骤:**
 1. 编辑 `skills/{lang}/{skill-name}/SKILL.md` 定义能力
 2. 添加领域专属知识和最佳实践
 3. 包含代码模板和常见模式
-4. 运行 `./setup-claude.sh --lang={lang}` 激活
+4. （可选）添加可执行脚本到 `skills/scripts/{skill-name}/`
+5. 运行 `./setup-claude.sh --lang={lang}` 激活
+
+**脚本支持：**
+当使用 `WITH_SCRIPTS=yes` 时，会在 `skills/scripts/{skill-name}/` 创建一个共享脚本目录。这样可以：
+- 多语言版本的 skill 共享相同的可执行脚本
+- 在 skill 文档中通过相对路径 `scripts/` 引用脚本
+- 在设置过程中自动链接/复制脚本，Unix/Mac 使用符号链接，Windows 使用复制
 
 #### 创建新的 MCP 服务
 
