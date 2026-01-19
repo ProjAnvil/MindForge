@@ -58,6 +58,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 
 ## 🤖 Available Agents
 
+- **@code-reviewer** - Expert code reviewer (software architecture, design patterns, code quality, SOLID principles)
 - **@frontend-engineer** - Modern frontend expert (React, Vue, Svelte, TypeScript)
 - **@golang-backend-engineer** - Go backend development expert (Fiber, Cobra, GORM, Clean Architecture)
 - **@ios-developer** - Expert iOS Developer (Swift 6, SwiftUI, MVVM, TCA)
@@ -93,6 +94,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 mindforge/
 ├── agents/              # Claude Code format Agents (multi-language)
 │   ├── en/             # English versions
+│   │   ├── code-reviewer.md
 │   │   ├── frontend-engineer.md
 │   │   ├── golang-backend-engineer.md
 │   │   ├── ios-developer.md
@@ -102,6 +104,7 @@ mindforge/
 │   │   ├── python-test-engineer.md
 │   │   └── system-architect.md
 │   └── zh-cn/          # Chinese versions
+│       ├── code-reviewer.md
 │       ├── frontend-engineer.md
 │       ├── golang-backend-engineer.md
 │       ├── java-backend-engineer.md

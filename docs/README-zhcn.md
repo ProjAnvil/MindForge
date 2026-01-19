@@ -58,6 +58,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 
 ## 🤖 可用的 Agents
 
+- **@code-reviewer** - 专家代码审查员（软件架构、设计模式、代码质量、SOLID 原则）
 - **@frontend-engineer** - 现代前端开发专家（React, Vue, Svelte, TypeScript）
 - **@golang-backend-engineer** - Go 后端开发专家（Fiber, Cobra, GORM, Clean Architecture）
 - **@ios-developer** - 专业的 iOS 开发者（Swift 6, SwiftUI, MVVM, TCA）
@@ -93,14 +94,17 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 mindforge/
 ├── agents/              # Claude Code 格式的 Agents（多语言支持）
 │   ├── en/             # 英文版本
+│   │   ├── code-reviewer.md
 │   │   ├── frontend-engineer.md
 │   │   ├── golang-backend-engineer.md
+│   │   ├── ios-developer.md
 │   │   ├── java-backend-engineer.md
 │   │   ├── java-unit-test.md
 │   │   ├── product-manager.md
 │   │   ├── python-test-engineer.md
 │   │   └── system-architect.md
 │   └── zh-cn/          # 中文版本
+│       ├── code-reviewer.md
 │       ├── frontend-engineer.md
 │       ├── golang-backend-engineer.md
 │       ├── java-backend-engineer.md
