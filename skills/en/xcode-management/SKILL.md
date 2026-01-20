@@ -1,3 +1,9 @@
+---
+name: xcode-management
+description: Expert in Xcode project management and iOS/macOS development workflows. Specializes in managing Xcode project files, understanding the .pbxproj format, and automating file additions to Xcode projects. Use this skill when managing Xcode projects, adding new files, configuring build settings, or troubleshooting project file issues.
+allowed-tools: Read, Grep, Glob, Edit, Write, Bash
+---
+
 # Xcode Project Management Skill
 
 ## Overview
