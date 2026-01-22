@@ -72,7 +72,7 @@ func userParsing() async throws {
 
 - **Conform to Sendable**: 任何在并发域之间传递的类型都应遵循 `Sendable` 协议。
 - **Avoid Global Mutable State**: 避免使用全局变量，除非它们由 Actor 保护。
-- **Implicitly Unwrapped Optionals**: 严禁使用 `!`，除非在初始化器中确实无法避免（极少见）。
+- **Implicitly Unwrapped Optionals**: 严禁使用强制解包操作符，除非在初始化器中确实无法避免（极少见）。
 - **Use `let` over `var`**: 默认使用常量，仅在必要时使用变量。
 - **Error Handling**: 优先使用 `throws` 和 `do-catch`，而不是返回 `Optional` 或 `Result` 类型（在 async 上下文中 throws 更自然）。
 

@@ -80,7 +80,7 @@ The View layer should remain "dumb" (purely presentational). All business logic,
 
 ### Don'ts:
 - Do not execute side effects directly inside the View body.
-- Do not force unwrap (`!`) unless absolutely necessary in test code.
+- Do not force unwrap (force unwrap operator) unless absolutely necessary in test code.
 - Do not perform heavy calculations on the main thread.
 
 ## Quality Checklist

@@ -72,7 +72,7 @@ func userParsing() async throws {
 
 - **Conform to Sendable**: Any type passed between concurrency domains must conform to the `Sendable` protocol.
 - **Avoid Global Mutable State**: Avoid global variables unless protected by an Actor.
-- **Implicitly Unwrapped Optionals**: Strictly forbidden (`!`), except where unavoidable in initializers (very rare).
+- **Implicitly Unwrapped Optionals**: Strictly forbidden (the force unwrap operator), except where unavoidable in initializers (very rare).
 - **Use `let` over `var`**: Default to constants; use variables only when necessary.
 - **Error Handling**: Prefer `throws` and `do-catch` over returning `Optional` or `Result` types (throws is more natural in async contexts).
 
