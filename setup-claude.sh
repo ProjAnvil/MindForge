@@ -277,10 +277,27 @@ if [ ${#SKILL_DIRS[@]} -eq 0 ]; then
 else
     for skill_dir in "${SKILL_DIRS[@]}"; do
         skill_name=$(basename "$skill_dir")
-
         target_dir="$CLAUDE_SKILLS_DIR/$skill_name"
 
-        create_symlink "$skill_dir" "$target_dir" "$skill_name"
+        # If the target is a symlink (old behavior), remove it so we can create a directory
+        # This prevents creating links *inside* the source directory via the symlink
+        if [ -L "$target_dir" ]; then
+            echo -e "${YELLOW}⟳${NC} Converting $skill_name from symlink to directory structure"
+            rm "$target_dir"
+        fi
+        
+        # Create the skill directory in .claude
+        create_dir "$target_dir"
+
+        # Link content from the language-specific directory
+        shopt -s nullglob
+        skill_files=("$skill_dir"*)
+        shopt -u nullglob
+
+        for skill_file in "${skill_files[@]}"; do
+            file_name=$(basename "$skill_file")
+            create_symlink "$skill_file" "$target_dir/$file_name" "$skill_name/$file_name"
+        done
         
         # Check if there are shared scripts for this skill
         shared_scripts_dir="$AITK_DIR/skills/scripts/$skill_name"
