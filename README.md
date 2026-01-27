@@ -81,6 +81,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **javascript-typescript** - JavaScript/TypeScript development (Node.js, Express, React)
 - **product-management** - Product management and strategy
 - **python-development** - Python development (FastAPI, Django, Flask, asyncio)
+- **session-summary** - Summarize current session context for seamless handover
 - **swift-development** - Core Swift 6+ development (Concurrency, Macros, Testing)
 - **swiftui-development** - Modern SwiftUI development (NavigationStack, Observation, SwiftData)
 - **system-architecture** - System architecture design

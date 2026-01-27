@@ -81,6 +81,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 - **javascript-typescript** - JavaScript/TypeScript 开发（Node.js, Express, React）
 - **product-management** - 产品管理与策略
 - **python-development** - Python 开发（FastAPI, Django, Flask, asyncio）
+- **session-summary** - 总结当前会话上下文以便无缝交接
 - **swift-development** - Swift 6+ 核心开发能力（并发编程、宏、测试）
 - **swiftui-development** - 现代 SwiftUI 开发（NavigationStack, Observation, SwiftData）
 - **system-architecture** - 系统架构设计
