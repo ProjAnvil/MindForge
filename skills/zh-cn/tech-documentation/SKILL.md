@@ -1,7 +1,6 @@
 ---
 name: tech-documentation
 description: 技术文档编写技能，涵盖 API 文档、架构文档、部署指南和各种技术写作最佳实践。使用此技能创建技术文档、编写 API 文档、创建架构设计文档，或需要部署和运维手册模板时使用。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # 技术文档编写技能

@@ -1,7 +1,6 @@
 ---
 name: git-guru
 description: Expert Git skills covering interactive rebase, worktree management, reflog recovery, bisect debugging, advanced workflows, commit message best practices, and clean history management. Use this skill when needing advanced Git operations, cleaning commit history, managing multiple worktrees, recovering lost commits, debugging with bisect, or implementing sophisticated Git workflows.
-allowed-tools: Read, Grep, Glob, Edit, Write, Bash
 ---
 
 # Git Guru - Advanced Git Mastery

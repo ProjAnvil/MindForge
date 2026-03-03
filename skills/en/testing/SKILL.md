@@ -1,7 +1,6 @@
 ---
 name: testing
 description: Comprehensive software testing skill covering unit tests, integration tests, TDD/BDD, mocking strategies, and test automation across multiple languages. Use this skill when writing test cases, designing test strategies, implementing test automation, or need guidance on testing frameworks and best practices. Ideal for ensuring code quality through comprehensive testing approaches.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Testing Skill

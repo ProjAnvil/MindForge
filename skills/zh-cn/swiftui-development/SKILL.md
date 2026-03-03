@@ -1,7 +1,6 @@
 ---
 name: swiftui-development
 description: 专注于使用 modern SwiftUI 构建用户界面，涵盖 NavigationStack, Observation 框架和 SwiftData 集成。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # SwiftUI 开发技能

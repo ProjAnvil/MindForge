@@ -1,7 +1,6 @@
 ---
 name: swift-development
 description: Provides core Swift 6+ language development capabilities, covering concurrency, macros, model design, and business logic.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Swift 6 Development Skill

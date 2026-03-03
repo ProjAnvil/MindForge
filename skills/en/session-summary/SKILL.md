@@ -1,7 +1,6 @@
 ---
 name: session-summary
 description: Skill for summarizing the current session's context, including completed tasks, technical decisions, and next steps. Use this to create a handover document for a new session without losing critical context.
-allowed-tools: Read, Write
 ---
 
 # Session Summary & Handover

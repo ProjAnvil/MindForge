@@ -1,7 +1,6 @@
 ---
 name: session-summary
 description: 会话总结技能，用于总结当前会话的上下文，包括已完成的任务、技术决策和下一步计划。使用此技能生成交接文档，以便在不丢失关键上下文的情况下开始新会话。
-allowed-tools: Read, Write
 ---
 
 # 会话总结与交接

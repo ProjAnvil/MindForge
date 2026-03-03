@@ -1,7 +1,6 @@
 ---
 name: swiftui-development
 description: Specialized in building user interfaces using modern SwiftUI, covering NavigationStack, Observation framework, and SwiftData integration.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # SwiftUI Development Skill

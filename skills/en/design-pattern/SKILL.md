@@ -1,7 +1,6 @@
 ---
 name: design-pattern
 description: Expert knowledge in software design patterns covering GoF patterns, architectural patterns, and modern design principles. Apply appropriate patterns to improve code maintainability, scalability, and extensibility.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Design Pattern Mastery

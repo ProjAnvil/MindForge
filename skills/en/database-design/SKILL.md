@@ -1,7 +1,6 @@
 ---
 name: database-design
 description: Database design and optimization skill covering ER diagrams, normalization, indexing, sharding, query optimization, and database best practices. Use this skill when designing database schemas, optimizing queries, planning data architecture, or need guidance on database scaling and performance tuning.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Database Design Skill

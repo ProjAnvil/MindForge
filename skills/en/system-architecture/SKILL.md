@@ -1,7 +1,6 @@
 ---
 name: system-architecture
 description: System architecture design skill covering architecture patterns, distributed systems, technology selection, and enterprise architecture documentation. Use this skill when designing system architectures, evaluating technology stacks, planning distributed systems, or creating architecture decision records and documentation.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # System Architecture Skill

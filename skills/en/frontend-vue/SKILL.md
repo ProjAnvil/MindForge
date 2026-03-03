@@ -1,7 +1,6 @@
 ---
 name: frontend-vue
 description: Professional Vue.js development skill covering Nuxt 3, Vue 3 Composition API, Tailwind CSS, and the Vue ecosystem. Use this skill when building Vue applications, implementing Nuxt features, using Pinia for state management, or component libraries like shadcn-vue.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Vue Development Skill

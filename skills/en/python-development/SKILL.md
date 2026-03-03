@@ -1,7 +1,6 @@
 ---
 name: python-development
 description: Professional Python development skill covering modern Python 3.10+, FastAPI, Django, Flask, async programming, data processing, and best practices.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Python Development Skill - System Prompt

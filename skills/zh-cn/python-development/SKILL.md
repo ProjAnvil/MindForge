@@ -1,7 +1,6 @@
 ---
 name: python-development
 description: 专业的 Python 开发技能，涵盖现代 Python 3.10+、FastAPI、Django、Flask、异步编程、数据处理和最佳实践。使用此技能开发 Python Web 应用、构建 FastAPI/Django 项目、实现异步编程，或需要 Python 架构设计和性能优化指导时使用。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Python 开发技能

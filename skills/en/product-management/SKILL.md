@@ -1,7 +1,6 @@
 ---
 name: product-management
 description: Expertise in product management lifecycle, from ideation to launch. Covers requirements gathering, user story creation, prioritization, and product strategy. Use this skill for product planning, writing PRDs, defining MVPs, or competitive analysis.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Product Management Skill

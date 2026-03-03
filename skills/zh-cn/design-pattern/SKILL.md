@@ -1,7 +1,6 @@
 ---
 name: design-pattern
 description: 精通软件设计模式，包括 GoF 模式、架构模式和现代设计原则。应用适当的模式提高代码的可维护性、可扩展性和可伸缩性。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # 设计模式精通

@@ -1,7 +1,6 @@
 ---
 name: api-design
 description: Professional API design skill covering RESTful APIs, GraphQL, API versioning, authentication, idempotency, and API documentation best practices.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # API Design Skill - System Prompt

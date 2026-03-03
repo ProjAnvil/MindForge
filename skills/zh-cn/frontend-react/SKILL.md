@@ -1,7 +1,6 @@
 ---
 name: frontend-react
 description: 专业的 React 开发技能，涵盖 Next.js、React Server Components、Tailwind CSS 和 React 生态系统。使用此技能构建现代 React 应用程序、实现 Next.js 功能、使用 shadcn/ui 创建 UI 组件，或处理复杂状态管理。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # React 开发技能

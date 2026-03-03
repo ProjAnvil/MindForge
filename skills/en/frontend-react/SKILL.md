@@ -1,7 +1,6 @@
 ---
 name: frontend-react
 description: Professional React development skill covering Next.js, React Server Components, Tailwind CSS, and the React ecosystem. Use this skill when building modern React applications, implementing Next.js features, creating UI components with shadcn/ui, or working with complex state management.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # React Development Skill

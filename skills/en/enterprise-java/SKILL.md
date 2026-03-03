@@ -1,7 +1,6 @@
 ---
 name: enterprise-java
 description: Enterprise Java development skill covering Spring ecosystem, microservices, design patterns, performance optimization, and Java best practices. Use this skill when building enterprise Java applications, working with Spring Boot, implementing microservices, or need guidance on Java architecture and performance tuning.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Enterprise Java Skill

@@ -1,7 +1,6 @@
 ---
 name: swift-development
 description: 提供 Swift 6+ 核心语言开发能力，涵盖并发编程、宏、数据模型设计和业务逻辑实现。
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Swift 6 开发技能

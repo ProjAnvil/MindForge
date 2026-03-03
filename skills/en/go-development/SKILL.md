@@ -1,7 +1,6 @@
 ---
 name: go-development
 description: Go language development skill focusing on Fiber web framework, Cobra CLI, GORM ORM, Clean Architecture, and concurrent programming.
-allowed-tools: Read, Grep, Glob, Edit, Write
 ---
 
 # Go Development Skill - System Prompt
