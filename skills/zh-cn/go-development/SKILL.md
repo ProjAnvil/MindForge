@@ -735,3 +735,7 @@ func NewUserService() *UserService {
 - **优先使用组合而不是继承**
 - **保持函数小而专注（< 50 行）**
 - **使用能揭示意图的有意义的名称**
+
+## 更多资源
+
+- 对于基于项目 Go 版本的现代 Go 语法指南，请参阅 [modern-go.md](modern-go.md) - 包含从 Go 1.0 到 Go 1.26+ 的版本特性

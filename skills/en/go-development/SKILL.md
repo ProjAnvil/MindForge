@@ -735,3 +735,7 @@ func NewUserService() *UserService {
 - **Prefer composition over inheritance**
 - **Keep functions small and focused (< 50 lines)**
 - **Use meaningful names that reveal intent**
+
+## Additional Resources
+
+- For modern Go syntax guidelines based on project's Go version, see [modern-go.md](modern-go.md) - includes version-specific features from Go 1.0 to Go 1.26+
