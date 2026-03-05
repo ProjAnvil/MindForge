@@ -100,7 +100,7 @@ git rebase -i main
 # Rebase from specific commit
 git rebase --onto <new-base> <upstream> <branch>
 
-# Example: Move feature分支 from old-main to new-main
+# Example: Move feature branch from old-main to new-main
 git rebase --onto new-main old-main feature
 ```
 
@@ -110,9 +110,6 @@ git rebase --onto new-main old-main feature
 ```bash
 # Create worktree for different branch
 git worktree add ../feature-branch feature
-
-# Create worktree with specific branch name
-git worktree add ../bugfix hotfix-123
 
 # Create worktree at specific commit
 git worktree add ../experiment abc1234
@@ -132,8 +129,7 @@ git worktree list
 # ~/workspace/
 #   ├── main-project/      # Primary worktree (main)
 #   ├── feature-auth/      # Worktree for auth feature
-#   ├── bugfix-login/      # Worktree for urgent fix
-#   └── experiment-newui/  # Worktree for experiments
+#   └── bugfix-login/      # Worktree for urgent fix
 
 # Switch between worktrees without stashing
 cd ~/workspace/feature-auth
@@ -141,9 +137,6 @@ cd ~/workspace/feature-auth
 
 cd ~/workspace/bugfix-login
 # Fix urgent bug without disturbing feature work
-
-cd ~/workspace/main-project
-# Integrate completed features
 ```
 
 #### Worktree Management
@@ -156,31 +149,6 @@ git worktree prune
 
 # Move worktree to new location
 git worktree move ../old-location ../new-location
-
-# Clean up working directory in worktree
-git worktree remove --force ../experiment
-```
-
-#### Worktree Best Practices
-```bash
-# Use descriptive directory names
-git worktree add ../feature-user-authentication feature/user-auth
-git worktree add ../hotfix-production-crash hotfix/crash-123
-
-# Group related worktrees
-mkdir -p ~/projects/myapp-worktrees
-cd ~/projects/myapp
-git worktree add ../myapp-worktrees/feature-a feature/a
-git worktree add ../myapp-worktrees/bugfix-b bugfix/b
-
-# Temporary worktree for inspection (detached HEAD)
-git worktree add --detach ../inspect-commit abc1234
-
-# Clean up after merge
-git checkout main
-git merge feature/new-auth
-git branch -d feature/new-auth
-git worktree remove ../feature-new-auth
 ```
 
 ### 3. Reflog - Git's Time Machine
@@ -233,17 +201,6 @@ git reflog | grep "checkout: moving from.*to.*feature-branch"
 git checkout -b feature-branch abc1234
 ```
 
-#### Reflog Expiration
-```bash
-# Reflog keeps commits for 90 days by default
-git reflog expire --expire=now --all
-git gc --prune=now --aggressive
-
-# Extend reflog retention
-git config gc.reflogExpireUnreachable 180 days
-git config gc.reflogExpire 90 days
-```
-
 ### 4. Git Bisect - Binary Search for Bugs
 
 #### Basic Bisect Workflow
@@ -289,29 +246,6 @@ git bisect run ./test_bug.sh
 # Result: Automatically finds bad commit
 ```
 
-#### Bisect in Specific File
-```bash
-# Only bisect changes in specific path
-git bisect start -- path/to/file.py
-git bisect bad HEAD
-git bisect good v1.0.0
-
-# Continue bisecting
-git bisect good  # or bad
-```
-
-#### Bisect Visualization
-```bash
-# Show bisect status
-git bisect visualize
-
-# Show bisect log
-git bisect log
-
-# Skip untestable commits
-git bisect skip
-```
-
 ### 5. Advanced Merging
 
 #### Merge Strategies
@@ -325,49 +259,17 @@ git merge branch-a branch-b branch-c
 # Ours strategy (always favor current branch)
 git merge feature-branch -s ours
 
-# Subtree strategy (include subproject)
-git merge --squash -s subtree vendor/lib
-
 # Strategy-specific options
 git merge -X theirs feature-branch
 git merge -X ours feature-branch
 git merge -X ignore-space-change feature-branch
 ```
 
-#### Resolve Conflicts with Tools
+#### Resolve Conflicts
 ```bash
-# Use specific merge tool
-git mergetool
-
-# Configure merge tool
-git config merge.tool vimdiff
-git config mergetool.prompt false
-
-# Conflict markers in file:
-# <<<<<<< HEAD
-# Your changes
-# =======
-# Their changes
-# >>>>>>> feature-branch
-
-# Accept both
+# Accept current or incoming
 git checkout --ours -- path/to/file
 git checkout --theirs -- path/to/file
-
-# Manual merge
-# Edit file, remove markers, then:
-git add path/to/file
-git commit
-```
-
-#### Advanced Conflict Resolution
-```bash
-# Use merge-file for three-way merge
-git merge-file --ours file.txt file.txt.base file.txt.remote
-
-# Combine both versions manually
-git checkout --conflict=merge file.txt
-# Edit: <<||| ||||| >>>>>>
 
 # See conflict diffs
 git diff --diff-filter=U
@@ -407,133 +309,7 @@ git cherry-pick --skip
 git cherry-pick --abort
 ```
 
-#### Cherry-pick to New Branch
-```bash
-# Create commits from another branch
-git checkout -b new-branch
-git cherry-pick feature1..feature2
-
-# Pick specific commits from another branch
-git log main --oneline
-git cherry-pick abc123 def456
-```
-
-### 7. Submodules
-
-#### Add Submodules
-```bash
-# Add submodule
-git submodule add https://github.com/user/repo.git path/to/submodule
-
-# Initialize and clone submodules
-git submodule init
-git submodule update
-
-# Clone with submodules
-git clone --recursive https://github.com/user/repo.git
-
-# Or after clone
-git submodule update --init --recursive
-```
-
-#### Update Submodules
-```bash
-# Update to latest commit
-cd path/to/submodule
-git pull origin main
-
-# Update from main repository
-git submodule update --remote
-
-# Update all submodules
-git submodule update --recursive
-
-# See submodule status
-git submodule status
-```
-
-#### Remove Submodule
-```bash
-# Remove submodule properly
-git submodule deinit path/to/submodule
-git rm path/to/submodule
-rm -rf .git/modules/path/to/submodule
-```
-
-#### Submodule Workflows
-```bash
-# Track specific branch in submodule
-git config -f .gitmodules submodule.path.branch main
-git submodule update --remote
-
-# Detach HEAD in submodule
-git submodule update --checkout
-
-# Merge submodule updates
-git submodule foreach 'git pull origin main'
-```
-
-### 8. Git Hooks
-
-#### Pre-commit Hook
-```bash
-# .git/hooks/pre-commit
-#!/bin/bash
-# Run linter
-npm run lint
-if [ $? -ne 0 ]; then
-    echo "Linting failed. Commit aborted."
-    exit 1
-fi
-
-# Run tests
-npm test
-if [ $? -ne 0 ]; then
-    echo "Tests failed. Commit aborted."
-    exit 1
-fi
-```
-
-#### Pre-push Hook
-```bash
-# .git/hooks/pre-push
-#!/bin/bash
-# Prevent pushing to main
-current_branch=$(git symbolic-ref --short HEAD)
-if [ "$current_branch" = "main" ]; then
-    echo "Direct pushes to main are forbidden!"
-    exit 1
-fi
-
-# Run full test suite before push
-npm run test:full
-```
-
-#### Commit Message Hook
-```bash
-# .git/hooks/commit-msg
-#!/bin/bash
-# Validate commit message format
-commit_regex='^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}'
-if ! grep -qE "$commit_regex" $1; then
-    echo "Invalid commit message format."
-    echo "Expected: type(scope): subject"
-    exit 1
-fi
-```
-
-#### Install Hooks
-```bash
-# Make hook executable
-chmod +x .git/hooks/pre-commit
-
-# Copy hooks from template
-cp .githooks/pre-commit .git/hooks/
-chmod +x .git/hooks/pre-commit
-
-# Or use core.hooksPath
-git config core.hooksPath .githooks
-```
+> **Submodules, Git Hooks, and Repository Maintenance**: see [references/advanced-features.md](references/advanced-features.md)
 
 ### 9. Commit Message Best Practices
 
@@ -592,277 +368,7 @@ if ! grep -qE "$commit_regex" "$1"; then
 fi
 ```
 
-### 10. Repository Maintenance
-
-#### Garbage Collection
-```bash
-# Basic garbage collection
-git gc
-
-# Aggressive garbage collection
-git gc --aggressive --prune=now
-
-# Prune loose objects
-git prune
-
-# Verify repository integrity
-git fsck
-
-# Expire reflog entries
-git reflog expire --expire=now --all
-git gc --prune=now
-```
-
-#### Repository Optimization
-```bash
-# Repack repository
-git repack -a -d --depth=250 --window=250
-
-# Remove unreachable objects
-git prune --expire now
-
-# Clean up working directory
-git clean -f -d
-
-# Dry run first
-git clean -n -d
-```
-
-#### Shallow Clone
-```bash
-# Clone only latest commit (save space)
-git clone --depth 1 https://github.com/user/repo.git
-
-# Clone with specific depth
-git clone --depth 5 https://github.com/user/repo.git
-
-# Convert shallow to deep
-git fetch --unshallow
-
-# Clone single branch
-git clone --single-branch --branch main https://github.com/user/repo.git
-
-# Shallow clone subdirectory
-git clone --depth 1 --filter=blob:none --sparse https://github.com/user/repo.git
-cd repo
-git sparse-checkout set path/to/subdirectory
-```
-
-#### Partial Clone
-```bash
-# Clone without blobs
-git clone --filter=blob:none https://github.com/user/repo.git
-
-# Fetch blobs as needed
-git lfs pull
-
-# Treeless clone
-git clone --filter=tree:0 https://github.com/user/repo.git
-```
-
-## Advanced Workflows
-
-### 1. Clean Feature Branch Workflow
-```bash
-# Create feature branch from main
-git checkout main
-git pull
-git checkout -b feature/new-auth
-
-# Make multiple commits
-git commit -m "feat: add login form"
-git commit -m "fix: button alignment"
-git commit -m "feat: implement OAuth"
-git commit -m "docs: update README"
-
-# Before merging, clean up with interactive rebase
-git rebase -i main
-
-# Squash fixups, reorder logically, reword for clarity
-
-# Merge with fast-forward only
-git checkout main
-git merge --ff-only feature/new-auth
-
-# Delete feature branch
-git branch -d feature/new-auth
-```
-
-### 2. Urgent Fix with Worktree
-```bash
-# Working on feature branch
-git status
-# On feature/auth, uncommitted changes
-
-# Urgent bug appears - don't want to stash or commit
-
-# Create worktree for hotfix
-git worktree add ../hotfix-123 main
-cd ../hotfix-123
-
-# Fix bug
-git commit -m "fix: critical production bug"
-
-# Push and deploy
-git push origin main
-
-# Return to feature work
-cd ../original-project
-# Continue feature work, no interruption
-```
-
-### 3. Recover from Bad Rebase
-```bash
-# Interactive rebase went wrong
-git rebase -i main~10
-# Made mistakes, now history is messy
-
-# Reflog to rescue
-git reflog
-# Find the state before rebase
-# abc1234 HEAD@{5}: commit: Working state before rebase
-
-git reset --hard HEAD@{5}
-
-# Or use reflog to find specific commits
-git reflog | grep "commit"
-
-# Recreate branch from lost state
-git checkout -b saved-work abc1234
-```
-
-### 4. Bisect to Find Regression
-```bash
-# Bug discovered in production
-git checkout main
-
-# Start bisect
-git bisect start
-git bisect bad HEAD  # Current version has bug
-git bisect good v1.0.0  # Known good version
-
-# Git checks out middle commit
-# Test the application
-npm test
-# Bug exists
-git bisect bad
-
-# Git checks out another commit
-# Test
-npm test
-# No bug
-git bisect good
-
-# Repeat until found
-# abc1234 is the first bad commit
-git show abc1234  # See what changed
-
-git bisect reset
-```
-
-### 5. Commit Message Cleanup in Pull Request
-```bash
-# Feature branch has many WIP commits
-git log --oneline
-# wip1, fix typo, wip2, more work, fix bug, wip3
-
-# Use interactive rebase to clean up
-git rebase -i main
-
-# Mark commits:
-# pick abc1234 Initial feature implementation
-# fixup def5678 Fix typo
-# fixup ghi9012 More work
-# squash jkl2345 Fix bug
-# squash mno6789 Final touches
-
-# Result: One clean, comprehensive commit
-```
-
-## Common Scenarios
-
-### Scenario 1: Clean Up Messy History
-```bash
-# Feature branch has 20 messy commits
-git checkout feature-branch
-
-# Interactive rebase to squash and reorder
-git rebase -i main
-
-# Use fixup liberally for minor corrections
-# Squash related changes together
-# Reword for clarity
-
-# Force push (carefully!)
-git push --force-with-lease origin feature-branch
-```
-
-### Scenario 2: Work on Multiple Features Simultaneously
-```bash
-# Create worktrees for each feature
-git worktree add ../feature-a feature/a
-git worktree add ../feature-b feature/b
-git worktree add ../hotfix-c main
-
-# Work on all three simultaneously
-# No context switching, no stash needed
-
-# After completion:
-git checkout main
-git merge feature/a
-git merge feature/b
-git merge hotfix/c
-
-# Clean up worktrees
-git worktree remove ../feature-a
-git worktree remove ../feature-b
-git worktree remove ../hotfix-c
-```
-
-### Scenario 3: Recover Accidentally Deleted Branch
-```bash
-# Oops, deleted wrong branch
-git branch -D important-feature
-
-# Find it in reflog
-git reflog | grep important-feature
-
-# abc1234 HEAD@{10}: checkout: moving from main to important-feature
-
-# Recreate branch
-git checkout -b important-feature abc1234
-
-# Verify it's correct
-git log
-```
-
-### Scenario 4: Merge Specific Commits from PR
-```bash
-# Large PR with 50 commits, only want 3 specific ones
-git log feature-branch --oneline
-
-# Cherry-pick specific commits
-git checkout main
-git cherry-pick abc123 def456 ghi789
-
-# Or cherry-pick range
-git cherry-pick main~10..main
-```
-
-### Scenario 5: Undo Commit After Push
-```bash
-# Pushed commit with mistake
-git push origin main
-# Oops, left debug code in
-
-# Create revert commit (safe)
-git revert HEAD
-git push origin main
-
-# Or force revert (dangerous, use with caution)
-git reset --hard HEAD~1
-git push --force-with-lease origin main
-```
+> **Advanced workflows** (clean feature branches, urgent fixes, rebase recovery) and **common scenarios** (history cleanup, parallel features, branch recovery): see [references/workflows-scenarios.md](references/workflows-scenarios.md)
 
 ## Response Patterns
 
@@ -980,7 +486,5 @@ Sources:
 - [Advanced Git Tutorial - Interactive Rebase, Cherry-Picking](https://www.youtube.com/watch?v=qsTthZi23VE)
 - [30 Advanced GIT Commands Visualised](https://nagibaba.medium.com/30-advanced-git-commands-visualised-by-chargraph-beb3ab42f027)
 - [Git Worktree Tutorial](https://www.datacamp.com/tutorial/git-worktree-tutorial)
-- [Git Worktree Advanced Git Techniques](https://medium.com/@sunithvs/git-worktree-advanced-git-techniques-for-10x-developer-productivity-ac3a532ede51)
 - [Advanced Git Commands: Reflog, Archive, Bisect](https://medium.com/@moamen.ashraf1892001/advanced-git-commands-reflog-archive-bisect-and-beyond-85549ed23115)
-- [Git Advanced Commands Tutorial (Chinese)](https://friday-go.icu/Tools/Git%25E9%25AB%2598%25E7%25BA%25A7%25E5%2591%25BD%25E4%25BB%25A4%25E6%2595%2599%25E7%25A8%258B)
 - [Beyond the Basics: 10 Advanced Git Commands](https://alphashaban.hashnode.dev/beyond-the-basics-10-advanced-git-commands-for-power-users)

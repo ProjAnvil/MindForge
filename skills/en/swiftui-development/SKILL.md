@@ -1,6 +1,6 @@
 ---
 name: swiftui-development
-description: Specialized in building user interfaces using modern SwiftUI, covering NavigationStack, Observation framework, and SwiftData integration.
+description: Specialized in building user interfaces using modern SwiftUI, covering NavigationStack, Observation framework, and SwiftData integration. Use this skill when writing SwiftUI view files, designing app navigation, handling animations and transitions, or binding ViewModel data to the interface.
 ---
 
 # SwiftUI Development Skill
@@ -99,13 +99,3 @@ struct ContentView: View {
 
 - For iOS 17+, `@Observable` is preferred. For legacy support, fallback to `ObservableObject` may be needed, but strictly mark it.
 - All UI updates must be performed on the main thread (SwiftUI generally handles this, but be careful with callbacks from background tasks).
-
-## Best Practices
-
-- [Best practice 1]
-- [Best practice 2]
-- [Best practice 3]
-
-## Notes
-
-[Any additional notes, warnings, or important considerations]

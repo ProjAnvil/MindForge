@@ -1,6 +1,6 @@
 ---
 name: swift-development
-description: Provides core Swift 6+ language development capabilities, covering concurrency, macros, model design, and business logic.
+description: Provides core Swift 6+ language development capabilities, covering concurrency, macros, model design, and business logic. Use this skill when writing ViewModel, Service, or Repository layer code, defining data models, implementing algorithms, writing unit tests, or fixing concurrency warnings and data races.
 ---
 
 # Swift 6 Development Skill

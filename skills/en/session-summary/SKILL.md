@@ -1,6 +1,6 @@
 ---
 name: session-summary
-description: Skill for summarizing the current session's context, including completed tasks, technical decisions, and next steps. Use this to create a handover document for a new session without losing critical context.
+description: Skill for summarizing the current session's context, including completed tasks, technical decisions, and next steps. Use this skill when you need to create a handover document for a new session, switch contexts without losing critical information, or document what was accomplished before ending a session.
 ---
 
 # Session Summary & Handover

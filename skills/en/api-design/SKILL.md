@@ -1,6 +1,6 @@
 ---
 name: api-design
-description: Professional API design skill covering RESTful APIs, GraphQL, API versioning, authentication, idempotency, and API documentation best practices.
+description: Professional API design skill covering RESTful APIs, GraphQL, API versioning, authentication, idempotency, and API documentation best practices. Use this skill when designing RESTful APIs, creating GraphQL schemas, implementing API versioning strategies, or need guidance on authentication, error handling, and API documentation.
 ---
 
 # API Design Skill - System Prompt
@@ -127,31 +127,8 @@ Server Errors (5xx):
 ```
 
 #### Collection Response with Pagination
-```json
-{
-  "code": 0,
-  "message": "Success",
-  "data": {
-    "items": [...],
-    "pagination": {
-      "page": 2,
-      "size": 20,
-      "total_items": 156,
-      "total_pages": 8,
-      "has_next": true,
-      "has_previous": true
-    },
-    "links": {
-      "self": "/api/v1/users?page=2&size=20",
-      "first": "/api/v1/users?page=1&size=20",
-      "prev": "/api/v1/users?page=1&size=20",
-      "next": "/api/v1/users?page=3&size=20",
-      "last": "/api/v1/users?page=8&size=20"
-    }
-  },
-  "request_id": "req_abc123xyz"
-}
-```
+
+Include `pagination` (page, size, total_items, total_pages, has_next, has_previous) and `links` (self, first, prev, next, last) inside `data`. See [references/pagination-rate-limiting.md](references/pagination-rate-limiting.md) for full example.
 
 ### 3. API Versioning Strategies
 
@@ -235,21 +212,21 @@ Content-Type: application/json
 ```python
 def create_order(request):
     idempotency_key = request.headers.get('Idempotency-Key')
-    
+
     if not idempotency_key:
         return error_response(400, "Idempotency-Key required")
-    
+
     # Check if already processed
     cached_response = redis.get(f"idempotency:{idempotency_key}")
     if cached_response:
         return cached_response  # Return cached result
-    
+
     # Process request
     result = process_order(request.json)
-    
+
     # Cache result for 24 hours
     redis.setex(f"idempotency:{idempotency_key}", 86400, result)
-    
+
     return result
 ```
 
@@ -258,16 +235,16 @@ def create_order(request):
 def create_order(request):
     order_id = request.json.get('order_id')
     lock_key = f"lock:order:{order_id}"
-    
+
     # Try to acquire lock
     if not redis.set(lock_key, "1", nx=True, ex=30):
         return error_response(409, "Order already being processed")
-    
+
     try:
         # Check if order exists
         if order_exists(order_id):
             return get_order(order_id)
-        
+
         # Create order
         result = create_new_order(request.json)
         return result
@@ -337,236 +314,7 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 - **SQL injection prevention**: Use parameterized queries
 - **XSS prevention**: Escape output, set CSP headers
 
-### 6. GraphQL Design Patterns
-
-#### Schema Design
-```graphql
-# Types
-type User {
-  id: ID!
-  username: String!
-  email: String!
-  posts(first: Int, after: String): PostConnection!
-  createdAt: DateTime!
-}
-
-type Post {
-  id: ID!
-  title: String!
-  content: String!
-  author: User!
-  comments: [Comment!]!
-  publishedAt: DateTime
-}
-
-# Queries
-type Query {
-  user(id: ID!): User
-  users(first: Int, after: String, filter: UserFilter): UserConnection!
-  post(id: ID!): Post
-  posts(first: Int, after: String): PostConnection!
-}
-
-# Mutations
-type Mutation {
-  createUser(input: CreateUserInput!): CreateUserPayload!
-  updateUser(id: ID!, input: UpdateUserInput!): UpdateUserPayload!
-  deleteUser(id: ID!): DeleteUserPayload!
-}
-
-# Subscriptions
-type Subscription {
-  postCreated(authorId: ID): Post!
-  commentAdded(postId: ID!): Comment!
-}
-
-# Input types
-input CreateUserInput {
-  username: String!
-  email: String!
-  password: String!
-}
-
-# Payload types
-type CreateUserPayload {
-  user: User
-  errors: [Error!]
-}
-
-# Connection types (Relay spec)
-type UserConnection {
-  edges: [UserEdge!]!
-  pageInfo: PageInfo!
-  totalCount: Int!
-}
-
-type UserEdge {
-  node: User!
-  cursor: String!
-}
-
-type PageInfo {
-  hasNextPage: Boolean!
-  hasPreviousPage: Boolean!
-  startCursor: String
-  endCursor: String
-}
-```
-
-#### Resolver Patterns
-```javascript
-// DataLoader for batching (solve N+1 problem)
-const userLoader = new DataLoader(async (userIds) => {
-  const users = await db.users.findMany({
-    where: { id: { in: userIds } }
-  });
-  return userIds.map(id => users.find(u => u.id === id));
-});
-
-const resolvers = {
-  Query: {
-    user: (_, { id }, context) => {
-      return context.loaders.user.load(id);
-    },
-    users: async (_, { first, after, filter }) => {
-      // Cursor-based pagination
-      const results = await db.users.findMany({
-        where: filter,
-        take: first + 1,
-        cursor: after ? { id: after } : undefined,
-      });
-      
-      const hasNextPage = results.length > first;
-      const edges = results.slice(0, first).map(node => ({
-        node,
-        cursor: node.id,
-      }));
-      
-      return {
-        edges,
-        pageInfo: {
-          hasNextPage,
-          endCursor: edges[edges.length - 1]?.cursor,
-        },
-      };
-    },
-  },
-  
-  User: {
-    posts: (user, args, context) => {
-      // Use DataLoader to batch load posts
-      return context.loaders.postsByUser.load(user.id);
-    },
-  },
-  
-  Mutation: {
-    createUser: async (_, { input }, context) => {
-      // Validate input
-      const errors = validateUserInput(input);
-      if (errors.length > 0) {
-        return { user: null, errors };
-      }
-      
-      // Create user
-      const user = await db.users.create({ data: input });
-      
-      return { user, errors: [] };
-    },
-  },
-};
-```
-
-### 7. Pagination Patterns
-
-#### Offset-Based Pagination (Simple)
-```
-GET /api/v1/posts?page=2&size=20
-
-Pros: Simple, works with SQL LIMIT/OFFSET
-Cons: Performance degrades with large offsets, inconsistent with concurrent writes
-
-SQL: SELECT * FROM posts ORDER BY id LIMIT 20 OFFSET 20;
-```
-
-#### Cursor-Based Pagination (Recommended for real-time feeds)
-```
-GET /api/v1/posts?cursor=post_123&limit=20
-
-Pros: Consistent, efficient, works with real-time data
-Cons: Cannot jump to arbitrary page
-
-Response:
-{
-  "data": [...],
-  "cursor": {
-    "next": "post_143",
-    "previous": "post_103"
-  },
-  "has_more": true
-}
-
-SQL: SELECT * FROM posts WHERE id > 'post_123' ORDER BY id LIMIT 20;
-```
-
-#### Keyset Pagination (Best performance)
-```
-GET /api/v1/posts?after_id=123&after_created_at=2025-01-01T00:00:00Z&limit=20
-
-Pros: Excellent performance, consistent
-Cons: Requires indexed columns, more complex
-
-SQL: 
-SELECT * FROM posts 
-WHERE (created_at, id) > ('2025-01-01', 123)
-ORDER BY created_at, id 
-LIMIT 20;
-```
-
-### 8. Rate Limiting Strategies
-
-#### Token Bucket Algorithm
-```
-Bucket capacity: 100 tokens
-Refill rate: 10 tokens/second
-Request cost: 1 token per request
-
-Headers:
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 45
-X-RateLimit-Reset: 1735689600
-
-When exceeded:
-HTTP 429 Too Many Requests
-Retry-After: 60
-```
-
-#### Implementation
-```python
-from redis import Redis
-import time
-
-redis = Redis()
-
-def check_rate_limit(user_id, limit=100, window=60):
-    key = f"rate_limit:{user_id}"
-    current = time.time()
-    
-    # Remove old entries
-    redis.zremrangebyscore(key, 0, current - window)
-    
-    # Count current requests
-    count = redis.zcard(key)
-    
-    if count >= limit:
-        return False, 0
-    
-    # Add current request
-    redis.zadd(key, {str(current): current})
-    redis.expire(key, window)
-    
-    remaining = limit - count - 1
-    return True, remaining
-```
+> **GraphQL design patterns** (schema, resolvers, DataLoader, N+1 prevention): see [references/graphql-patterns.md](references/graphql-patterns.md)
 
 ## API Design Process
 
@@ -662,23 +410,11 @@ Content-Type: application/json
 ```json
 HTTP/1.1 201 Created
 Location: /api/v1/users/user_123
-Content-Type: application/json
 
 {
   "code": 0,
   "message": "User created successfully",
-  "data": {
-    "id": "user_123",
-    "username": "john_doe",
-    "email": "john@example.com",
-    "profile": {
-      "first_name": "John",
-      "last_name": "Doe",
-      "bio": "Software engineer"
-    },
-    "created_at": "2025-01-01T00:00:00Z",
-    "updated_at": "2025-01-01T00:00:00Z"
-  },
+  "data": { "id": "user_123", "username": "john_doe", "email": "john@example.com", "created_at": "2025-01-01T00:00:00Z" },
   "request_id": "req_abc123"
 }
 ```
@@ -698,158 +434,20 @@ def get_user(user_id, current_user):
     # Check if user can view this profile
     if user_id != current_user.id and not current_user.has_permission('read:users'):
         raise PermissionDenied("Cannot view other user profiles")
-    
+
     return db.users.get(user_id)
 ```
 
 ### Phase 6: Documentation
 
 #### OpenAPI Specification
-```yaml
-openapi: 3.0.0
-info:
-  title: Blog API
-  version: 1.0.0
-  description: RESTful API for blog platform
 
-servers:
-  - url: https://api.example.com/v1
-    description: Production server
+Use OpenAPI 3.0 to document all endpoints with request/response schemas, authentication, and examples.
 
-paths:
-  /users:
-    get:
-      summary: List users
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: size
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserListResponse'
-    post:
-      summary: Create user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUserRequest'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserResponse'
+> **Full OpenAPI template** with paths, components, schemas, and security schemes: see [references/openapi-template.md](references/openapi-template.md)
+> **Pagination patterns** (offset, cursor, keyset) and **Rate limiting** (token bucket, sliding window): see [references/pagination-rate-limiting.md](references/pagination-rate-limiting.md)
 
-components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: string
-        username:
-          type: string
-        email:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-```
-
-## Common Patterns You Recommend
-
-### 1. Bulk Operations
-```
-POST /api/v1/users/bulk
-{
-  "operations": [
-    {
-      "method": "create",
-      "data": {"username": "user1", ...}
-    },
-    {
-      "method": "update",
-      "id": "user_123",
-      "data": {"email": "new@example.com"}
-    },
-    {
-      "method": "delete",
-      "id": "user_456"
-    }
-  ]
-}
-
-Response:
-{
-  "results": [
-    {"operation": 0, "status": "success", "data": {...}},
-    {"operation": 1, "status": "success", "data": {...}},
-    {"operation": 2, "status": "error", "error": {"code": 404, "message": "Not found"}}
-  ]
-}
-```
-
-### 2. Async Operations
-```
-POST /api/v1/reports/generate
-{
-  "type": "annual",
-  "year": 2025
-}
-
-Response:
-HTTP 202 Accepted
-{
-  "job_id": "job_abc123",
-  "status": "pending",
-  "status_url": "/api/v1/jobs/job_abc123"
-}
-
-Check status:
-GET /api/v1/jobs/job_abc123
-{
-  "job_id": "job_abc123",
-  "status": "completed",
-  "result_url": "/api/v1/reports/report_xyz789"
-}
-```
-
-### 3. Webhooks
-```
-Register webhook:
-POST /api/v1/webhooks
-{
-  "url": "https://client.example.com/webhook",
-  "events": ["user.created", "user.updated"],
-  "secret": "webhook_secret_123"
-}
-
-Webhook payload:
-POST https://client.example.com/webhook
-X-Webhook-Signature: sha256=abc123...
-{
-  "event": "user.created",
-  "timestamp": "2025-01-01T00:00:00Z",
-  "data": {
-    "id": "user_123",
-    "username": "john_doe"
-  }
-}
-```
+> **Common patterns** (bulk operations, async operations, webhooks): see [references/common-patterns.md](references/common-patterns.md)
 
 ## Communication Style
 
