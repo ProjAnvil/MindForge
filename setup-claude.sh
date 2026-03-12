@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Claude Code AITK Setup Script (Multilingual Support)
-# This script creates symbolic links from your AITK project to ~/.claude/
+# Claude Code MindForge Setup Script (Multilingual Support)
+# This script creates symbolic links from your MindForge project to ~/.claude/
 # so that Claude Code can automatically discover your agents and skills.
 
 set -e  # Exit on error
@@ -70,13 +70,13 @@ fi
 
 # Get the absolute path of this script's directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-AITK_DIR="$SCRIPT_DIR"
+MINDFORGE_DIR="$SCRIPT_DIR"
 
 # Source directories (with language)
-AITK_AGENTS_DIR="$AITK_DIR/agents/$LANG_CODE"
-AITK_SKILLS_DIR="$AITK_DIR/skills/$LANG_CODE"
-AITK_DOCS_SRC_DIR="$AITK_DIR/docs/agents-detail/$LANG_CODE"
-AITK_USER_CLAUDE_MD_SRC="$AITK_DIR/user_claude_md/$LANG_CODE/CLAUDE.md"
+MINDFORGE_AGENTS_DIR="$MINDFORGE_DIR/agents/$LANG_CODE"
+MINDFORGE_SKILLS_DIR="$MINDFORGE_DIR/skills/$LANG_CODE"
+MINDFORGE_DOCS_SRC_DIR="$MINDFORGE_DIR/docs/agents-detail/$LANG_CODE"
+MINDFORGE_USER_CLAUDE_MD_SRC="$MINDFORGE_DIR/user_claude_md/$LANG_CODE/CLAUDE.md"
 
 # Target directories
 CLAUDE_DIR="$HOME/.claude"
@@ -86,45 +86,45 @@ CLAUDE_DOCS_DIR="$CLAUDE_DIR/docs"
 CLAUDE_USER_CLAUDE_MD_TARGET="$CLAUDE_DIR/CLAUDE.md"
 
 # Verify source directories exist
-if [ ! -d "$AITK_AGENTS_DIR" ]; then
-    echo -e "${RED}Error: Agents directory not found: $AITK_AGENTS_DIR${NC}"
+if [ ! -d "$MINDFORGE_AGENTS_DIR" ]; then
+    echo -e "${RED}Error: Agents directory not found: $MINDFORGE_AGENTS_DIR${NC}"
     echo "Available languages:"
-    ls -d "$AITK_DIR/agents/"*/ 2>/dev/null | xargs -n 1 basename
+    ls -d "$MINDFORGE_DIR/agents/"*/ 2>/dev/null | xargs -n 1 basename
     exit 1
 fi
 
-if [ ! -d "$AITK_SKILLS_DIR" ]; then
-    echo -e "${RED}Error: Skills directory not found: $AITK_SKILLS_DIR${NC}"
+if [ ! -d "$MINDFORGE_SKILLS_DIR" ]; then
+    echo -e "${RED}Error: Skills directory not found: $MINDFORGE_SKILLS_DIR${NC}"
     echo "Available languages:"
-    ls -d "$AITK_DIR/skills/"*/ 2>/dev/null | xargs -n 1 basename
+    ls -d "$MINDFORGE_DIR/skills/"*/ 2>/dev/null | xargs -n 1 basename
     exit 1
 fi
 
-if [ ! -d "$AITK_DOCS_SRC_DIR" ]; then
-    echo -e "${RED}Error: Docs source directory not found: $AITK_DOCS_SRC_DIR${NC}"
+if [ ! -d "$MINDFORGE_DOCS_SRC_DIR" ]; then
+    echo -e "${RED}Error: Docs source directory not found: $MINDFORGE_DOCS_SRC_DIR${NC}"
     echo "Available languages:"
-    ls -d "$AITK_DIR/docs/agents-detail/"*/ 2>/dev/null | xargs -n 1 basename
+    ls -d "$MINDFORGE_DIR/docs/agents-detail/"*/ 2>/dev/null | xargs -n 1 basename
     exit 1
 fi
 
-if [ ! -f "$AITK_USER_CLAUDE_MD_SRC" ]; then
-    echo -e "${RED}Error: User CLAUDE.md not found: $AITK_USER_CLAUDE_MD_SRC${NC}"
+if [ ! -f "$MINDFORGE_USER_CLAUDE_MD_SRC" ]; then
+    echo -e "${RED}Error: User CLAUDE.md not found: $MINDFORGE_USER_CLAUDE_MD_SRC${NC}"
     echo "Available languages:"
-    ls -d "$AITK_DIR/user_claude_md/"*/ 2>/dev/null | xargs -n 1 basename
+    ls -d "$MINDFORGE_DIR/user_claude_md/"*/ 2>/dev/null | xargs -n 1 basename
     exit 1
 fi
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}  AITK Claude Code Setup${NC}"
+echo -e "${BLUE}  MindForge Claude Code Setup${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 echo -e "${GREEN}OS Detected:${NC} $OS_TYPE"
 echo -e "${GREEN}Language:${NC} $LANG_CODE"
 echo -e "${GREEN}Source:${NC}"
-echo "  Agents: $AITK_AGENTS_DIR"
-echo "  Skills: $AITK_SKILLS_DIR"
-echo "  Docs: $AITK_DOCS_SRC_DIR"
-echo "  User CLAUDE.md: $AITK_USER_CLAUDE_MD_SRC"
+echo "  Agents: $MINDFORGE_AGENTS_DIR"
+echo "  Skills: $MINDFORGE_SKILLS_DIR"
+echo "  Docs: $MINDFORGE_DOCS_SRC_DIR"
+echo "  User CLAUDE.md: $MINDFORGE_USER_CLAUDE_MD_SRC"
 echo -e "${GREEN}Target:${NC}"
 echo "  Claude: $CLAUDE_DIR/"
 echo "  Docs: $CLAUDE_DOCS_DIR/"
@@ -248,11 +248,11 @@ echo -e "\n${BLUE}Step 2: Linking agents${NC}"
 
 # Auto-discover all agent files
 shopt -s nullglob  # Return empty array if no matches
-AGENT_FILES=("$AITK_AGENTS_DIR"/*.md)
+AGENT_FILES=("$MINDFORGE_AGENTS_DIR"/*.md)
 shopt -u nullglob
 
 if [ ${#AGENT_FILES[@]} -eq 0 ]; then
-    echo -e "${YELLOW}No agent files found in $AITK_AGENTS_DIR${NC}"
+    echo -e "${YELLOW}No agent files found in $MINDFORGE_AGENTS_DIR${NC}"
 else
     for agent_file in "${AGENT_FILES[@]}"; do
         agent_name=$(basename "$agent_file")
@@ -269,11 +269,11 @@ echo -e "\n${BLUE}Step 3: Linking skills${NC}"
 
 # Auto-discover all skill directories
 shopt -s nullglob
-SKILL_DIRS=("$AITK_SKILLS_DIR"/*/)
+SKILL_DIRS=("$MINDFORGE_SKILLS_DIR"/*/)
 shopt -u nullglob
 
 if [ ${#SKILL_DIRS[@]} -eq 0 ]; then
-    echo -e "${YELLOW}No skill directories found in $AITK_SKILLS_DIR${NC}"
+    echo -e "${YELLOW}No skill directories found in $MINDFORGE_SKILLS_DIR${NC}"
 else
     for skill_dir in "${SKILL_DIRS[@]}"; do
         skill_name=$(basename "$skill_dir")
@@ -300,7 +300,7 @@ else
         done
         
         # Check if there are shared scripts for this skill
-        shared_scripts_dir="$AITK_DIR/skills/scripts/$skill_name"
+        shared_scripts_dir="$MINDFORGE_DIR/skills/scripts/$skill_name"
         if [ -d "$shared_scripts_dir" ]; then
             target_scripts_dir="$target_dir/scripts"
             echo -e "${GREEN}  └─${NC} Found shared scripts for $skill_name"
@@ -314,11 +314,11 @@ echo -e "\n${BLUE}Step 4: Linking docs${NC}"
 
 # Auto-discover all doc directories
 shopt -s nullglob
-DOC_DIRS=("$AITK_DOCS_SRC_DIR"/*/)
+DOC_DIRS=("$MINDFORGE_DOCS_SRC_DIR"/*/)
 shopt -u nullglob
 
 if [ ${#DOC_DIRS[@]} -eq 0 ]; then
-    echo -e "${YELLOW}No doc directories found in $AITK_DOCS_SRC_DIR${NC}"
+    echo -e "${YELLOW}No doc directories found in $MINDFORGE_DOCS_SRC_DIR${NC}"
 else
     for doc_dir in "${DOC_DIRS[@]}"; do
         doc_name=$(basename "$doc_dir")
@@ -331,7 +331,7 @@ fi
 
 # Step 5: Link user CLAUDE.md
 echo -e "\n${BLUE}Step 5: Linking user CLAUDE.md${NC}"
-create_symlink "$AITK_USER_CLAUDE_MD_SRC" "$CLAUDE_USER_CLAUDE_MD_TARGET" "CLAUDE.md"
+create_symlink "$MINDFORGE_USER_CLAUDE_MD_SRC" "$CLAUDE_USER_CLAUDE_MD_TARGET" "CLAUDE.md"
 
 # Step 6: Verification
 echo -e "\n${BLUE}Step 6: Verification${NC}"
@@ -409,10 +409,10 @@ fi
 echo "- To switch language, run: ${BLUE}$0 --lang=<lang>${NC}"
 echo ""
 echo -e "${GREEN}Available languages:${NC}"
-ls -d "$AITK_DIR/agents/"*/ 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
+ls -d "$MINDFORGE_DIR/agents/"*/ 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
 echo ""
 echo -e "${GREEN}Documentation:${NC}"
-echo "- Project README: $AITK_DIR/README.md"
-echo "- Setup guide: $AITK_DIR/CLAUDE_CODE_SETUP.md"
+echo "- Project README: $MINDFORGE_DIR/README.md"
+echo "- Setup guide: $MINDFORGE_DIR/CLAUDE_CODE_SETUP.md"
 echo ""
 echo -e "${GREEN}Happy coding! 🚀${NC}"

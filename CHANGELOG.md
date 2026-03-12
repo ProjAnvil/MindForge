@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-03-12
+
+### Changed
+
+- **Setup Script Naming**: Renamed all internal variables and user-facing text from `AITK` to `MindForge` in `setup-claude.sh` for brand consistency:
+  - `AITK_DIR` → `MINDFORGE_DIR`
+  - `AITK_AGENTS_DIR` → `MINDFORGE_AGENTS_DIR`
+  - `AITK_SKILLS_DIR` → `MINDFORGE_SKILLS_DIR`
+  - `AITK_DOCS_SRC_DIR` → `MINDFORGE_DOCS_SRC_DIR`
+  - `AITK_USER_CLAUDE_MD_SRC` → `MINDFORGE_USER_CLAUDE_MD_SRC`
+  - Banner text updated from "AITK Claude Code Setup" to "MindForge Claude Code Setup"
+
 ## [0.3.0] - 2026-03-05
 
 ### Changed
