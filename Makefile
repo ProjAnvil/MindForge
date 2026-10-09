@@ -1,7 +1,7 @@
 # MindForge Makefile
 # Manage MCP services, Agents, and Skills
 
-.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all
+.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm
 
 # Default target
 help:
@@ -31,6 +31,10 @@ help:
 	@echo "    make build-all                       Build all resources"
 	@echo "    make test-all                        Test all resources"
 	@echo "    make clean-all                       Clean all resources"
+	@echo ""
+	@echo "  Skill Evaluation (smelt):"
+	@echo "    make eval                            Deterministic evals (lint + plumbing, no LLM key)"
+	@echo "    make eval-llm                        Full evals incl. behavior cases (needs SMELT_API_KEY)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make init-agent AGENT=my-agent LANG=en"
@@ -237,3 +241,17 @@ clean-all:
 		fi; \
 	done
 	@echo "✓ All resources cleaned"
+
+# Skill evaluation with smelt (evals/ project, uv-managed)
+# Deterministic: lint all SKILL.md + harness self-tests — safe for CI.
+eval:
+	@echo "Running deterministic skill evals (smelt)..."
+	@cd evals && uv sync --quiet && uv run pytest -m "not llm"
+	@echo "✓ Deterministic evals passed"
+
+# Full evaluation including real-model behavior cases.
+# Needs SMELT_API_KEY (shell env or evals/.env — see evals/.env.template).
+eval-llm:
+	@echo "Running full skill evals incl. LLM behavior cases..."
+	@cd evals && uv sync --quiet && uv run pytest
+	@echo "✓ All evals passed"

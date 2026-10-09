@@ -88,3 +88,7 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
+
+# Smelt eval reports
+evals/.env
+.smelt/

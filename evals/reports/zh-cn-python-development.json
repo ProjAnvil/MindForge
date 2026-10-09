@@ -1,0 +1,182 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/python-development",
+    "name": "python-development"
+  },
+  "overall": {
+    "score": 91.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7166666666666667,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-django-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/django-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-fastapi-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/fastapi-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-testing-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/testing-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7166666666666667,
+    "overall_comment": "A well-structured and broadly accurate Python skill whose actionability is decent, but its examples need modernization and correction to avoid teaching outdated or invalid patterns.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "The name and description accurately frame a broad Python development skill with web frameworks, async, and best practices, though the content is more web-framework-centric than the 'data processing' description implies."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.55,
+        "comment": "Examples illustrate good and bad patterns but contain correctness issues such as deprecated Pydantic @validator, an aiohttp relative URL, and awaiting synchronous SQLAlchemy Session commit/rollback, with limited edge-case coverage."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.75,
+        "comment": "Response patterns give clear high-level steps and project layouts, but the referenced pattern files are not included and many rules remain principles rather than executable instructions."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Examples & edge cases section, replace the deprecated Pydantic @validator with @field_validator, change the aiohttp relative URL to an absolute URL, and remove await from synchronous SQLAlchemy Session.commit/rollback calls to fix the demonstrated correctness issues.",
+    "In the Actionability section, include the referenced pattern files or inline their key snippets so readers do not have to locate missing files.",
+    "In the Examples & edge cases and Actionability sections, convert remaining principles into executable instructions and add edge-case examples such as validation failures, URL resolution, and transaction error/rollback flows."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/django-patterns.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/fastapi-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/testing-patterns.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

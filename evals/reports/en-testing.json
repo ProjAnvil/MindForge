@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/testing",
+    "name": "testing"
+  },
+  "overall": {
+    "score": 91.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7000000000000001,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-language-specific-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/language-specific-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7000000000000001,
+    "overall_comment": "A well-organized and readable testing skill with clear principles and numeric targets, but its heavy reliance on abstract placeholders and deferral of real examples to a reference file keeps it from being fully concrete or executable on its own.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "The name and description accurately reflect the skill's coverage of unit/integration testing, TDD/BDD, mocking, and coverage guidance, though the promised 'multiple languages' and 'test automation' content is only referenced, not delivered in-doc."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.55,
+        "comment": "Examples are largely language-agnostic placeholders (e.g., [Prepare test objects]) rather than concrete runnable cases, and while failure paths like null inputs and exceptions are listed, no worked failure-path examples are shown."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "The Red-Green-Refactor cycle, concrete coverage targets, and mock-vs-don't-mock rules are explicit and usable, but many sections are opinionated checklists without rationale and the templates require the reader to fill in blanks themselves."
+      }
+    ]
+  },
+  "suggestions": [
+    "Replace placeholder examples such as [Prepare test objects] with concrete, runnable, language-specific test snippets in the Examples & edge cases section.",
+    "Add a brief rationale for each rule in the opinionated checklist sections to explain why the practice matters.",
+    "Turn fill-in-the-blank templates into completed worked examples or annotate each blank with sample values so readers can apply them without guessing."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/language-specific-patterns.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

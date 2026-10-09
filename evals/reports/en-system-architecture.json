@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/system-architecture",
+    "name": "system-architecture"
+  },
+  "overall": {
+    "score": 93.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7666666666666666,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-architecture-templates",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/architecture-templates.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7666666666666666,
+    "overall_comment": "A well-structured and semantically accurate architecture skill document that is strong as a reference but could be more actionable and example-rich for real design execution.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The skill name and description accurately match the document's focus on architecture patterns, distributed systems, technology selection, and architecture documentation."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.75,
+        "comment": "The document includes useful when-to-use/when-not-to-use examples, anti-patterns, and failure-oriented guidance, but lacks detailed end-to-end worked architecture examples and deeper edge-case analysis."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.65,
+        "comment": "The phased process, checklists, and decision template provide direction, but the guidance remains largely conceptual rather than explicit, executable, and output-specific."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the phased process, checklists, and decision template, replace conceptual steps with explicit, executable, output-specific instructions and required artifacts for each phase.",
+    "In the examples section, add at least one detailed end-to-end worked architecture example that follows the process from requirements through decisions to final design.",
+    "In the failure-oriented guidance and anti-patterns section, add deeper edge-case analysis with concrete boundary conditions and prescribed handling for each."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/architecture-templates.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

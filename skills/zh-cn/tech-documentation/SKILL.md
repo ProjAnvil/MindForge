@@ -7,6 +7,14 @@ description: 技术文档编写技能，涵盖 API 文档、架构文档、部�
 
 技术文档编写技能库，提供全面的技术文档写作方法论和模板。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要编写 API 文档或接口说明时
+- 当需要撰写架构设计文档时
+- 当用户要求提供部署指南或运维手册模板时
+
 ## 概述
 
 这是一个专注于技术文档编写的综合性技能模块，涵盖各类技术文档的编写规范、模板和最佳实践，帮助团队产出高质量、易理解、易维护的技术文档。
@@ -160,6 +168,69 @@ description: 技术文档编写技能，涵盖 API 文档、架构文档、部�
 ```
 @tech-documentation 请为这个API创建完整的文档
 ```
+
+## 完整示例：为 POST /login 编写文档
+
+任务：*「为 POST /login 接口写一份 API 文档」*
+
+**第一步——与需求方确认范围。** 读者：第三方接入方；
+结构遵循 [references/api-doc-template.md](references/api-doc-template.md)；
+响应信封采用下方示例中的 `{code, message, data, request_id, timestamp}`
+字段约定（如项目使用其他信封格式，需先明确写出定义）。
+
+**第二步——撰写文档。**
+
+### POST /login
+
+验证用户身份并返回访问令牌。
+
+**请求体**
+
+| 字段 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| username | string | 是 | 账号名或邮箱 |
+| password | string | 是 | 账号密码（需 TLS） |
+
+```json
+{
+  "username": "john_doe",
+  "password": "s3cret!"
+}
+```
+
+**响应 200**
+
+```json
+{
+  "code": 0,
+  "message": "Success",
+  "data": { "token": "eyJhbGciOi...", "expires_in": 3600 },
+  "request_id": "req_abc123",
+  "timestamp": "2026-10-08T10:30:00Z"
+}
+```
+
+**响应 401——凭证无效**
+
+```json
+{
+  "code": 40101,
+  "message": "Invalid username or password",
+  "request_id": "req_def456",
+  "timestamp": "2026-10-08T10:30:01Z"
+}
+```
+
+**cURL 示例**
+
+```bash
+curl -X POST https://api.example.com/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "john_doe", "password": "s3cret!"}'
+```
+
+**第三步——自查**：对照下方的文档质量检查清单逐项核对
+（接口地址、参数表、成功与错误响应、可运行示例均已覆盖）。
 
 ## 文档质量检查清单
 

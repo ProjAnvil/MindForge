@@ -1,0 +1,121 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/product-management",
+    "name": "product-management"
+  },
+  "overall": {
+    "score": 86.0,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.5333333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['作为'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.5333333333333333,
+    "overall_comment": "A well-organized conceptual overview with accurate naming and reusable template scaffolds, but it lacks concrete worked examples and executable steps that would make the skill directly actionable.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately capture a full-lifecycle product management skill (discovery, prioritization, strategy, PRD), though the description is verbatim-duplicated in the frontmatter and body."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.3,
+        "comment": "Only empty templates are provided (user story, PRD structure) with no filled-in worked examples, no anti-patterns, and no failure or edge-case handling."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.4,
+        "comment": "Frameworks like RICE, MoSCoW, Kano, and WSJF are named but never explained or given step-by-step procedures, leaving the reader to know how to apply them already."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the user story and PRD template sections, add fully filled-in worked examples, anti-patterns, and explicit edge/failure cases so the examples section shows expected outputs and boundary handling.",
+    "In the framework descriptions for RICE, MoSCoW, Kano, and WSJF, add step-by-step application procedures with inputs, scoring/calculation steps, and short worked examples so readers can apply them without prior knowledge."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

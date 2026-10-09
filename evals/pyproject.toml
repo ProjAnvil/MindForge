@@ -1,0 +1,22 @@
+[project]
+name = "evals"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "smelt[json,openai]",
+]
+
+[tool.uv.sources]
+smelt = { git = "https://github.com/ProjAnvil/Smelt.git", tag = "v0.5.1" }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-xdist>=3.8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "llm: behavior cases that need a real model (SMELT_API_KEY)",
+]

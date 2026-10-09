@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/xcode-management",
+    "name": "xcode-management"
+  },
+  "overall": {
+    "score": 92.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7333333333333334,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['add_files_to_xcode.py'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7333333333333334,
+    "overall_comment": "A well-structured, example-rich skill doc that is largely actionable, though its grand 'expert' framing oversells a skill that in practice centers on a single file-adding script.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.7,
+        "comment": "The name and description broadly match the skill's focus on Xcode project management and file automation, but the description overpromises wide-ranging 'expert' coverage (build settings, SPM, CocoaPods, extensions) while the actual content is largely built around one script."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.72,
+        "comment": "Numerous concrete bash examples, exit codes, and a dedicated troubleshooting section cover key failure paths, though a few commands (e.g., -newer .git/ORIG_HEAD, the comm/grep one-liner) are fragile and could fail silently."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.78,
+        "comment": "Workflows are numbered and provide executable commands with flags, but ambiguity around whether script paths are relative to the skill directory or project root may confuse execution."
+      }
+    ]
+  },
+  "suggestions": [
+    "Revise the description to narrow or qualify claims of expert coverage for build settings, SPM, CocoaPods, and extensions so it matches the script-centered content.",
+    "Replace fragile example commands such as `-newer .git/ORIG_HEAD` and the `comm`/`grep` one-liner with more robust equivalents and explicit failure checks in the examples and troubleshooting section.",
+    "Clarify in the workflows whether each script path is relative to the skill directory or the project root, and use a consistent base path or variable in the commands."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "scripts/add_files_to_xcode.py",
+      "reached": 0,
+      "origin": "scanned"
+    }
+  ]
+}

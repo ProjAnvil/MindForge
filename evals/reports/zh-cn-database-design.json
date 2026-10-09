@@ -1,0 +1,178 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/database-design",
+    "name": "database-design"
+  },
+  "overall": {
+    "score": 95.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.8333333333333334,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-migration-backup",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/migration-backup.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-query-optimization",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/query-optimization.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-sharding-strategies",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/sharding-strategies.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.8333333333333334,
+    "overall_comment": "A technically strong, example-rich skill doc with a clear phased workflow, held back mainly by over-promised topics that live only in reference files and a few imprecise EXPLAIN/datatype claims plus a formatting glitch before 数据库设计流程.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "name/description correctly capture ER modeling, normalization, indexing and table design, but the description and 专业领域 promise sharding, query optimization and migration content that is only pointed to via reference files rather than delivered in this document."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.85,
+        "comment": "SQL examples for 1NF-3NF, composite-index leftmost-prefix (with ✅/❌ cases), datatype selection and the 索引陷阱 failure modes are concrete and mostly correct, though a few technical statements are imprecise (e.g. 'Using index 无 Using where = 覆盖索引' and the absolute ❌ on CHAR(n)/INT)."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.8,
+        "comment": "The 5-phase design flow, requirement-collection question lists and 沟通风格 checklist give an executable path, but several headline topics (sharding, EXPLAIN-driven query optimization, migration/backup) are deferred to references with no inline steps, and the reference callouts are jammed into the section body without proper heading spacing."
+      }
+    ]
+  },
+  "suggestions": [],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/migration-backup.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/query-optimization.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/sharding-strategies.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

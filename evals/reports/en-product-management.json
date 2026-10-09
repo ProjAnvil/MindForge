@@ -1,0 +1,122 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/product-management",
+    "name": "product-management"
+  },
+  "overall": {
+    "score": 86.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.5499999999999999,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['As a'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.5499999999999999,
+    "overall_comment": "A competent reference overview that accurately scopes the skill but reads as a glossary of frameworks rather than an actionable guide with concrete examples.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "The name and description accurately reflect the skill's coverage of requirements, prioritization, user stories, and strategy, though the description is duplicated verbatim in the Description section and omits roadmap/strategy that the body covers."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.35,
+        "comment": "Only a placeholder skeleton for a user story and a PRD outline are given—no concrete filled-in examples and no failure paths or edge cases such as conflicting priorities or vague acceptance criteria."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.45,
+        "comment": "Frameworks and templates are listed, but there are no explicit step-by-step procedures for how to gather requirements, run prioritization, or resolve trade-offs, leaving execution ambiguous."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the user story and PRD outline sections, replace the placeholder skeletons with fully filled-in examples that demonstrate concrete acceptance criteria, at least one failure path, and edge cases such as conflicting priorities or vague acceptance criteria.",
+    "In the frameworks and templates sections, add explicit step-by-step procedures for gathering requirements, running prioritization, and resolving trade-offs so readers can execute each without guessing.",
+    "Add a short worked example that applies those step-by-step procedures to the filled-in user story/PRD, showing how to resolve a conflicting-priority trade-off and tighten a vague acceptance criterion."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

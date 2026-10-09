@@ -1,0 +1,182 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/database-design",
+    "name": "database-design"
+  },
+  "overall": {
+    "score": 94.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.8166666666666668,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-migration-backup",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/migration-backup.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-query-optimization",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/query-optimization.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-sharding-strategies",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/sharding-strategies.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.8166666666666668,
+    "overall_comment": "A well-structured, example-driven database design skill whose semantic framing is strong, with only minor accuracy nits and some loss of actionable depth where detail is offloaded to references.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately reflect the skill's coverage of ER modeling, normalization, indexing, and design processes, with sharding/migration/query-optimization correctly signaled as delegated references."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.8,
+        "comment": "Rich, mostly correct worked examples (1NF–3NF, index pitfalls, data-type do/don't) cover many failure paths, though a few claims are over-generalized (e.g., 'never use INT', VARCHAR(36) for UUID) and the text ER diagram is misaligned."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.75,
+        "comment": "The phased design process, clarifying-question checklist, and concrete SQL DDL are executable, but later phases stay high-level and the deepest procedures live only in external reference files."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the later phases of the design document, replace high-level descriptions with concrete step-by-step procedures, commands, and decision criteria so readers can execute each phase directly.",
+    "Bring the deepest procedures out of external reference files by inlining the critical steps or adding a concise procedure summary with direct links at the point of use in the main document.",
+    "Add a completion checklist or worked example for each later phase that mirrors the concrete SQL DDL detail already provided in the earlier phases."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/migration-backup.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/query-optimization.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/sharding-strategies.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/xcode-management",
+    "name": "xcode-management"
+  },
+  "overall": {
+    "score": 93.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7666666666666666,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['add_files_to_xcode.py'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7666666666666666,
+    "overall_comment": "The SKILL.md is well organized and practical, but it would be stronger with precise script paths, safer examples, and tighter alignment between its broad Xcode claims and its file-addition focus.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "The name and description correctly identify Xcode project management and .pbxproj/file-addition automation, though 'expert' and broad iOS/macOS workflow claims slightly exceed the script-focused content."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.7,
+        "comment": "Examples cover common workflows, dry runs, exit codes, and troubleshooting, but several shell snippets are fragile or misaligned on paths (e.g., ORIG_HEAD, comm/grep, scripts/ vs project root)."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.75,
+        "comment": "The workflows provide explicit commands and checklists, but ambiguous script locations and auto-detection assumptions leave readers unsure how to execute the tool reliably."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the examples, resolve the `scripts/` vs project-root ambiguity by documenting a single expected working directory and updating every command path to match it.",
+    "For the `ORIG_HEAD`, `comm`, and `grep` snippets, add explicit guards and fallbacks (e.g., checking `ORIG_HEAD` exists and handling empty `grep`/`comm` output) so the examples do not fail in edge cases.",
+    "In the usage/setup section, state the auto-detection assumptions and provide an explicit override or prerequisite checklist so readers know how to execute the tool reliably."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "scripts/add_files_to_xcode.py",
+      "reached": 0,
+      "origin": "scanned"
+    }
+  ]
+}

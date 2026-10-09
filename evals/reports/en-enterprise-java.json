@@ -1,0 +1,151 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/enterprise-java",
+    "name": "enterprise-java"
+  },
+  "overall": {
+    "score": 95.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.85,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-class-templates",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/class-templates.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-response-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/response-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.85,
+    "overall_comment": "A strong, well-structured skill document with accurate scope and useful examples; it could be more actionable by inlining or summarizing the referenced templates and edge-case guidance.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately reflect the skill's Spring/enterprise Java focus, though the description's scope is broader than the mostly pattern-and-best-practice content."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.85,
+        "comment": "Examples correctly demonstrate common bad/good practices and pitfalls like transactions, lazy loading, and cache eviction, but they do not deeply cover edge cases or failure paths beyond these common patterns."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.8,
+        "comment": "The skill provides clear triggers, code-generation steps, and a quality checklist, but several actionable details live in external references and some guidance remains high-level."
+      }
+    ]
+  },
+  "suggestions": [],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/class-templates.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/response-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

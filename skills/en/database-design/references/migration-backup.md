@@ -1,5 +1,33 @@
 ### 6. Data Migration Strategy
 
+#### Schema Migration (Zero-Downtime DDL on Large Tables)
+
+First check whether the change is even blocking — do NOT reach for
+dual-write for a simple column addition:
+
+- **PostgreSQL 11+ / MySQL 8.0.12+**: `ADD COLUMN` with a constant default is
+  an instant, metadata-only operation — no table rebuild, no dual-write
+- **Still blocking**: changing column types, adding a volatile default
+  (`now()`, `random()`), `NOT NULL` without default on old versions, most
+  DROP/RENAME on hot tables
+- **MySQL < 8.0.12 or locking DDL**: use pt-online-schema-change or gh-ost
+- Always set `lock_timeout` (PG) / `--max-load` (gh-ost) so a blocked DDL
+  fails fast instead of piling up connections
+- Indexes on big tables: `CREATE INDEX CONCURRENTLY` (PG) /
+  `ALGORITHM=INPLACE, LOCK=NONE` (MySQL)
+
+**Migration Runbook — mandatory structure for any large-table DDL:**
+
+1. **Preflight** — DB version, table size, replication lag; confirm the DDL
+   is instant or pick an online tool
+2. **Backup verification** — a backup exists AND was restore-tested recently
+   (an untested backup is not a backup)
+3. **Guard rails** — lock_timeout / statement_timeout set; alerts on
+   connection pile-up and replication lag
+4. **Staged rollout** — staging → smallest production replica → primary
+5. **Rollback** — exact reverse DDL written in advance; explicit abort
+   criteria
+
 #### Online Migration (Zero Downtime)
 ```
 Phase 1: Preparation

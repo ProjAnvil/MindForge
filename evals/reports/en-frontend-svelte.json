@@ -1,0 +1,205 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/frontend-svelte",
+    "name": "frontend-svelte"
+  },
+  "overall": {
+    "score": 96.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.8666666666666667,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-api-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/api-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-deployment-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/deployment-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-forms-styling",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/forms-styling.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-testing-performance-a11y",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/testing-performance-a11y.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.8666666666666667,
+    "overall_comment": "This is a strong, accurate, and practical SvelteKit skill document with rich examples, but it could improve edge-case coverage and step-by-step guidance.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately capture the skill's Svelte/SvelteKit/shadcn-svelte/Bun scope, though the body also ventures into full-stack server-side SvelteKit patterns."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.8,
+        "comment": "Examples are numerous and mostly correct, covering form validation failures, auth redirects, and server errors, but miss edge cases such as store subscription cleanup, JSON parse failures, and Svelte version differences."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.85,
+        "comment": "Installation commands, directory layouts, and copy-ready patterns make the skill largely actionable, though key areas are delegated to external reference files and no end-to-end workflow is provided."
+      }
+    ]
+  },
+  "suggestions": [],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/api-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/deployment-patterns.md",
+      "reached": 3,
+      "origin": "both"
+    },
+    {
+      "path": "references/forms-styling.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/testing-performance-a11y.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

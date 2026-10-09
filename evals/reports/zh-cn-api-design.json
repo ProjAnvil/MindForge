@@ -1,0 +1,209 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/api-design",
+    "name": "api-design"
+  },
+  "overall": {
+    "score": 93.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7833333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-pagination-rate-limiting",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/pagination-rate-limiting.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-openapi-template",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/openapi-template.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-common-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/common-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-graphql-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/graphql-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7833333333333333,
+    "overall_comment": "A well-structured, example-rich API design reference whose main weakness is a compressed, non-procedural design workflow that limits step-by-step actionability.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately capture the skill's coverage of RESTful/GraphQL design, versioning, auth, idempotency, and docs, matching the body content well."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.8,
+        "comment": "Strong concrete examples (good/bad URIs, status codes, response/error formats, pagination anti-patterns, idempotency, JWT) but failure-path design is only partially covered and the design-process phases (2-6) are left unelaborated."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.6,
+        "comment": "Provides useful templates and principles, but the workflow phases are collapsed into a single vague line and most guidance is declarative reference rather than explicit executable steps."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the workflow section, replace the single vague line describing phases with a numbered step-by-step sequence that gives each phase explicit actions, inputs, and outputs.",
+    "Throughout the reference guidance, rewrite declarative descriptions into imperative executable steps (e.g., \"do X, then Y\") instead of only explaining what exists.",
+    "For each reference topic (pagination/rate limiting, OpenAPI template, common patterns, GraphQL patterns), add a short \"how to apply\" checklist that turns the existing template or principle into a concrete next action."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/common-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/graphql-patterns.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/openapi-template.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/pagination-rate-limiting.md",
+      "reached": 4,
+      "origin": "both"
+    }
+  ]
+}

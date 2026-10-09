@@ -1,0 +1,122 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/swiftui-development",
+    "name": "swiftui-development"
+  },
+  "overall": {
+    "score": 89.0,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6333333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['NavigationStack'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6333333333333333,
+    "overall_comment": "文档结构清晰且示例可用，但覆盖范围与描述不完全一致，边界情况和操作步骤仍有欠缺。",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.75,
+        "comment": "名称与总体描述准确覆盖 modern SwiftUI 开发，但描述提到的动画/转场在正文中几乎没有内容支撑，略有承诺过度。"
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.5,
+        "comment": "两个示例代码基本正确，但仅覆盖 Observation 和 NavigationStack，未覆盖 SwiftData、动画/转场，也没有失败路径或边界情况。"
+      },
+      {
+        "name": "Actionability",
+        "score": 0.65,
+        "comment": "提供了可执行的代码片段和最佳实践，但缺少分步操作、动画/SwiftData 的具体实现步骤以及常见错误处理，执行细节不够完整。"
+      }
+    ]
+  },
+  "suggestions": [
+    "Add a dedicated animation/transition section and SwiftData example to the body, or remove those promises from the overview, to resolve the overpromise and missing examples.",
+    "Add failure paths and edge cases to the existing Observation and NavigationStack examples and any new SwiftData/animation examples, since current coverage lacks boundary conditions.",
+    "Add step-by-step implementation instructions and common error-handling notes for each example, especially animation/transition and SwiftData, to improve actionability."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

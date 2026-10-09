@@ -7,6 +7,14 @@ description: 专业的 React 开发技能，涵盖 Next.js、React Server Compon
 
 现代 React 开发的综合技能，专注于 Next.js、TypeScript、Tailwind CSS 和广泛的 React 生态系统。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要构建 React 或 Next.js 应用时
+- 当需要用 shadcn/ui 或 Tailwind CSS 编写组件时
+- 当用户要求处理 React 状态管理或服务端组件时
+
 ## 技术栈
 
 ### 核心框架：React + Next.js

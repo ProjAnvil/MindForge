@@ -5,6 +5,14 @@ description: Expertise in product management lifecycle, from ideation to launch.
 
 # Product Management Skill
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Plan a product or write a PRD
+- Create user stories or prioritize requirements
+- Define an MVP or run a competitive analysis
+
 ## Description
 Expertise in product management lifecycle, from ideation to launch. Covers requirements gathering, user story creation, prioritization, and product strategy.
 

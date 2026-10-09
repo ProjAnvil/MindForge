@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/enterprise-java",
+    "name": "enterprise-java"
+  },
+  "overall": {
+    "score": 92.7,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7566666666666667,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-code-examples",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/code-examples.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7566666666666667,
+    "overall_comment": "Accurate and mostly actionable as a prompt-style skill, but it would be stronger if the linked reference content were inlined and the duplicated/typo-ridden sections were cleaned up.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately identify an enterprise Java/Spring development guidance skill, matching the broad persona, principles, and task patterns in the body."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.65,
+        "comment": "The document includes useful N+1, OOM, architecture, and code-review examples, but key templates, best practices, and pitfalls are only linked to an external file and some edge-case coverage is shallow."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.72,
+        "comment": "It gives clear response formats and step sequences for common task types, yet several actionable sections are stubs pointing to references, reducing standalone executability."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the actionable sections that are currently stubs, replace reference-only pointers with concrete standalone steps or checklists for each common task type.",
+    "In the templates, best practices, and pitfalls sections, inline the essential content currently linked to the external file so the document is executable without it.",
+    "In the examples section, add concrete edge-case examples alongside the existing N+1, OOM, architecture, and code-review examples to deepen shallow coverage."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/code-examples.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

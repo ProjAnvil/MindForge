@@ -7,6 +7,14 @@ description: 专业的 Vue.js 开发技能，涵盖 Nuxt 3、Vue 3 Composition A
 
 现代 Vue.js 开发的综合技能，专注于 Nuxt 3、Vue 3 Composition API、Tailwind CSS 和 Vue 生态系统。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要构建 Vue 应用或实现 Nuxt 功能时
+- 当需要编写 Vue 3 Composition API 组件时
+- 当用户要求使用 Pinia 做状态管理或接入 shadcn-vue 组件库时
+
 ## 技术栈
 
 ### 核心框架：Vue 3 + Nuxt 3

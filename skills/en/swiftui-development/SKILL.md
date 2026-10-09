@@ -19,6 +19,7 @@ Use this skill to write declarative, reactive UI code. Always adhere to the iOS 
 
 ## When to Use This Skill
 
+Trigger scenarios:
 - When writing `.swift` view files.
 - When designing the App's navigation structure.
 - When handling animations and transitions.

@@ -1,0 +1,122 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/session-summary",
+    "name": "session-summary"
+  },
+  "overall": {
+    "score": 89.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.65,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['Postgres'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.65,
+    "overall_comment": "A well-structured and semantically accurate skill document that would benefit from a concrete example and coverage of edge cases to improve robustness.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately reflect the skill's purpose of summarizing session context for handoff, including tasks, decisions, and next steps."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.35,
+        "comment": "It provides an output template but no concrete worked example and does not address failure paths such as empty sessions, missing context, or blocked-task handling beyond a status label."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "The responsibilities and structured handoff format are clear and executable, but steps remain somewhat generic, lacking guidance on where to source session data or tools to gather state."
+      }
+    ]
+  },
+  "suggestions": [
+    "Add a concrete worked example to the handoff output template section that shows a fully populated handoff (inputs, session source, and final structured output) so users can copy the expected format.",
+    "Add explicit failure-path instructions in the process section for empty sessions, missing context, and blocked tasks, specifying what data to collect, what status to assign, and when to escalate or stop.",
+    "Add guidance in the responsibilities/steps section on where to source session data and which tools or commands to use to gather current state before producing the handoff."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

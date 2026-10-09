@@ -7,6 +7,14 @@ description: Professional React development skill covering Next.js, React Server
 
 Comprehensive skill for modern React development, focusing on Next.js, TypeScript, Tailwind CSS, and the wider React ecosystem.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Build React or Next.js applications
+- Create UI components with shadcn/ui or Tailwind CSS
+- Work with React state management or Server Components
+
 ## Technology Stack
 
 ### Core Framework: React + Next.js

@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/session-summary",
+    "name": "session-summary"
+  },
+  "overall": {
+    "score": 90.66000000000001,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7000000000000001,
+    "lint": 0.983
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['Postgres'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 98.3,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 90.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "warning",
+            "text": "body is ~246 words; aim for at least 250",
+            "fix": "expand thin sections with concrete detail"
+          }
+        ]
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7000000000000001,
+    "overall_comment": "A well-structured, semantically accurate handover skill whose main weakness is the absence of edge-case and failure-path examples.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately capture the skill's purpose of producing a session handover summary with tasks, decisions, and next steps, matching the body's format and responsibilities."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.5,
+        "comment": "The handover template serves as a concrete example, but there is no coverage of failure paths such as empty sessions, blocked or incomplete work, or how to handle missing context."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "The responsibilities and output format are clear and executable, though steps like 'Generate Handover Prompt' (missing article) are slightly vague and lack guidance on prioritization or length limits."
+      }
+    ]
+  },
+  "suggestions": [
+    "[structure] body is ~246 words; aim for at least 250 → expand thin sections with concrete detail",
+    "Add explicit failure-path examples to the handover template for empty sessions, blocked or incomplete work, and missing context, specifying how the agent should respond in each case.",
+    "Add prioritization and length-limit guidance to the output format or responsibilities so the handover prompt tells the agent what to include first and how concise to be."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

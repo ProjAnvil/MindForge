@@ -1,0 +1,161 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/git-guru",
+    "name": "git-guru"
+  },
+  "overall": {
+    "score": 90.58,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7000000000000001,
+    "lint": 0.9790000000000001
+  },
+  "behavior": [
+    {
+      "case": "ref-advanced-features",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/advanced-features.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-workflows-scenarios",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/workflows-scenarios.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 97.9,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 85.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "error",
+            "text": "found unfilled content: unfinished marker (TODO/FIXME/TBD/XXX)",
+            "fix": "replace the placeholder with real content or remove it"
+          }
+        ]
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7000000000000001,
+    "overall_comment": "A well-scoped and safety-conscious skill whose high-level principles are strong, but it would benefit from more realistic, correct command examples and explicit failure-recovery paths in the main document.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately reflect the skill's scope (interactive rebase, worktree, reflog, bisect, commit conventions, history cleanup), and the body stays consistent with that promise."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.5,
+        "comment": "The bash snippets are mostly correct but thin and partly unreliable (e.g., `git reflog | grep \"commit message\"` and a bare `git reset --hard` after locating a lost commit), and no failure paths such as rebase conflicts, failed bisect, or unrecoverable reflog expiry are demonstrated."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "Core commands and the safety ordering (reflog → backup branch → recover) are explicit and executable, but several steps lack verification/rollback detail and the substantive guidance lives only in unshown reference files."
+      }
+    ]
+  },
+  "suggestions": [
+    "[clarity] found unfilled content: unfinished marker (TODO/FIXME/TBD/XXX) → replace the placeholder with real content or remove it",
+    "In the examples section, replace the unreliable `git reflog | grep \"commit message\"` and bare `git reset --hard` snippets with an explicit inspect-then-backup-then-recover sequence that includes the exact commit hash variable and verification before destructive reset.",
+    "In the examples and edge cases section, add failure-path walkthroughs for rebase conflicts, failed bisect, and unrecoverable reflog expiry, each showing the detection command and the rollback or recovery action."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/advanced-features.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/workflows-scenarios.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

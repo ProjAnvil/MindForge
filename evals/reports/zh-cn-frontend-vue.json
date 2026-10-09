@@ -1,0 +1,171 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/frontend-vue",
+    "name": "frontend-vue"
+  },
+  "overall": {
+    "score": 87.52777777777779,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 0.9305555555555556,
+    "writing": 0.7000000000000001,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "vue-composition-api",
+      "score": 0.861111111111111,
+      "passed": true,
+      "error": null,
+      "runs": 3,
+      "run_scores": [
+        0.9166666666666667,
+        0.8333333333333333,
+        0.8333333333333333
+      ],
+      "run_passed": [
+        true,
+        true,
+        true
+      ],
+      "pass_hat": true,
+      "score_std": 0.039283710065919374,
+      "expectations": [
+        {
+          "name": "output_contains(['setup', 'ref'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 3,
+          "score_std": 0.0
+        },
+        {
+          "name": "llm_judge(3 dimensions, threshold=0.6)",
+          "score": 0.7222222222222222,
+          "threshold": 0.6,
+          "passed": true,
+          "message": "weakest: domain correctness (0.5) — The component uses Vue 3 Composition API correctly, but its loading state is tied to a simulated delay in performSearch while the usage example performs the real API call in the parent with a separate isSearching flag, so the loading indicator does not reflect the actual search operation.",
+          "runs": 3,
+          "score_std": 0.07856742013183865
+        }
+      ]
+    },
+    {
+      "case": "vue-state-management",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 3,
+      "run_scores": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "run_passed": [
+        true,
+        true,
+        true
+      ],
+      "pass_hat": true,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['Pinia'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 3,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7000000000000001,
+    "overall_comment": "A solid, semantically accurate Vue/Nuxt skill reference that would be stronger with explicit setup steps and more robust failure-path examples.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately frame a Vue/Nuxt frontend skill, and the body consistently covers Vue 3, Nuxt 3, Tailwind, Pinia, and shadcn-vue."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.6,
+        "comment": "Examples are mostly correct and idiomatic, but failure paths are weak—especially the useFetch example where an error would still render “加载中...”—and edge cases like SSR hydration are mentioned without concrete examples."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.55,
+        "comment": "The document is a useful reference with patterns and structure, but it lacks explicit setup/install commands and step-by-step implementation guidance for Nuxt, Tailwind, Pinia, or shadcn-vue."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the useFetch example, add an error branch so it no longer renders “加载中...” when the request fails.",
+    "In the Nuxt, Tailwind, Pinia, and shadcn-vue sections, add explicit setup/install commands and required configuration snippets so readers can reproduce the environment.",
+    "For Nuxt, Tailwind, Pinia, and shadcn-vue, add step-by-step implementation guidance with file paths and ordered steps instead of only reference patterns.",
+    "In the SSR hydration discussion, replace the general mention with a concrete example showing the mismatch, its cause, and the fix.",
+    "Across the examples, add explicit failure-path variants such as error handling alongside the current happy-path examples."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

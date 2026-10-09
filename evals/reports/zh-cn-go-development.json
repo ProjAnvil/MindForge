@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/go-development",
+    "name": "go-development"
+  },
+  "overall": {
+    "score": 92.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.75,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-file-templates",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/file-templates.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.75,
+    "overall_comment": "The document is well-aligned and organized for a Go development skill, but outdated or invalid code examples and reliance on an external template file limit its correctness and immediate actionability.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately frame a specialized Go skill covering Fiber, Cobra, GORM, clean architecture, and concurrency."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.6,
+        "comment": "The good/bad contrast covers common failure paths, but several snippets use invalid GORM syntax or outdated `errors.Wrap` for a modern Go skill."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "Response workflows and structural conventions are clear, but key templates are external and many instructions remain declarative guidance rather than executable steps."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Examples & edge cases snippets, replace invalid GORM syntax with valid modern GORM calls and replace outdated `errors.Wrap` usage with modern Go error wrapping such as `fmt.Errorf` with `%w`.",
+    "In the skill's templates section, inline the key templates that are currently external so users can copy and apply them without leaving the skill.",
+    "In each response workflow, convert declarative guidance into numbered executable steps with expected inputs and outputs to make the instructions directly actionable."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/file-templates.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

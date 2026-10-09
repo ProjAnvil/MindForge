@@ -1,0 +1,181 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/tech-documentation",
+    "name": "tech-documentation"
+  },
+  "overall": {
+    "score": 93.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7833333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-api-doc-template",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/api-doc-template.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-architecture-template",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/architecture-template.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-deployment-template",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/deployment-template.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7833333333333333,
+    "overall_comment": "Overall, the skill is accurately scoped and provides a useful worked example and checklist, though it would be more actionable with embedded templates and broader error/edge-case examples.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 1.0,
+        "comment": "The name and description accurately describe a broad technical-documentation skill covering APIs, architecture, deployment, templates, and best practices."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.65,
+        "comment": "The POST /login worked example is correct and includes one failure path (401), but it omits other common edge cases such as 400 validation errors, 429 rate limits, and 500 responses, and the error envelope omits the promised `data` field."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "The worked example and checklist give concrete steps, but most guidance remains a high-level inventory with actual templates delegated to reference files, leaving some execution details unstated."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the POST /login worked example, add 400 validation-error, 429 rate-limit, and 500 server-error failure paths and include the promised `data` field in the error envelope.",
+    "In the guidance section that currently inventories templates and delegates execution details to reference files, inline the critical template snippets and step-by-step details so the checklist is actionable without opening separate reference files."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/api-doc-template.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/architecture-template.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/deployment-template.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

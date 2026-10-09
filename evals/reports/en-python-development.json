@@ -1,0 +1,182 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/python-development",
+    "name": "python-development"
+  },
+  "overall": {
+    "score": 92.0,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7333333333333334,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-django-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/django-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-fastapi-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/fastapi-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-testing-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/testing-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7333333333333334,
+    "overall_comment": "A useful high-level Python development skill prompt with clear structure, but it would benefit from modernized examples and more explicit, executable guidance.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.85,
+        "comment": "The name and description accurately capture a broad Python development skill, though data processing is mentioned more in the description than substantively covered in the body."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.6,
+        "comment": "The good/bad examples are helpful, but some code is outdated or flawed—such as Pydantic v1-style @validator and a relative aiohttp URL without a base URL—and failure-path coverage is limited."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.75,
+        "comment": "Trigger scenarios and response patterns provide clear behavioral guidance, but the document remains largely declarative and lacks concrete setup commands or fully executable procedures."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the relevant reference pattern examples (e.g., Pydantic/aiohttp sections), replace outdated Pydantic v1-style @validator with v2 @field_validator and use a full base URL for aiohttp requests so the code is current and executable.",
+    "In the Examples & edge cases sections of the reference pattern documents, add explicit failure-path examples such as invalid input, network errors, and validation failures alongside the existing good/bad examples.",
+    "In the Actionability sections of the reference pattern documents, add concrete setup/run commands and step-by-step executable procedures for each trigger scenario instead of leaving guidance largely declarative."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/django-patterns.md",
+      "reached": 1,
+      "origin": "both"
+    },
+    {
+      "path": "references/fastapi-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/testing-patterns.md",
+      "reached": 3,
+      "origin": "both"
+    }
+  ]
+}

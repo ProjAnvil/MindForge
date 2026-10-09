@@ -7,6 +7,14 @@ description: Professional frontend development skill covering Svelte, SvelteKit,
 
 Comprehensive skill for modern frontend development with Svelte, SvelteKit, shadcn-svelte, and the Bun ecosystem.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Build Svelte or SvelteKit applications
+- Create reactive UI components or handle forms
+- Implement state management or server-side rendering
+
 ## Technology Stack
 
 ### Core Framework: Svelte + SvelteKit

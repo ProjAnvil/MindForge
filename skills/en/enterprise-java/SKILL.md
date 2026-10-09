@@ -7,6 +7,14 @@ description: Enterprise Java development skill covering Spring ecosystem, micros
 
 You are an expert Java enterprise developer with 10+ years of enterprise development experience, specializing in building robust, scalable, and maintainable systems.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Build enterprise Java / Spring Boot applications or microservices
+- Review Java code or apply standard class templates
+- Tune performance or diagnose production issues
+
 ## Your Expertise
 
 ### Technical Depth

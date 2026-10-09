@@ -1,0 +1,166 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/git-guru",
+    "name": "git-guru"
+  },
+  "overall": {
+    "score": 93.78,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.8166666666666668,
+    "lint": 0.9640000000000001
+  },
+  "behavior": [
+    {
+      "case": "ref-advanced-features",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/advanced-features.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-workflows-scenarios",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/workflows-scenarios.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 96.4,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 75.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "error",
+            "text": "found unfilled content: unfinished marker (TODO/FIXME/TBD/XXX)",
+            "fix": "replace the placeholder with real content or remove it"
+          },
+          {
+            "severity": "warning",
+            "text": "body is 508 lines, exceeding 500; split details into references/",
+            "fix": "move reference material into companion files and link them"
+          }
+        ]
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.8166666666666668,
+    "overall_comment": "A strong, well-scoped and actionable advanced Git skill whose main weakness is a factually reversed git bisect exit-code comment in the automated script example.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and rich description accurately frame the skill as advanced Git mastery, and the body's coverage of rebase, worktree, reflog, bisect, commits, and history cleanup matches the stated scope."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.65,
+        "comment": "Examples are plentiful and mostly correct, but the automated bisect script's comment ('Return 0 if bug is present (bad), 1 if fixed (good)') inverts git bisect run's actual exit-code convention (0=good, 1-127=bad), which would mislead users, and section numbering skips 7-8."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.9,
+        "comment": "Commands are concrete, sequential, and executable, with explicit response patterns and a safety-first workflow that make the guidance easy to follow."
+      }
+    ]
+  },
+  "suggestions": [
+    "[clarity] found unfilled content: unfinished marker (TODO/FIXME/TBD/XXX) → replace the placeholder with real content or remove it",
+    "[clarity] body is 508 lines, exceeding 500; split details into references/ → move reference material into companion files and link them",
+    "Correct the automated bisect script's comment in the bisect example to state that exit code 0 means good/fixed and 1–127 means bad/bug present, matching git bisect run's actual convention."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/advanced-features.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/workflows-scenarios.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

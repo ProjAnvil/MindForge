@@ -1,5 +1,23 @@
 ### 6. 数据迁移策略
 
+#### 模式迁移（大表零停机 DDL）
+
+先判断变更是否真的阻塞——简单的加列**不要**动用双写：
+
+- **PostgreSQL 11+ / MySQL 8.0.12+**：带常量默认值的 `ADD COLUMN` 是秒级元数据操作——不重建表，不需要双写
+- **仍然阻塞的场景**：修改列类型、加 volatile 默认值（`now()`、`random()`）、旧版本上加无默认值的 `NOT NULL`、热表上的 DROP/RENAME
+- **MySQL < 8.0.12 或会锁表的 DDL**：使用 pt-online-schema-change 或 gh-ost
+- 始终设置 `lock_timeout`（PG）/ `--max-load`（gh-ost），让被阻塞的 DDL 快速失败而不是堆积连接
+- 大表建索引：`CREATE INDEX CONCURRENTLY`（PG）/ `ALGORITHM=INPLACE, LOCK=NONE`（MySQL）
+
+**迁移 Runbook——大表 DDL 必须遵循的结构：**
+
+1. **前置检查**——数据库版本、表大小、主从延迟；确认 DDL 是即时操作，否则选择在线工具
+2. **备份验证**——备份存在且近期做过恢复演练（没验证过的备份不算备份）
+3. **护栏**——设置 lock_timeout / statement_timeout；对连接堆积和主从延迟设告警
+4. **灰度发布**——预发 → 最小生产副本 → 主库
+5. **回滚**——提前写好精确的反向 DDL；明确的中止判据
+
 #### 在线迁移（零停机时间）
 ```
 阶段 1: 准备

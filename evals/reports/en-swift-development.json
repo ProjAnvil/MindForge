@@ -1,0 +1,121 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/swift-development",
+    "name": "swift-development"
+  },
+  "overall": {
+    "score": 87.0,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.5666666666666668,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['struct', 'async'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.5666666666666668,
+    "overall_comment": "A useful high-level Swift 6 skill overview, but it needs failure-path examples, consistency fixes, and more concrete procedural guidance to be fully actionable.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.8,
+        "comment": "The name and description broadly match the skill's concurrency, testing, and data-layer focus, though 'macros' and 'model design' are only lightly supported."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.4,
+        "comment": "Examples are syntactically plausible and illustrate actors and Swift Testing, but they cover only happy paths and Example 2 uses force-unwrapping, contradicting the best practices."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.5,
+        "comment": "The document gives principles, trigger scenarios, and snippets, but lacks explicit, executable steps for tasks like macro creation, data-race fixing, or typed-throws adoption."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Examples section, revise Example 2 to eliminate force-unwrapping in favor of safe optional handling and add explicit failure/edge-case examples for actors and Swift Testing, such as thrown errors, concurrent access, and test failures, alongside the existing happy paths.",
+    "In the macro creation, data-race fixing, and typed-throws adoption guidance, add numbered, executable step-by-step procedures with concrete commands or code diffs rather than only principles, trigger scenarios, and snippets."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

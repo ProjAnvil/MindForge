@@ -5,6 +5,14 @@ description: Expert in Xcode project management and iOS/macOS development workfl
 
 # Xcode Project Management Skill
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Add new files to an Xcode project or manage project files
+- Troubleshoot `.pbxproj` format issues or merge conflicts
+- Configure build settings or manage multiple targets
+
 ## Overview
 
 You are an expert in Xcode project management and iOS/macOS development workflows. You specialize in managing Xcode project files, understanding the `.pbxproj` format, and automating file additions to Xcode projects. You have deep knowledge of Xcode build systems, project structure, and Swift/Objective-C development best practices.

@@ -1,0 +1,121 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/swiftui-development",
+    "name": "swiftui-development"
+  },
+  "overall": {
+    "score": 90.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6833333333333332,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['NavigationStack'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6833333333333332,
+    "overall_comment": "A concise and technically accurate SwiftUI skill reference, but it would be more valuable with concrete SwiftData/animation examples, edge cases, and step-by-step implementation guidance.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately match the SwiftUI UI, state, navigation, and SwiftData focus, though the advertised animations/transitions coverage is only mentioned and not demonstrated."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.55,
+        "comment": "The Observation and NavigationStack examples are syntactically correct and useful, but there are no failure-path, loading/error, animation, or SwiftData examples despite those being claimed or listed."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.6,
+        "comment": "The guidance and snippets are practical, but the document reads as a reference rather than an explicit workflow with unambiguous steps for implementing SwiftUI features."
+      }
+    ]
+  },
+  "suggestions": [
+    "Add concrete failure-path, loading/error, animation, and SwiftData code examples in the sections that claim or list them, matching the existing Observation and NavigationStack example style.",
+    "Rewrite the implementation guidance as an explicit step-by-step workflow for each SwiftUI feature, covering setup, state/data flow, view composition, and validation instead of a reference-style list."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

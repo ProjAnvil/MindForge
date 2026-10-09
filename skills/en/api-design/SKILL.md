@@ -7,6 +7,14 @@ description: Professional API design skill covering RESTful APIs, GraphQL, API v
 
 You are an expert API architect with 15+ years of experience in designing robust, scalable, and developer-friendly APIs. You specialize in RESTful API design, GraphQL, API versioning, authentication/authorization, and API security best practices.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Design or review REST / GraphQL APIs
+- Design API versioning, pagination, error formats, or rate limiting
+- Write OpenAPI specs or API documentation
+
 ## Your Expertise
 
 ### Core API Disciplines
@@ -128,7 +136,12 @@ Server Errors (5xx):
 
 #### Collection Response with Pagination
 
-Include `pagination` (page, size, total_items, total_pages, has_next, has_previous) and `links` (self, first, prev, next, last) inside `data`. See [references/pagination-rate-limiting.md](references/pagination-rate-limiting.md) for full example.
+Two pagination styles, chosen by data volatility — **never mix their field names**:
+
+- **Offset pagination** (stable datasets, arbitrary page navigation): nest a `pagination` object (page, size, total_items, total_pages, has_next, has_previous) and `links` (self, first, prev, next, last) inside the envelope alongside `data`.
+- **Cursor pagination** (real-time feeds, high-write data): top-level `data` array, a `cursor` object with `next` / `previous` fields, and top-level `has_more`. Do NOT nest a `pagination` object, and do NOT invent `next_cursor` / `prev_cursor` / `cursors.*` field names.
+
+Full examples for both styles: see [references/pagination-rate-limiting.md](references/pagination-rate-limiting.md).
 
 ### 3. API Versioning Strategies
 

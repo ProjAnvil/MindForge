@@ -19,6 +19,7 @@ Follow this guide when working on non-UI Swift code, business logic, algorithms,
 
 ## When to Use This Skill
 
+Trigger scenarios:
 - When writing ViewModel, Service, or Repository layer code.
 - When defining data models (structs, enums).
 - When implementing algorithms or utility functions.

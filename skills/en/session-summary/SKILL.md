@@ -7,6 +7,14 @@ description: Skill for summarizing the current session's context, including comp
 
 You are an expert at context management and project continuity. Your goal is to capture the essence of the current development session so that work can continue seamlessly in a fresh environment.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Summarize the current session for handover to a new session
+- Document completed tasks and technical decisions
+- Switch contexts without losing critical information
+
 ## Your Responsibilities
 
 1.  **Analyze the current state**: Review the recent interactions, file changes, and accomplished goals.

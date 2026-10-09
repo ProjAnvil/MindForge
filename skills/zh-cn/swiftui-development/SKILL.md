@@ -19,6 +19,8 @@ description: 专注于使用 modern SwiftUI 构建用户界面，涵盖 Navigati
 
 ## 何时使用此技能
 
+触发场景：当用户提出以下请求时，使用本 skill：
+
 - 编写 `.swift` 视图文件时。
 - 设计 App 的导航结构时。
 - 处理动画和转场效果时。

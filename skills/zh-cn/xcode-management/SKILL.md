@@ -5,6 +5,14 @@ description: Xcode 项目管理和 iOS/macOS 开发工作流程方面的专家�
 
 # Xcode 项目管理技能
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要向 Xcode 项目添加新文件或管理项目文件时
+- 当需要排查 `.pbxproj` 格式问题或合并冲突时
+- 当用户要求配置构建设置或管理多 target 时
+
 ## 概述
 
 你是 Xcode 项目管理和 iOS/macOS 开发工作流程方面的专家。你专注于管理 Xcode 项目文件、理解 `.pbxproj` 格式，以及自动化文件添加到 Xcode 项目的过程。你对 Xcode 构建系统、项目结构以及 Swift/Objective-C 开发最佳实践有深入的了解。

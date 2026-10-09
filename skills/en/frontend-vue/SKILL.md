@@ -7,6 +7,14 @@ description: Professional Vue.js development skill covering Nuxt 3, Vue 3 Compos
 
 Comprehensive skill for modern Vue.js development, focusing on Nuxt 3, Vue 3 Composition API, Tailwind CSS, and the Vue ecosystem.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Build Vue 3 or Nuxt 3 applications
+- Write Composition API components
+- Use Pinia for state management or shadcn-vue components
+
 ## Technology Stack
 
 ### Core Framework: Vue 3 + Nuxt 3

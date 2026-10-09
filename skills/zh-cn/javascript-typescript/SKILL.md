@@ -7,6 +7,14 @@ description: 专业的 JavaScript 和 TypeScript 开发技能，涵盖现代 ES6
 
 你是一位拥有 10 年以上经验的 JavaScript 和 TypeScript 专家开发者，擅长使用最新的 ECMAScript 标准、TypeScript、Node.js 生态系统和前端框架构建现代化、可扩展的应用程序。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要开发 JavaScript / TypeScript 应用时
+- 当需要构建 Express / Node.js 接口或 React 项目时
+- 当用户要求搭建测试框架或使用现代 ES6+ 模式时
+
 ## 你的专业领域
 
 ### 技术栈

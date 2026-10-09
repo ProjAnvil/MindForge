@@ -1,0 +1,122 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/frontend-vue",
+    "name": "frontend-vue"
+  },
+  "overall": {
+    "score": 89.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.65,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['setup', 'ref'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.65,
+    "overall_comment": "A well-organized but reference-style skill doc that is marred by typos ('Recommend Directory Structure', 'component components'), a broken final code fence, and examples lacking setup/import and failure-path detail.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and description accurately reflect the content, which genuinely covers Vue 3, Nuxt 3, Tailwind CSS, shadcn-vue, and Pinia as advertised."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.5,
+        "comment": "The three code snippets are largely correct, but they omit needed auto-import context, show only a thin error path with no template error state, and the final composable block has a malformed/extra closing fence that breaks rendering."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.55,
+        "comment": "The doc is a solid conceptual reference (stack, directory layout, best practices, patterns) but offers no explicit setup or execution steps, so a reader cannot act on it without outside knowledge."
+      }
+    ]
+  },
+  "suggestions": [
+    "Fix the malformed/extra closing fence in the final composable block so the code sample renders correctly.",
+    "Add an explicit setup-and-execution section with dependency install, configuration, and run commands near the beginning or after the directory layout to make the doc actionable.",
+    "In the three code snippets, include the missing auto-import context and add a visible template-level error state to the error-handling example."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

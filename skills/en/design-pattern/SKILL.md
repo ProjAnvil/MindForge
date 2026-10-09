@@ -26,7 +26,7 @@ This skill provides comprehensive knowledge and practical guidance on software d
 
 ## When to Use This Skill
 
-Use this skill when:
+Trigger scenarios — use this skill when:
 - Designing new software components or systems
 - Reviewing code for design quality
 - Refactoring existing code

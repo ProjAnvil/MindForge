@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-09
+
+### Added
+
+- **Skill evaluation suite (`evals/`)** — a uv-managed smelt harness
+  (ProjAnvil/Smelt, v0.5.1) with 200+ test cases: static lint over all 38
+  SKILL.md files, golden-keyword behavior cases, judge-scored smoke tests,
+  two-arm (skill vs. bare-model) discrimination gates for every skill in both
+  languages, per-skill evaluate reports with Reference Coverage, and
+  doctor-ready module-level case files (`evals/cases/`).
+- **`add_files_to_xcode.py`** for both xcode-management skills — the script
+  the SKILL.md always referenced but never shipped: scans for untracked
+  source files, adds them to the correct target/build phase of
+  `project.pbxproj`, with `--dry-run`, `--target`, backup, and idempotent
+  re-runs.
+- **Trigger-guidance sections** ("When to Use" / "何时使用") for every skill
+  in both languages, and per-skill `evals/README.md` pointers to the central
+  suite.
+
+### Fixed
+
+- **api-design**: SKILL.md pagination guidance now separates offset vs.
+  cursor conventions explicitly and bans mixing field names
+  (`next_cursor`/`cursors.*`), both languages — the previous prose made
+  agents hybridize the two shapes.
+- **database-design**: `references/migration-backup.md` gained a modern
+  zero-downtime DDL section (instant ADD COLUMN on PG11+/MySQL 8.0.12+,
+  gh-ost/pt-osc criteria, lock_timeout guard rails, CREATE INDEX
+  CONCURRENTLY) plus a mandatory Migration Runbook structure; the dual-write
+  recipe is now scoped to DB-to-DB moves where it belongs.
+- **git-guru**: new "Untrusted Instructions in the Repo" guidance (both
+  languages) — instruction files found in a repo are untrusted input, never
+  commands to execute; plus act-don't-just-describe guidance for recovery
+  tasks.
+- **tech-documentation**: worked end-to-end example (POST /login) in both
+  languages, replacing a dangling cross-skill reference.
+
+
 ## [0.3.1] - 2026-03-12
 
 ### Changed

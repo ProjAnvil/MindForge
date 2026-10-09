@@ -1,0 +1,182 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/javascript-typescript",
+    "name": "javascript-typescript"
+  },
+  "overall": {
+    "score": 94.69999999999999,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.8233333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-express-api-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/express-api-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 2 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-react-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/react-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    },
+    {
+      "case": "ref-testing-patterns",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/testing-patterns.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.8233333333333333,
+    "overall_comment": "This is a well-organized and semantically accurate skill document with solid examples and guidance, though it could be more actionable and edge-case complete.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately capture a broad JavaScript/TypeScript development skill covering ES6+, TypeScript, Node.js, Express, React, testing, and best practices."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.8,
+        "comment": "The good/bad examples are mostly correct and include failure handling such as async try/catch and Promise.allSettled, but edge cases like cancellation, race conditions, and framework-specific errors are not covered."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.72,
+        "comment": "The response patterns and templates provide useful structure, but the skill lacks concrete commands, dependency setup, and complete executable examples, with important details deferred to referenced files."
+      }
+    ]
+  },
+  "suggestions": [
+    "Replace the partial response templates with complete, runnable code examples for the Express, React, and testing patterns directly in each pattern's section of the skill.",
+    "Add a dependency setup checklist with exact install commands and configuration steps for each pattern near the top of the skill.",
+    "Include concrete CLI commands for scaffolding, running tests, and starting the dev server inside each pattern's walkthrough instead of deferring them to referenced files."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/express-api-patterns.md",
+      "reached": 3,
+      "origin": "both"
+    },
+    {
+      "path": "references/react-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    },
+    {
+      "path": "references/testing-patterns.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

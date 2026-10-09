@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/go-development",
+    "name": "go-development"
+  },
+  "overall": {
+    "score": 95.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.85,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-file-templates",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/file-templates.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 2 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.85,
+    "overall_comment": "This is a strong, focused Go development skill with clear architecture guidance and idiomatic examples, but it relies on external references and leaves some code fragments partial.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.95,
+        "comment": "The name and description accurately frame the skill's Fiber, Cobra, GORM, Clean Architecture, and concurrency focus, matching the document content."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.78,
+        "comment": "The examples are idiomatic and cover several failure paths such as error swallowing, N+1 queries, and goroutine leaks, though some snippets omit imports or full dependency context."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.82,
+        "comment": "The document gives explicit structures, response workflows, and best practices, but many executable templates are deferred to external references rather than embedded directly."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Examples & edge cases section, add the missing import statements to every Go snippet that currently lacks them so the examples compile independently.",
+    "In the same Examples & edge cases section, add the minimal surrounding dependency context—such as type definitions, DB/client setup, or goroutine coordination—for each failure-path snippet so readers can reproduce the error swallowing, N+1, and goroutine leak scenarios.",
+    "For snippets where imports or dependency context are intentionally omitted for brevity, add a one-line note listing the omitted prerequisites so readers understand what is assumed."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/file-templates.md",
+      "reached": 2,
+      "origin": "both"
+    }
+  ]
+}

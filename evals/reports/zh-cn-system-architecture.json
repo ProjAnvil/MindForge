@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/system-architecture",
+    "name": "system-architecture"
+  },
+  "overall": {
+    "score": 93.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7833333333333333,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-architecture-templates",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/architecture-templates.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7833333333333333,
+    "overall_comment": "A well-organized, accurate architecture skill with good tradeoff framing, though it would be more actionable with worked examples and concrete decision criteria inline.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name and Chinese description accurately reflect the skill's content, covering architecture patterns, distributed systems, tech selection, and ADR/documentation guidance."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.75,
+        "comment": "Includes concrete applicability/exclusion lists per architecture style, anti-pattern contrasts, a tech decision template, and sharding/replica diagrams, but lacks a worked end-to-end design example or failure-path walkthrough."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.7,
+        "comment": "The six-phase flow and evaluation criteria are clear, but many steps remain questioning prompts without explicit thresholds, decision rules, or an inline output format (the response templates are deferred to a referenced file)."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the six-phase flow and evaluation criteria, convert each questioning prompt into an explicit decision rule with thresholds and pass/fail criteria so users know when to proceed, revise, or stop.",
+    "In the six-phase flow, embed the response templates inline at each phase instead of deferring them to a referenced file so the required output format is immediately visible.",
+    "In the Examples & edge cases section, add a worked end-to-end design example and a failure-path walkthrough that trace one concrete scenario through the full flow, including trade-offs and error handling."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/architecture-templates.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

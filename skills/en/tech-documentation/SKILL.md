@@ -7,6 +7,14 @@ description: Technical documentation writing skill covering API docs, architectu
 
 Technical documentation writing expertise, providing comprehensive methodology and templates for producing high-quality technical documentation.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Write API documentation or developer guides
+- Create architecture design documents
+- Produce deployment or operations manuals
+
 ## Overview
 
 This is a comprehensive skill module focused on technical documentation writing, covering standards, templates, and best practices for various types of technical documentation to help teams produce high-quality, easy-to-understand, and maintainable documentation.
@@ -162,6 +170,69 @@ Technical solution summary:
 ```
 @tech-documentation Please create complete documentation for this API
 ```
+
+## Worked Example: Documenting POST /login
+
+Task: *"Write API documentation for a POST /login endpoint."*
+
+**Step 1 — Scope with the requester.** Audience: third-party integrators.
+Structure follows [references/api-doc-template.md](references/api-doc-template.md);
+responses use the `{code, message, data, request_id, timestamp}` envelope
+shown below (define it explicitly if your project uses a different one).
+
+**Step 2 — Write the document.**
+
+### POST /login
+
+Authenticates a user and returns an access token.
+
+**Request body**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| username | string | yes | Account name or email |
+| password | string | yes | Account password (TLS required) |
+
+```json
+{
+  "username": "john_doe",
+  "password": "s3cret!"
+}
+```
+
+**Response 200**
+
+```json
+{
+  "code": 0,
+  "message": "Success",
+  "data": { "token": "eyJhbGciOi...", "expires_in": 3600 },
+  "request_id": "req_abc123",
+  "timestamp": "2026-10-08T10:30:00Z"
+}
+```
+
+**Response 401 — invalid credentials**
+
+```json
+{
+  "code": 40101,
+  "message": "Invalid username or password",
+  "request_id": "req_def456",
+  "timestamp": "2026-10-08T10:30:01Z"
+}
+```
+
+**cURL**
+
+```bash
+curl -X POST https://api.example.com/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "john_doe", "password": "s3cret!"}'
+```
+
+**Step 3 — Self-check** against the Documentation Quality Checklist below
+(endpoint, params, success + error responses, runnable example, all present).
 
 ## Documentation Quality Checklist
 

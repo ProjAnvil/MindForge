@@ -7,6 +7,14 @@ description: 现代前端开发综合技能，涵盖 Svelte、SvelteKit、shadcn
 
 现代前端开发的综合技能，包含 Svelte、SvelteKit、shadcn-svelte 和 Bun 生态系统。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要构建 Svelte 或 SvelteKit 应用时
+- 当需要编写响应式组件或处理表单时
+- 当用户要求进行状态管理或服务端渲染时
+
 ## 技术栈
 
 ### 核心框架：Svelte + SvelteKit

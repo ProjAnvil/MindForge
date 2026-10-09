@@ -1,0 +1,121 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/zh-cn/frontend-react",
+    "name": "frontend-react"
+  },
+  "overall": {
+    "score": 87.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.5833333333333334,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "generic",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['useState'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.5833333333333334,
+    "overall_comment": "A clean, semantically consistent reference for React development, but it reads more like a knowledge dump than an actionable skill and omits edge cases or failure-path guidance.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.8,
+        "comment": "The name 'frontend-react' and description accurately reflect the React/Next.js/Tailwind/shadcn/ui content, though the promised '复杂状态管理' (complex state management) is only lightly covered."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.4,
+        "comment": "The two code examples are syntactically correct and idiomatic, but there are no failure paths, error handling, anti-patterns, or edge-case guidance."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.55,
+        "comment": "The doc reads as a well-organized reference with feature lists and best practices, but lacks explicit step-by-step or executable procedures for building a React app."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the code examples and best-practices sections, add concrete failure-path, error-handling, anti-pattern, and edge-case examples (e.g., API errors and empty states) to address the missing edge-case guidance.",
+    "In the main React guide, add an explicit step-by-step executable procedure for building a React app, with commands and expected outcomes, to improve actionability."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

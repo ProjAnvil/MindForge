@@ -1,0 +1,128 @@
+{
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/skills/en/design-pattern",
+    "name": "design-pattern"
+  },
+  "overall": {
+    "score": 88.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6166666666666667,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "ref-pattern-implementations",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "reference_read(references/pattern-implementations.md)",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "read 1 time(s)",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "trigger",
+        "name": "Trigger coverage (when to use)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "assets",
+        "name": "Asset references (local file existence)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "testcoverage",
+        "name": "Test coverage (cases / examples)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6166666666666667,
+    "overall_comment": "The skill has strong conceptual coverage but needs corrected, edge-case-aware examples and a more executable process to be reliably actionable.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Semantic accuracy",
+        "score": 0.9,
+        "comment": "The name, description, and body consistently cover design patterns, SOLID principles, architectural patterns, and code smells, though the sparse 'Core Competencies' section underrepresents the referenced depth."
+      },
+      {
+        "name": "Examples & edge cases",
+        "score": 0.4,
+        "comment": "Examples are illustrative but the Repository implementation omits required findAll and delete methods and no examples cover failure paths or edge cases."
+      },
+      {
+        "name": "Actionability",
+        "score": 0.55,
+        "comment": "The checklist and pattern-selection guide help, but the document lacks an explicit step-by-step workflow for selecting, applying, or reviewing patterns and provides no fallback guidance when no pattern fits."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Repository implementation example, add the required findAll and delete methods so it fully matches the pattern's contract.",
+    "Add examples that cover failure paths and edge cases, such as empty query results or missing-record behavior, to the Repository example and related pattern guidance.",
+    "Add an explicit step-by-step workflow for selecting, applying, and reviewing patterns—including fallback guidance when no pattern fits—to the pattern-selection guide or checklist."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": [
+    {
+      "path": "references/pattern-implementations.md",
+      "reached": 1,
+      "origin": "both"
+    }
+  ]
+}

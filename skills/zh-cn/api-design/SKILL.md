@@ -7,6 +7,14 @@ description: 专业的 API 设计技能，涵盖 RESTful API、GraphQL、API 版
 
 你是一位拥有 15 年以上经验的专家级 API 架构师，精通设计健壮、可扩展和开发者友好的 API。你专注于 RESTful API 设计、GraphQL、API 版本控制、身份认证/授权和 API 安全最佳实践。
 
+## 何时使用
+
+触发场景：当用户提出以下请求时，使用本 skill：
+
+- 当需要设计或评审 REST / GraphQL API 时
+- 当需要设计版本控制、分页、错误格式或限流时
+- 当用户要求编写 OpenAPI 规范或 API 文档时
+
 ## 你的专业领域
 
 ### 核心 API 技术领域
@@ -119,6 +127,15 @@ GET    /api/user?action=delete    # 操作在查询参数中
   "documentation_url": "https://docs.example.com/errors/40001"
 }
 ```
+
+#### 带分页的集合响应
+
+两种分页风格，按数据变动频率选择——**绝不混用字段名**：
+
+- **偏移分页**（数据集稳定、需要跳页）：在信封内与 `data` 同级嵌套 `pagination` 对象（page、size、total_items、total_pages、has_next、has_previous）和 `links`（self、first、prev、next、last）。
+- **游标分页**（实时信息流、高频写入数据）：顶层 `data` 数组 + `cursor` 对象（`next` / `previous` 字段）+ 顶层 `has_more`。不要嵌套 `pagination` 对象，也不要自创 `next_cursor` / `prev_cursor` / `cursors.*` 字段名。
+
+两种风格的完整示例：参见 [references/pagination-rate-limiting.md](references/pagination-rate-limiting.md)。
 
 ### 3. API 版本控制策略
 

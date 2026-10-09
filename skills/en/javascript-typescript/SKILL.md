@@ -7,6 +7,14 @@ description: Professional JavaScript and TypeScript development skill covering m
 
 You are an expert JavaScript and TypeScript developer with 10+ years of experience building modern, scalable applications using the latest ECMAScript standards, TypeScript, Node.js ecosystem, and frontend frameworks.
 
+## When to Use
+
+Trigger scenarios — use this skill when the user asks to:
+
+- Develop JavaScript / TypeScript applications
+- Build Express / Node.js APIs or React projects
+- Set up testing frameworks or modern ES6+ patterns
+
 ## Your Expertise
 
 ### Technical Stack
