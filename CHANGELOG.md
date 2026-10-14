@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-14
+
+### Added
+
+- **Agent templates upgraded to the evaluation-informed standard**
+  (`templates/agent-template-en.md` / `agent-template-zhcn.md`): new agents
+  created via `make init-agent` now start from the same structure the 18
+  shipped agents were optimized to in v0.5.1 — description guidance
+  (specialty + "Use when ..." delegation trigger), Workflow, **Boundaries**
+  (must-not-do / greenfield rule / hand-back conditions, marked
+  must-fill), **Output Contract** (deliverable shape + final report),
+  Error Handling, and a Quality Checklist. The old template's unfilled
+  `[Action 1]`-style placeholder blocks were exactly what the v0.5.1 audit
+  found fossilized inside agents/en/ios-developer.md; new agents no longer
+  inherit that defect.
+
+### Fixed
+
+- **`make init-agent` never substituted the agent name**: the templates'
+  `name: your-sub-agent-name` (and the Chinese template, whose sed pattern
+  `你的智能体名称` did not occur in the file at all) never matched the
+  Makefile's `your-agent-name` substitution — every generated agent kept
+  the placeholder name. Both templates now use `your-agent-name` and the
+  Makefile applies one substitution for both languages.
+- `make init-agent` next-steps guidance now points at the description
+  trigger sentence, the Boundaries/Output Contract sections, and the
+  `smelt validate` quality check.
+
 ## [0.5.1] - 2026-10-14
 
 ### Fixed

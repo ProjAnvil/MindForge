@@ -110,18 +110,19 @@ init-agent:
 	@echo "Creating Agent: $(AGENT) ($(LANG))"
 	@if [ "$(LANG)" = "en" ]; then \
 		cp templates/agent-template-en.md agents/$(LANG)/$(AGENT).md; \
-		sed -i.bak 's/your-agent-name/$(AGENT)/g' agents/$(LANG)/$(AGENT).md && rm agents/$(LANG)/$(AGENT).md.bak; \
 	else \
 		cp templates/agent-template-zhcn.md agents/$(LANG)/$(AGENT).md; \
-		sed -i.bak 's/你的智能体名称/$(AGENT)/g' agents/$(LANG)/$(AGENT).md && rm agents/$(LANG)/$(AGENT).md.bak; \
-	fi
+	fi; \
+	sed -i.bak 's/your-agent-name/$(AGENT)/g' agents/$(LANG)/$(AGENT).md && rm agents/$(LANG)/$(AGENT).md.bak
 	@echo "✓ Agent created: agents/$(LANG)/$(AGENT).md"
 	@echo ""
 	@echo "Next steps:"
 	@echo "  1. Edit agents/$(LANG)/$(AGENT).md"
-	@echo "  2. Update the agent name, description, and system prompt"
-	@echo "  3. Specify tools, model, and skills in the frontmatter"
-	@echo "  4. Run ./setup-claude.sh --lang=$(LANG) to activate"
+	@echo "  2. Write the description: specialty + when to delegate ('Use when ...')"
+	@echo "  3. Fill in the role, workflow, Boundaries, and Output Contract sections"
+	@echo "  4. Specify tools, model, and skills in the frontmatter"
+	@echo "  5. Check quality: cd evals && uv run smelt validate ../agents/$(LANG)"
+	@echo "  6. Run ./setup-claude.sh --lang=$(LANG) to activate"
 
 # Create a new Skill
 init-skill:
