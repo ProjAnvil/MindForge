@@ -1,14 +1,14 @@
 # Agent Evaluation Report: ios-developer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/ios-developer.md`
-- Overall: **86.1 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 53.8, lint 100.0
+- Overall: **94.0 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 80.0, lint 100.0
 
 ## Behavior Tests
 
 ### ✅ behavior-en-ios-developer (100 pts)
 - ✔ `tool_args_contain('Write', 'SettingsView.swift')` 1.00 (threshold 1.00) — 1 call(s) to Write containing 'SettingsView.swift'
-- ✔ `tool_args_contain('Write', 'SwiftUI')` 1.00 (threshold 1.00) — 2 call(s) to Write containing 'SwiftUI'
+- ✔ `tool_args_contain('Write', 'SwiftUI')` 1.00 (threshold 1.00) — 1 call(s) to Write containing 'SwiftUI'
 
 ## Static Lint
 
@@ -26,16 +26,16 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.70 | Description clearly signals an iOS/SwiftUI specialist tied to relevant skills, so routing is feasible, though it lacks explicit 'use when' triggers to distinguish it from a generic Swift agent. |
-| Prompt quality | 0.60 | Role, stack, principles, and workflow are concrete with good ✅/❌ examples, but there is no output contract (deliverable format/summary expectations) and large portions remain unfilled template placeholders. |
-| Boundaries | 0.45 | Some 'Don'ts' exist, but there is no statement of scope limits (e.g., non-iOS platforms, backend/DevOps work) or conditions for handing back to the main agent. |
-| Conciseness | 0.40 | The useful first half is undercut by duplicated 'Best Practices' and 'Quality Checklist' sections plus empty placeholder blocks that burn tokens without adding guidance. |
+| Delegation fit | 0.80 | The description clearly names the domain (Swift 6/SwiftUI iOS apps) so routing is easy, but it omits trigger cues like when *not* to use it or task types (feature build vs. debugging) that would sharpen main-agent routing. |
+| Prompt quality | 0.85 | Role, stack, workflow, and quality checklist are explicit and opinionated, but there is no stated output contract (e.g., what to return to the caller, how to report verification results). |
+| Boundaries | 0.95 | A dedicated Boundaries section cleanly excludes non-iOS work, project-level build/signing/CI changes, and system architecture, and specifies hand-back triggers for ambiguous requirements. |
+| Conciseness | 0.60 | The body repeats the same concurrency/separation-of-concerns guidance across Core Principles, Best Practices, Workflow, and Quality Checklist, so the token budget could be trimmed without losing substance. |
 
-> Strong domain content in the opening sections, but the file needs deduplication, placeholder removal, and an explicit boundary/output contract before it is production-ready.
+> A well-scoped, boundary-conscious iOS subagent whose main weaknesses are a slightly thin description and notable redundancy between its principles, best-practices, and checklist sections.
 
 ## Improvement Suggestions
 
-1. In the skill file, remove the duplicated Best Practices and Quality Checklist sections and empty placeholder blocks to save tokens and sharpen guidance.
-2. In the Boundaries section, add explicit scope limits for non-iOS platforms and backend/DevOps work, along with clear handback conditions for the main agent.
-3. In the prompt/skill instructions, add an output contract specifying deliverable format and summary expectations, and add explicit 'use when' triggers to the description to distinguish it from a generic Swift agent.
+1. In the Core Principles section, keep the primary concurrency/separation-of-concerns guidance and replace its repeated explanations in Best Practices, Workflow, and Quality Checklist with brief cross-references.
+2. Trim the Best Practices and Workflow sections so each concurrency/separation-of-concerns point adds new actionable detail instead of restating the same rule.
+3. Condense the Quality Checklist by merging duplicate concurrency/separation-of-concerns items into a single item to reduce tokens while preserving the guidance.
 

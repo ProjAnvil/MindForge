@@ -5,8 +5,8 @@
     "name": "system-architect"
   },
   "overall": {
-    "score": 88.0,
-    "grade": "B",
+    "score": 96.25,
+    "grade": "A",
     "weights": {
       "behavior": 0.5,
       "writing": 0.3,
@@ -15,7 +15,7 @@
   },
   "scores": {
     "behavior": 1.0,
-    "writing": 0.6,
+    "writing": 0.875,
     "lint": 1.0
   },
   "behavior": [
@@ -31,11 +31,11 @@
       "score_std": 0.0,
       "expectations": [
         {
-          "name": "output_contains(['Architecture'])",
+          "name": "delivered('Architecture')",
           "score": 1.0,
           "threshold": 1.0,
           "passed": true,
-          "message": "",
+          "message": "fragment found in output or Write args: True",
           "runs": 1,
           "score_std": 0.0
         }
@@ -89,36 +89,36 @@
     ]
   },
   "writing": {
-    "score": 0.6,
-    "overall_comment": "A capable but verbose architect definition with clear delegation triggers; it needs tighter output contracts, explicit boundaries, and less boilerplate.",
+    "score": 0.875,
+    "overall_comment": "A strong, well-scoped architect subagent with crisp boundaries and output contracts, held back mainly by redundant skill restatements and a slightly verbose body.",
     "error": null,
     "dimensions": [
       {
         "name": "Delegation fit",
-        "score": 0.85,
-        "comment": "The description clearly names architecture design, technology selection, and ADR creation, giving the main agent enough trigger keywords to route work, though it lacks explicit handoff conditions."
+        "score": 0.9,
+        "comment": "The description names concrete triggers (architecture design, technology selection, ADRs) so a main agent can route confidently, though it could hint at when NOT to route."
       },
       {
         "name": "Prompt quality",
-        "score": 0.75,
-        "comment": "The role and process are well defined, but the output contract is loose—no required ADR/design-doc format or concrete templates—and it defers details to an external README."
+        "score": 0.95,
+        "comment": "Role, structured design process, response patterns, and an explicit output contract (ADRs, design docs with named sections) make expectations unambiguous."
       },
       {
         "name": "Boundaries",
-        "score": 0.25,
-        "comment": "The prompt has almost no explicit prohibitions or hand-back criteria, so it does not prevent the subagent from drifting into implementation or making unapproved changes."
+        "score": 0.95,
+        "comment": "Clear must-nots (no implementation code, no unilateral system changes) with explicit hand-back conditions to development subagents and the main agent."
       },
       {
         "name": "Conciseness",
-        "score": 0.55,
-        "comment": "The frontmatter description is concise, but the body repeats generic principles and checklists, making it longer than needed for a subagent prompt."
+        "score": 0.7,
+        "comment": "Well-organized but padded—the four skills are listed twice (frontmatter and an 'Integrated Skills' section) and several competency lists repeat the same content, wasting tokens."
       }
     ]
   },
   "suggestions": [
-    "Add explicit prohibitions against implementation and unapproved changes, plus clear hand-back criteria, to the boundaries section of the architect subagent prompt.",
-    "Replace the loose output contract with a mandatory ADR/design-doc format that includes concrete templates and required sections instead of deferring details to an external README.",
-    "Remove repeated generic principles and checklists from the prompt body and keep only unique, task-specific instructions to improve conciseness."
+    "Remove the duplicate listing of the four skills from either the frontmatter or the 'Integrated Skills' section, keeping one authoritative version.",
+    "Consolidate the repeated competency lists into a single section instead of restating the same content across multiple sections.",
+    "After deduplication, replace any remaining repeated competency phrasing with concise cross-references to the canonical list to reduce token usage."
   ],
   "suggestions_error": null,
   "challenge": null,

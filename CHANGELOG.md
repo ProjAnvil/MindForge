@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-14
+
+### Fixed
+
+Quality fixes for all 18 agent definitions, driven by the v0.5.0 evaluation
+reports (writing review: boundaries 0.20–0.55, conciseness 0.30–0.70).
+Subagent audit + full eval re-run: writing scores rose to 0.80–0.90 and
+every agent now grades A (94.0–97.0 overall, previously 3 A + 15 B); lint
+stays 100/A; all behavior and routing cases pass.
+
+- **All 18 agents** gained a Boundaries / 边界与交接 section: must-not-do
+  scope prohibitions plus explicit hand-back-to-main-agent conditions.
+  Wording is greenfield-safe: in an empty workspace, agents proceed with
+  stated assumptions instead of stalling on confirmation.
+- **code-reviewer (both languages)**: rewritten to remove heavy duplication
+  (principles/checklist/anti-patterns merged into one checklist; one
+  feedback template); `tools:` no longer grants Edit/Write — the role is
+  review-only, and Bash (zh) is restricted to running tests/builds.
+- **ios-developer en**: removed unfilled template placeholder blocks; added
+  real Error Handling guidance. **zh**: matching 错误处理 section added.
+- **frontend-engineer (both)**: framework detection consolidated to one
+  section; added hard limits (no backend/deployment) and an output contract.
+- **golang/java-backend (both)**: consolidated guidance repeated 3+×;
+  restored unique rules lost in consolidation (SOLID/god classes, externalized
+  configuration, logging levels); added boundaries + output contracts.
+- **java-unit-test / python-test-engineer (both)**: "never modify production
+  code" boundary; output contracts made conditional on the workspace having
+  a runnable build, so bare workspaces don't burn turns trying.
+- **product-manager (both)**: owns the what/why, not the how — explicit
+  must-nots (no architecture/implementation decisions) and structured
+  deliverable contract (stories/PRD shape, scope in/out).
+- **system-architect (both)**: merged duplicated principle/remember sections;
+  must-nots (no code implementation, no unapproved changes); ADR/design-doc
+  output contract.
+- **python-test-engineer (both)**: removed api-design/database-design skill
+  claims not present in frontmatter; removed all `~/.claude/docs/...` dead
+  references across agents.
+
 ## [0.5.0] - 2026-10-14
 
 ### Added

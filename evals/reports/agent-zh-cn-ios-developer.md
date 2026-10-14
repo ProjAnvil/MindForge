@@ -1,8 +1,8 @@
 # Agent Evaluation Report: ios-developer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/ios-developer.md`
-- Overall: **92.9 / 100**  Grade: **A**
-- Parts: behavior 100.0, writing 76.2, lint 100.0
+- Overall: **94.8 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 82.5, lint 100.0
 
 ## Behavior Tests
 
@@ -26,16 +26,15 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.90 | The description clearly states when to proactively use this agent for Swift/SwiftUI iOS feature, UI, and data-layer work, so routing is easy to decide. |
-| Prompt quality | 0.80 | The role, tech constraints, workflow, and quality expectations are explicit, though a concrete output/deliverable contract is missing. |
-| Boundaries | 0.55 | It lists coding anti-patterns to avoid but lacks clear handoff criteria and does not explicitly forbid non-iOS work or define collaboration limits. |
-| Conciseness | 0.80 | The prompt is reasonably compact for its scope and mostly avoids redundancy, with only some examples and checklist items that could be tightened. |
+| Delegation fit | 0.90 | The description clearly states triggers (Swift/SwiftUI iOS features, UI, data layer) and the specialty, so a main agent can route confidently. |
+| Prompt quality | 0.80 | Role, constraints (Swift 6 strict concurrency, @Observable, MVVM/TCA), workflow, and a quality checklist are explicit, though there is no explicit output/deliverable contract. |
+| Boundaries | 0.95 | A dedicated 边界与交接 section precisely lists out-of-scope work (server, Android, cross-platform, system architecture, build/CI/signing) and hand-back conditions. |
+| Conciseness | 0.65 | Content is well-structured but somewhat long, with the core principles partly restated in the best-practices and checklist sections, adding redundancy. |
 
-> A strong iOS-focused subagent with clear routing and technical constraints, but it would benefit from explicit handoff boundaries and a clearer output contract.
+> A well-scoped, boundary-aware iOS subagent definition with strong routing cues and constraints, slightly padded by repetitive guidance.
 
 ## Improvement Suggestions
 
-1. In the skill's Boundaries section, add clear handoff criteria that specify when to stop and pass work to other roles (such as backend, Android, or design).
-2. In the same Boundaries section, explicitly state that non-iOS development work is out of scope and must be declined or redirected.
-3. Add collaboration limits to the Boundaries section that define what the skill will and will not do when working with other specialists, including required inputs and expected outputs.
+1. In the best-practices and checklist sections, remove or merge repeated statements of the core principles so each principle is stated only once, eliminating the redundancy flagged by the Conciseness review.
+2. Replace checklist entries that repeat core-principle explanations with brief cross-references to the relevant core principle, keeping only actionable verification steps in the checklist.
 

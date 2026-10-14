@@ -1,13 +1,13 @@
 # Agent Evaluation Report: code-reviewer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/code-reviewer.md`
-- Overall: **88.8 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 62.5, lint 100.0
+- Overall: **95.9 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 86.2, lint 100.0
 
 ## Behavior Tests
 
 ### ✅ behavior-zh-cn-code-reviewer (100 pts)
-- ✔ `llm_judge(回复是一份结构化的代码评审：指出了给定代码的具体问题——例如, threshold=0.6)` 1.00 (threshold 0.60) — The answer is a structured, severity-ordered code review that identifies concrete issues in service.py—such as silently swallowed payment exceptions, an overburdened method with many dependencies, poor return semantics, magic strings/log formatting, and missing tests—and provides actionable remediation steps.
+- ✔ `llm_judge(回复是一份结构化的代码评审：指出了给定代码的具体问题——例如, threshold=0.6)` 1.00 (threshold 0.60) — The answer is a structured, severity-ranked code review that identifies concrete service.py issues—silently swallowed payment/mail exceptions, undifferentiated boolean returns, excessive parameters, logging/readability flaws, missing type hints, and missing tests—and provides actionable fixes.
 
 ## Static Lint
 
@@ -25,12 +25,12 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.85 | 描述清晰界定了架构/设计模式/代码质量审查的专长领域,主智能体可据此判断何时路由,但未点明具体触发场景(如 PR 审查、重构评审)。 |
-| Prompt quality | 0.90 | 角色定位、审查重点、流程步骤与反馈模板(含代码审查总结结构)都写得非常明确,输出契约清晰可执行。 |
-| Boundaries | 0.45 | 虽列出沟通层面的「不应该做」清单,却缺少范围边界与交接条件,尤其授予了 Edit/Write 工具与「只审查不建议改代码」的定位存在潜在冲突。 |
-| Conciseness | 0.30 | 篇幅过长且高度重复(两处「最佳实践」、多处内容交叠),远超必要 token 预算,大量条目可合并精简。 |
+| Delegation fit | 0.90 | The description clearly signals architecture/design/quality review expertise and purpose, so a main agent can route with confidence. |
+| Prompt quality | 0.95 | Role, boundaries, review workflow, detailed checklist, and a structured output contract are all explicit and actionable. |
+| Boundaries | 0.95 | The 'review-only' constraint is crisp, with explicit no-edit/no-commit rules and clear handback triggers (implementation, ADR, missing context). |
+| Conciseness | 0.65 | The extensive checklist and language-specific notes risk token bloat, though most content is purposeful and non-redundant. |
 
-> 内容专业、输出模板扎实,但边界模糊、工具权限与审查定位不符,且篇幅冗长重复,建议精简并明确只读权限与交接规则。
+> A thorough, well-bounded reviewer definition with strong delegation fit and output contract, held back only by verbosity in its checklist.
 
 ## Challenge (adversarial probes)
 
@@ -38,63 +38,45 @@ Total 100.0, grade A
 
 | Type | Trigger | Verdict | Note |
 |---|---|---|---|
-| route | I have a PR that technically works but feels gross. Before I merge, can you play architecture skeptic and tell me where it will hurt in six months? No edits, just a prioritized review of abstraction boundaries, SOLID, and hidden coupling. | ✔ survived |  |
-| route | Our new hire wrote this module. I suspect it is a God object and maybe Singleton abuse. Can you inspect it and tell me if I am overreacting, with concrete file/line examples and suggestions? | ✘ break | no Task call was made; the router answered directly |
-| route | Take a look at this Go package. I do not need implementation work, but I need an expert opinion on package organization, interface design, and whether error handling and concurrency patterns follow best practices. | ✘ break | no Task call was made; the router answered directly |
-| no-route | Refactor this 500-line Java class into smaller classes and apply the Strategy pattern. | ✔ survived |  |
-| no-route | Write unit tests for this Java service with JUnit, Mockito, and AssertJ, aiming for 90% coverage. | ✘ break | delegated to ['java-unit-test'] |
-| no-route | Design a new microservice architecture for our payments platform and write ADRs comparing gRPC vs REST. | ✘ break | delegated to ['system-architect'] |
-| ambiguous | Review this Svelte component for accessibility and state management; if there are issues, please fix them. | ✘ break | The answer sensibly asks for the missing component code, but it does not resolve the review-vs-implementation ambiguity or split the work between code-reviewer for review findings and frontend-engineer for Svelte fixes as expected, instead routing all review and fixes to frontend-engineer. |
-| ambiguous | Our Java service has a SAST finding for SQL injection. Assess whether it is exploitable and then patch it. | ✔ survived |  |
+| route | 我有个 Python 数据管道脚本，明天要合并，但总觉得异常处理和上下文管理器那里有点别扭。你能不能只看代码和跑现有测试，帮我判断有没有正确性和可测试性问题？别改，给我一个按严重程度排的报告就行。 | ✘ break | no Task call was made; the router answered directly |
+| route | 我们 Go 服务里 handler、service、repository 的依赖方向我看不太懂，有人说违反 DIP，有人说只是包组织问题。你帮我从架构和设计模式角度审一下，指出具体文件和行，给建议但不要动代码。 | ✔ survived |  |
+| route | 这个 Spring Boot 接口的代码审查交给谁比较合适？我想知道有没有 OWASP 类问题和错误处理缺陷，只出审查意见，不要重构。 | ✘ break | no Task call was made; the router answered directly |
+| no-route | 这段 Java 代码的审查意见我们收到了，你现在直接按意见重构 service 层并提交 commit，顺便把测试也补了。 | ✔ survived |  |
+| no-route | 帮我评审一下这个新功能的代码值不值得做，顺便写成用户故事和验收标准，再排个优先级。 | ✘ break | delegated to ['code-reviewer', 'product-manager'] |
+| no-route | 我们在两个消息队列之间纠结，你帮我评审现有代码后直接拍板技术选型，并写一份 ADR。 | ✔ survived |  |
+| ambiguous | 这个单体拆微服务的方案你帮我把把关，看看现有代码的分层和耦合有没有问题，也告诉我到底该不该拆、怎么拆。 | ✔ survived |  |
+| ambiguous | 这个 Python 模块的测试写得很薄，你帮我审一下测试代码质量，然后把缺失的边界用例直接补上并跑覆盖率。 | ✔ survived |  |
 
-Suggested case for break `Our new hire wrote this module. I suspect it is a God object and maybe Singleton abuse. Can you inspect it and tell me if I am overreacting, with concrete file/line examples and suggestions?`:
-
-```python
-new_case("probe-route")
-    .given(router_agent(AGENTS_DIR, llm=router_llm))
-    .when(task('Our new hire wrote this module. I suspect it is a God object and maybe Singleton abuse. Can you inspect it and tell me if I am overreacting, with concrete file/line examples and suggestions?'))
-    .then(delegates_to('code-reviewer'))
-```
-
-Suggested case for break `Take a look at this Go package. I do not need implementation work, but I need an expert opinion on package organization, interface design, and whether error handling and concurrency patterns follow best practices.`:
+Suggested case for break `我有个 Python 数据管道脚本，明天要合并，但总觉得异常处理和上下文管理器那里有点别扭。你能不能只看代码和跑现有测试，帮我判断有没有正确性和可测试性问题？别改，给我一个按严重程度排的报告就行。`:
 
 ```python
 new_case("probe-route")
     .given(router_agent(AGENTS_DIR, llm=router_llm))
-    .when(task('Take a look at this Go package. I do not need implementation work, but I need an expert opinion on package organization, interface design, and whether error handling and concurrency patterns follow best practices.'))
+    .when(task('我有个 Python 数据管道脚本，明天要合并，但总觉得异常处理和上下文管理器那里有点别扭。你能不能只看代码和跑现有测试，帮我判断有没有正确性和可测试性问题？别改，给我一个按严重程度排的报告就行。'))
     .then(delegates_to('code-reviewer'))
 ```
 
-Suggested case for break `Write unit tests for this Java service with JUnit, Mockito, and AssertJ, aiming for 90% coverage.`:
+Suggested case for break `这个 Spring Boot 接口的代码审查交给谁比较合适？我想知道有没有 OWASP 类问题和错误处理缺陷，只出审查意见，不要重构。`:
+
+```python
+new_case("probe-route")
+    .given(router_agent(AGENTS_DIR, llm=router_llm))
+    .when(task('这个 Spring Boot 接口的代码审查交给谁比较合适？我想知道有没有 OWASP 类问题和错误处理缺陷，只出审查意见，不要重构。'))
+    .then(delegates_to('code-reviewer'))
+```
+
+Suggested case for break `帮我评审一下这个新功能的代码值不值得做，顺便写成用户故事和验收标准，再排个优先级。`:
 
 ```python
 new_case("probe-no-route")
     .given(router_agent(AGENTS_DIR, llm=router_llm))
-    .when(task('Write unit tests for this Java service with JUnit, Mockito, and AssertJ, aiming for 90% coverage.'))
+    .when(task('帮我评审一下这个新功能的代码值不值得做，顺便写成用户故事和验收标准，再排个优先级。'))
     .then(no_delegation())
-```
-
-Suggested case for break `Design a new microservice architecture for our payments platform and write ADRs comparing gRPC vs REST.`:
-
-```python
-new_case("probe-no-route")
-    .given(router_agent(AGENTS_DIR, llm=router_llm))
-    .when(task('Design a new microservice architecture for our payments platform and write ADRs comparing gRPC vs REST.'))
-    .then(no_delegation())
-```
-
-Suggested case for break `Review this Svelte component for accessibility and state management; if there are issues, please fix them.`:
-
-```python
-new_case("probe-ambiguous")
-    .given(router_agent(AGENTS_DIR, llm=router_llm))
-    .when(task('Review this Svelte component for accessibility and state management; if there are issues, please fix them.'))
-    .then(llm_judge(judge, criteria='Ambiguous. Main agent should ask whether the user wants review or implementation, or split: code-reviewer for review findings, frontend-engineer for Svelte fixes.'))
 ```
 
 ## Improvement Suggestions
 
-1. In the skill's tool permissions, remove Edit/Write or explicitly restrict them to non-mutating use to resolve the conflict with the 'review only, do not suggest code changes' positioning.
-2. In the skill prompt, add explicit scope boundaries and handoff conditions so reviewers know what is in-scope, out-of-scope, and when to stop or escalate.
-3. In the skill content, merge the two 'best practices' sections and overlapping items into one concise checklist to reduce token usage.
+1. In the behavior-zh-cn-code-reviewer skill prompt, condense the extensive checklist into grouped, imperative review steps to reduce token usage while preserving all current coverage.
+2. In the same skill's language-specific notes, replace verbose prose with a compact zh-CN-specific reference table or short bullet list to cut token bloat.
+3. After condensing, rerun the behavior-zh-cn-code-reviewer test to confirm the reduced prompt still passes the existing expectations.
 

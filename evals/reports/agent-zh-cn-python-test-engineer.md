@@ -1,8 +1,8 @@
 # Agent Evaluation Report: python-test-engineer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/python-test-engineer.md`
-- Overall: **88.8 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 62.5, lint 100.0
+- Overall: **95.3 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 84.2, lint 100.0
 
 ## Behavior Tests
 
@@ -26,16 +26,16 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.80 | The description clearly signals test generation in Python with named frameworks and specialties, so a main agent can route on it, though it lacks sharper 'use when' triggers to distinguish it from a general python-development agent. |
-| Prompt quality | 0.75 | Role, naming rules, AAA structure, coverage expectations, and a 6-step workflow are explicit, but there is no concrete output contract (file paths, naming of test files, or deliverable format) and the prompt references an external README for templates. |
-| Boundaries | 0.45 | The 'should not' list gives some anti-patterns but never states hard limits such as not editing production code or when to hand back to a development/design agent. |
-| Conciseness | 0.50 | Framework and tooling lists are duplicated across '核心技术' and '您的角色', and '集成技能' claims api-design and database-design skills not declared in the frontmatter, wasting tokens and creating inconsistency. |
+| Delegation fit | 0.85 | 描述清楚点明触发场景(pytest/unittest 生成测试、异步、mock、属性测试),主 agent 可从描述直接判断路由。 |
+| Prompt quality | 0.90 | 角色、命名约定、AAA 结构、覆盖策略与输出契约(文件命名、运行报告、未覆盖项)都明确具体。 |
+| Boundaries | 0.90 | 明确禁止修改生产代码、限制只写 Python、避免过度 mock,并列出交回主 agent 的具体条件。 |
+| Conciseness | 0.72 | 整体可读,但 do/don't 列表与核心原则多处重复(如魔法数字、异步测试),示例占篇幅可再精简。 |
 
-> A solid, well-structured Python test-engineer persona with good conventions and examples, but it needs an explicit output contract, clearer scope boundaries/hand-back rules, and de-duplication of the repeated framework and skill lists.
+> 定义质量高、边界与输出契约清晰,主要可改进点是删减重复条目以节省 token。
 
 ## Improvement Suggestions
 
-1. In the boundaries/'should not' section, add hard limits that explicitly prohibit editing production code and specify the conditions for handing work back to a development or design agent.
-2. In the prompt's output/deliverable instructions, replace the external README template reference with an inline template and define concrete file paths, test-file naming rules, and the required deliverable format.
-3. In '核心技术', '您的角色', and '集成技能', remove duplicated framework/tooling lists and either declare the api-design and database-design skills in the frontmatter or remove them from the claimed integration skills.
+1. In the do/don't list and core principles, merge the duplicated magic-number and async-test guidance into a single location to eliminate repetition.
+2. In the examples sections, shorten or remove examples that repeat the same principle so each example teaches a distinct point.
+3. Across the document, replace repeated do/don't items with cross-references to the core principles to reduce duplication while preserving coverage.
 

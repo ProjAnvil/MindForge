@@ -111,6 +111,35 @@ REVIEW_CRITERIA_ZH = (
 )
 
 
+class DeliveredIn:
+    """A fragment delivered either in the final output or via a Write tool call.
+
+    Output contracts that mandate documents accept both shapes: written to a
+    workspace file, or returned inline as the reply. Asserts substance, not channel.
+    """
+
+    def __init__(self, fragment: str, threshold: float = 1.0):
+        self.name = f"delivered({fragment!r})"
+        self.threshold = threshold
+        self._fragment = fragment
+
+    def evaluate(self, trace):
+        import json
+
+        from smelt import ExpectationResult
+
+        hit = self._fragment in trace.output or any(
+            c.name == "Write" and self._fragment in json.dumps(c.arguments)
+            for c in trace.tool_calls
+        )
+        return ExpectationResult(
+            name=self.name,
+            score=1.0 if hit else 0.0,
+            threshold=self.threshold,
+            message=f"fragment found in output or Write args: {hit}",
+        )
+
+
 def _behavior_spec(lang: str, agent: str):
     """(files, trigger, then-builder) for one (lang, agent) behavior case.
 
@@ -213,7 +242,8 @@ def _behavior_spec(lang: str, agent: str):
                 "zh-cn": "为一个支付处理系统写一份架构概述",
             }[lang]
         ), lambda judge_llm: (
-            output_contains("Architecture" if lang == "en" else "架构"),
+            # output contract ships designs as documents — file or inline
+            DeliveredIn("Architecture" if lang == "en" else "架构"),
         )
 
     raise ValueError(f"no behavior spec for agent {agent!r}")

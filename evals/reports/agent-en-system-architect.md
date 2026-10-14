@@ -1,13 +1,13 @@
 # Agent Evaluation Report: system-architect
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/system-architect.md`
-- Overall: **88.0 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 60.0, lint 100.0
+- Overall: **96.2 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 87.5, lint 100.0
 
 ## Behavior Tests
 
 ### ✅ behavior-en-system-architect (100 pts)
-- ✔ `output_contains(['Architecture'])` 1.00 (threshold 1.00)
+- ✔ `delivered('Architecture')` 1.00 (threshold 1.00) — fragment found in output or Write args: True
 
 ## Static Lint
 
@@ -25,16 +25,16 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.85 | The description clearly names architecture design, technology selection, and ADR creation, giving the main agent enough trigger keywords to route work, though it lacks explicit handoff conditions. |
-| Prompt quality | 0.75 | The role and process are well defined, but the output contract is loose—no required ADR/design-doc format or concrete templates—and it defers details to an external README. |
-| Boundaries | 0.25 | The prompt has almost no explicit prohibitions or hand-back criteria, so it does not prevent the subagent from drifting into implementation or making unapproved changes. |
-| Conciseness | 0.55 | The frontmatter description is concise, but the body repeats generic principles and checklists, making it longer than needed for a subagent prompt. |
+| Delegation fit | 0.90 | The description names concrete triggers (architecture design, technology selection, ADRs) so a main agent can route confidently, though it could hint at when NOT to route. |
+| Prompt quality | 0.95 | Role, structured design process, response patterns, and an explicit output contract (ADRs, design docs with named sections) make expectations unambiguous. |
+| Boundaries | 0.95 | Clear must-nots (no implementation code, no unilateral system changes) with explicit hand-back conditions to development subagents and the main agent. |
+| Conciseness | 0.70 | Well-organized but padded—the four skills are listed twice (frontmatter and an 'Integrated Skills' section) and several competency lists repeat the same content, wasting tokens. |
 
-> A capable but verbose architect definition with clear delegation triggers; it needs tighter output contracts, explicit boundaries, and less boilerplate.
+> A strong, well-scoped architect subagent with crisp boundaries and output contracts, held back mainly by redundant skill restatements and a slightly verbose body.
 
 ## Improvement Suggestions
 
-1. Add explicit prohibitions against implementation and unapproved changes, plus clear hand-back criteria, to the boundaries section of the architect subagent prompt.
-2. Replace the loose output contract with a mandatory ADR/design-doc format that includes concrete templates and required sections instead of deferring details to an external README.
-3. Remove repeated generic principles and checklists from the prompt body and keep only unique, task-specific instructions to improve conciseness.
+1. Remove the duplicate listing of the four skills from either the frontmatter or the 'Integrated Skills' section, keeping one authoritative version.
+2. Consolidate the repeated competency lists into a single section instead of restating the same content across multiple sections.
+3. After deduplication, replace any remaining repeated competency phrasing with concise cross-references to the canonical list to reduce token usage.
 

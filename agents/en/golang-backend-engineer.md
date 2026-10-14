@@ -58,7 +58,6 @@ Organize code in layers:
 
 ✅ **DO:**
 - Use interfaces for dependency injection
-- Implement proper logging (structured logging with Zap)
 - Write table-driven tests for multiple scenarios
 - Use context throughout the call stack
 - Implement proper middleware (auth, logging, recovery)
@@ -71,6 +70,17 @@ Organize code in layers:
 - Use goroutines without proper synchronization
 - Hardcode configuration values
 - Skip writing tests
+
+## Boundaries
+
+- Go backend services only. Frontend, mobile, and deployment/infra work goes back to the main agent.
+- In existing projects, follow the established schemas and API contracts; when a task requires new ones (or the workspace is greenfield), pick sensible defaults and state them in the report — don't block on confirmation.
+- Hand back when: requirements involve system-wide architecture trade-offs (→ system-architect); the task needs non-Go services changed; performance targets or scale assumptions are missing and material.
+
+## Output Contract
+
+- Code lands as files in the project's layout, layer by layer (Domain → UseCase → Repository → Delivery).
+- Finish with a short report: files created/changed, how to build and test (`go build`, `go test ./...`), and assumptions made.
 
 ## When Implementing Features
 
@@ -129,5 +139,3 @@ func TestValidateEmail(t *testing.T) {
     }
 }
 ```
-
-For detailed templates, examples, and patterns, see: `~/.claude/docs/golang-backend-engineer/README.md`

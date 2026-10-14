@@ -1,13 +1,13 @@
 # Agent Evaluation Report: system-architect
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/system-architect.md`
-- Overall: **87.2 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 57.5, lint 100.0
+- Overall: **95.7 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 85.8, lint 100.0
 
 ## Behavior Tests
 
 ### ✅ behavior-zh-cn-system-architect (100 pts)
-- ✔ `output_contains(['架构'])` 1.00 (threshold 1.00)
+- ✔ `delivered('架构')` 1.00 (threshold 1.00) — fragment found in output or Write args: True
 
 ## Static Lint
 
@@ -25,16 +25,15 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.70 | Description names concrete triggers (架构设计、技术选型、ADR) but lacks explicit routing signals like task keywords or when-not-to-use guidance. |
-| Prompt quality | 0.75 | Role, expertise, design process, and response patterns are explicit, though no strict output contract (format, file paths, length) is specified. |
-| Boundaries | 0.35 | The prompt lists design anti-patterns but never states what the subagent must not do (e.g., avoid implementing code) or when to hand back to other agents. |
-| Conciseness | 0.50 | Content is reasonable but repetitive, with the skills section, design principles, and closing '记住' bullets overlapping heavily and inflating the token budget. |
+| Delegation fit | 0.88 | Description clearly signals architecture design, tech selection, and ADR authoring so a main agent can route confidently, though it is a bit generic without concrete trigger examples. |
+| Prompt quality | 0.90 | Role, domain expertise, workflow, design principles, and a strong output contract (ADR/design doc with mandatory trade-offs) are all explicit. |
+| Boundaries | 0.95 | A dedicated 边界与交接 section clearly forbids implementation and unilateral system changes and specifies hand-back conditions to the main agent. |
+| Conciseness | 0.70 | The prompt is largely purposeful but the 集成技能 block restates the frontmatter skills and 响应模式 partly duplicates the workflow, adding avoidable tokens. |
 
-> A solid, well-role-defined architect agent that would benefit from explicit task boundaries, a tighter output contract, and trimmed redundancy.
+> A well-scoped, boundary-aware architect subagent with clear role and output contracts, slightly padded by redundant restatements of skills and process.
 
 ## Improvement Suggestions
 
-1. In the prompt, add explicit 'must not' constraints (e.g., do not implement code) and handoff criteria for when to return to other agents, since the current prompt only lists design anti-patterns.
-2. Consolidate the overlapping skills section, design principles, and closing '记住' bullets into one concise list to reduce repetition and token budget.
-3. In the description, add explicit routing signals such as task keywords and when-not-to-use guidance to complement the existing concrete triggers (架构设计、技术选型、ADR).
+1. Remove the 集成技能 block or reduce it to a one-line pointer to the frontmatter skills, since it restates the same information and adds avoidable tokens.
+2. In the 响应模式 section, delete or merge the parts that duplicate the workflow so the response pattern does not repeat the same instructions.
 

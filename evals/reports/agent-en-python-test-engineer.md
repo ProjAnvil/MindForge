@@ -1,14 +1,14 @@
 # Agent Evaluation Report: python-test-engineer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/python-test-engineer.md`
-- Overall: **87.6 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 58.8, lint 100.0
+- Overall: **95.9 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 86.2, lint 100.0
 
 ## Behavior Tests
 
 ### ✅ behavior-en-python-test-engineer (100 pts)
-- ✔ `tool_args_contain('Read', 'app.py')` 1.00 (threshold 1.00) — 1 call(s) to Read containing 'app.py'
-- ✔ `tool_args_contain('Write', 'def test_')` 1.00 (threshold 1.00) — 1 call(s) to Write containing 'def test_'
+- ✔ `tool_args_contain('Read', 'app.py')` 1.00 (threshold 1.00) — 2 call(s) to Read containing 'app.py'
+- ✔ `tool_args_contain('Write', 'def test_')` 1.00 (threshold 1.00) — 2 call(s) to Write containing 'def test_'
 
 ## Static Lint
 
@@ -26,16 +26,16 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.85 | Description clearly signals Python test generation with named frameworks, so a main agent can route test-writing tasks without ambiguity. |
-| Prompt quality | 0.70 | Role, naming conventions, AAA structure, and coverage strategy are explicit, but the output contract (exact artifact shape, where files go, run/verify step) is only implied. |
-| Boundaries | 0.30 | No hard 'must not' rules (e.g., don't modify production code, don't over-mock, when to hand back to the main agent) are stated, and Write/Bash tools are granted without guardrails. |
-| Conciseness | 0.50 | Content is repetitive across Expertise/Role/Technologies, and it claims api-design and database-design skills not listed in the frontmatter, wasting tokens and creating inconsistency. |
+| Delegation fit | 0.90 | The description clearly scopes routing to Python test generation with named frameworks, making it easy for a main agent to decide when to invoke it. |
+| Prompt quality | 0.95 | Role, mandatory naming/AAA conventions, and an explicit output contract (files, test count, run result, uncovered APIs) are all spelled out. |
+| Boundaries | 0.95 | It explicitly forbids modifying production code, over-mocking, and non-Python work, and lists concrete hand-back triggers. |
+| Conciseness | 0.65 | The prompt is long and repetitive—expertise lists, integrated skills, and DO/DON'T sections restate the same naming and structure rules, inflating the token cost. |
 
-> A well-structured, domain-rich tester prompt that would benefit from explicit tool-use boundaries and a tighter, less redundant body aligned with its declared skills.
+> A well-scoped and explicit Python test subagent with strong boundaries and output contract, marred only by redundant expertise sections that could be tightened.
 
 ## Improvement Suggestions
 
-1. Add a Boundaries section to the skill prompt with explicit hard 'must not' rules (e.g., do not modify production code, do not over-mock, and define when to hand back to the main agent) plus guardrails for the granted Write/Bash tools.
-2. Add an Output Contract section to the skill prompt that specifies the exact test artifact shape, where files go, and the run/verify step the agent must complete.
-3. Remove repetitive content across Expertise, Role, and Technologies in the skill prompt and delete api-design and database-design claims that are not listed in the frontmatter.
+1. Deduplicate the naming and structure rules that currently appear in the expertise lists, integrated skills, and DO/DON'T sections, keeping a single canonical statement near the top of the prompt.
+2. Rewrite the DO/DON'T section as a short checklist containing only constraints not already covered by the consolidated naming and structure rules.
+3. Trim the expertise lists and integrated skills by removing repeated naming/structure guidance and retaining only role-specific capabilities.
 

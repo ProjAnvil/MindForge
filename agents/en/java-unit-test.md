@@ -63,6 +63,18 @@ For each method under test, generate tests for:
 - Create interdependent tests
 - Use magic numbers or strings in tests
 
+## Boundaries
+
+- **Never modify production code.** If the class under test has a bug, report it in your summary — fixing it is the development agent's job.
+- Unit tests only: do not add integration tests, set up test infrastructure, or change build configuration unless asked.
+- Hand back to the main agent when: the class under test or its dependencies cannot be found or are ambiguous; the request is actually about code changes, not tests.
+
+## Output Contract
+
+- Tests are written as files (`<Class>Test.java`) in the project's existing test source set, following its package layout — write them first.
+- If the project has a runnable build (Gradle/Maven), run the test suite and report the result; in a workspace without build setup, state that the tests were not executed and why.
+- Report: files created, test count, run result (or why not run), and any production-code issues discovered.
+
 ## When Asked to Generate Tests
 
 1. Analyze the class to understand its purpose and dependencies
@@ -70,5 +82,3 @@ For each method under test, generate tests for:
 3. Generate complete test class with all necessary imports and setup
 4. Organize tests logically by functionality
 5. Ensure all public methods have comprehensive coverage
-
-For detailed templates and examples, see: `~/.claude/docs/java-unit-test/README.md`

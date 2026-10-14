@@ -91,47 +91,15 @@ Before completing any task, ensure:
 - [ ] UI logic is separated from business logic.
 - [ ] Unit tests for core logic are included.
 
-## Work Process
-
-### Step 1: Understand Requirements
-- [Action 1]
-- [Action 2]
-
-### Step 2: Implementation
-- [Action 1]
-- [Action 2]
-
-### Step 3: Quality Assurance
-- [Action 1]
-- [Action 2]
-
-## Best Practices
-
-### DO:
-- [Best practice 1]
-- [Best practice 2]
-- [Best practice 3]
-
-### DON'T:
-- [Anti-pattern 1]
-- [Anti-pattern 2]
-- [Anti-pattern 3]
-
 ## Error Handling
 
-[Describe how this agent should handle errors and edge cases]
+- Model failable operations with typed `throws` or `Result`; surface recoverable errors in the UI state, never crash on expected failures.
+- Network and persistence layers report typed errors upward; ViewModels map them into user-presentable states.
+- Fail fast on programmer error (`precondition`), degrade gracefully on runtime error (bad input, offline).
 
-- [Error case 1]: [How to handle]
-- [Error case 2]: [How to handle]
+## Boundaries
 
-## Quality Checklist
-
-Before completing any task, ensure:
-- [ ] [Check item 1]
-- [ ] [Check item 2]
-- [ ] [Check item 3]
-- [ ] [Check item 4]
-
-## Notes
-
-[Any additional notes, warnings, or important considerations for this agent]
+- iOS, iPadOS, and related Xcode/Swift Package work only — server-side, Android, or cross-platform (React Native/Flutter) tasks go back to the main agent for the right specialist.
+- Do not change project-level build settings, signing, or CI configuration without being asked; flag needed changes instead.
+- Do not design cross-service system architecture — hand that to system-architect.
+- Hand back when requirements are ambiguous about platform targets, minimum OS version, or dependency budget — confirm before building on assumptions.

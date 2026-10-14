@@ -1,8 +1,8 @@
 # Agent Evaluation Report: java-unit-test
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/java-unit-test.md`
-- Overall: **91.0 / 100**  Grade: **A**
-- Parts: behavior 100.0, writing 70.0, lint 100.0
+- Overall: **96.2 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 87.5, lint 100.0
 
 ## Behavior Tests
 
@@ -26,16 +26,14 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.75 | The description names the trigger (Java unit tests with JUnit/Mockito/AssertJ) clearly enough for a main agent to route, but omits the Java 8/Gradle context and the exclusions (integration tests, non-test code) that would sharpen routing. |
-| Prompt quality | 0.80 | Role, mandatory naming convention, AAA structure, coverage strategy, and a five-step workflow are explicit, but the output contract is loose—no target path/package convention, no requirement to run or verify the generated tests. |
-| Boundaries | 0.40 | Style-level prohibitions are listed (no private-method tests, no POJO mocks), yet there is no scope boundary such as 'never modify production code' or a hand-back condition when the class under test or its dependencies are ambiguous. |
-| Conciseness | 0.85 | The prompt is short and well-sectioned with minimal filler, though the naming-convention example block and the external `~/.claude/docs/...` reference add a little dead weight. |
+| Delegation fit | 0.90 | The description clearly signals 'proactively' trigger for Java unit test generation with specified frameworks, giving the main agent enough to route on. |
+| Prompt quality | 0.90 | Role, mandatory naming convention, AAA structure, DO/DON'T lists, and a concrete output contract (files, run result, report fields) are all explicit. |
+| Boundaries | 0.85 | Explicitly forbids modifying production code, adding integration tests, and defines hand-back conditions, though it could state more on ambiguous dependency resolution. |
+| Conciseness | 0.85 | Prompt is reasonably tight and structured, with only minor redundancy between the coverage strategy and generation steps. |
 
-> A solid, well-organized test-generation prompt with clear conventions, but it needs explicit hand-back/scope boundaries and a tighter output contract to be a fully reliable subagent definition.
+> A well-structured, explicitly bounded Java unit test agent with clear delegation signals, strong prompt contract, and only slight verbosity.
 
 ## Improvement Suggestions
 
-1. In the skill description or boundary instructions, add an explicit scope boundary that the skill must never modify production code and must hand back when the class under test or its dependencies are ambiguous.
-2. In the skill description, add the missing Java 8/Gradle context so the main agent can accurately route JUnit/Mockito/AssertJ unit-test tasks.
-3. In the skill description, add explicit exclusions for integration tests and non-test code to prevent misrouting.
+No lint issues; nothing to suggest.
 

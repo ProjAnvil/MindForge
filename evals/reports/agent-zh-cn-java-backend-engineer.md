@@ -1,8 +1,8 @@
 # Agent Evaluation Report: java-backend-engineer
 
 - Path: `/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/java-backend-engineer.md`
-- Overall: **89.1 / 100**  Grade: **B**
-- Parts: behavior 100.0, writing 63.7, lint 100.0
+- Overall: **94.0 / 100**  Grade: **A**
+- Parts: behavior 100.0, writing 80.0, lint 100.0
 
 ## Behavior Tests
 
@@ -26,16 +26,16 @@ Total 100.0, grade A
 
 | Dimension | Score | Comment |
 |---|---|---|
-| Delegation fit | 0.75 | Description clearly names the tech stack and purpose, letting a main agent route Java/Spring tasks, though it doesn't differentiate from adjacent backend or API-design agents. |
-| Prompt quality | 0.80 | Role, expertise areas, security/quality constraints, and a step-by-step code-generation workflow are explicit and actionable. |
-| Boundaries | 0.50 | Has a do/don't list and a strong 'reuse existing dependencies' rule, but never states what the agent must not do or when to hand back to the main agent (e.g., frontend, DevOps, unclear requirements). |
-| Conciseness | 0.50 | Prompt is bloated with heavy repetition—dependency management, layering, and transaction rules appear three-plus times across principles, best practices, and do/don't sections. |
+| Delegation fit | 0.90 | 描述明确点出技术栈(Spring Boot、MyBatis、Clean Architecture)与用途,主 agent 能据此判断路由。 |
+| Prompt quality | 0.90 | 角色、技术领域、核心原则、工作流程和输出契约(交付物 + 结束报告)都写得具体可执行。 |
+| Boundaries | 0.90 | 「边界与交接」明确划出前端/DevOps、系统架构、测试生成等交回路径,并说明绿地场景下的默认行为。 |
+| Conciseness | 0.50 | 内容重复度较高(事务管理出现三次、异常处理两处、测试策略与 skills 重叠),部分段落只是指向别处的空壳,提示词篇幅偏冗长。 |
 
-> A solid, well-scoped Java backend agent, but it needs explicit hand-back boundaries and de-duplication to fit the token budget.
+> 这是一份职责清晰、触发明确、交接边界完整的 Java 后端 agent 定义,主要短板是存在重复段落导致 token 效率偏低。
 
 ## Improvement Suggestions
 
-1. Add an explicit out-of-scope/hand-back subsection to the agent prompt that states when to return to the main agent for frontend, DevOps, or unclear requirements, since Boundaries scored 0.5.
-2. Consolidate the repeated dependency-management, layering, and transaction rules into a single section of the prompt to remove three-plus duplications and improve Conciseness.
-3. Revise the agent description to distinguish Java/Spring backend implementation from adjacent backend or API-design agents so the main agent can route more precisely.
+1. In the skill prompt, remove the duplicate transaction-management passages (three occurrences) and exception-handling passages (two occurrences), keeping one canonical description of each.
+2. In the skill prompt, merge the testing-strategy content with the overlapping skills section into a single testing subsection to eliminate duplicated guidance.
+3. Replace the empty paragraphs that only point elsewhere with either concrete instructions or remove them, then shorten the overall prompt to improve conciseness.
 

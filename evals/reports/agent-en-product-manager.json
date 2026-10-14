@@ -5,8 +5,8 @@
     "name": "product-manager"
   },
   "overall": {
-    "score": 88.75,
-    "grade": "B",
+    "score": 97.0,
+    "grade": "A",
     "weights": {
       "behavior": 0.5,
       "writing": 0.3,
@@ -15,7 +15,7 @@
   },
   "scores": {
     "behavior": 1.0,
-    "writing": 0.625,
+    "writing": 0.9,
     "lint": 1.0
   },
   "behavior": [
@@ -84,37 +84,33 @@
     ]
   },
   "writing": {
-    "score": 0.625,
-    "overall_comment": "A well-scoped, clearly described PM agent with good role framing, but it needs explicit output contracts and boundary/handback rules to be production-ready.",
+    "score": 0.9,
+    "overall_comment": "A strong, well-structured product-manager definition with clear routing triggers, explicit constraints, and a solid output contract, marred only slightly by mild verbosity.",
     "error": null,
     "dimensions": [
       {
         "name": "Delegation fit",
-        "score": 0.85,
-        "comment": "The description clearly names trigger scenarios (requirements analysis, feature breakdown, user stories, scope planning), giving a main agent enough signal to route reliably."
+        "score": 0.9,
+        "comment": "The description names concrete triggers (requirements analysis, feature breakdown, user stories, scope planning) and the domain clearly, so a main agent can route confidently."
       },
       {
         "name": "Prompt quality",
-        "score": 0.6,
-        "comment": "Role, principles, and worked examples are strong, but there is no explicit output contract specifying the expected deliverable format (e.g., PRD/story template) or success criteria."
+        "score": 0.95,
+        "comment": "Role, core principles, best practices, and an explicit output contract with deliverable shapes make the agent's behavior and outputs fully specified."
       },
       {
         "name": "Boundaries",
-        "score": 0.2,
-        "comment": "The prompt never states what the subagent must not do (e.g., avoid implementation details or architectural decisions) nor when to hand back to the main agent."
+        "score": 0.95,
+        "comment": "Explicit 'must not' rules (no architecture/tech decisions, no committing scope/timelines) plus clear hand-back conditions give strong guardrails."
       },
       {
         "name": "Conciseness",
-        "score": 0.85,
-        "comment": "Content is tight and scannable with minimal filler, well within a reasonable token budget for a subagent prompt."
+        "score": 0.8,
+        "comment": "Well-organized and scannable, but some overlap between the role description, core principles, and best practices adds minor redundancy to the token budget."
       }
     ]
   },
-  "suggestions": [
-    "In the subagent prompt, add a 'Handback criteria' section stating exactly when the subagent should stop and return control to the main agent.",
-    "In the subagent prompt, add a 'Must not do' section that explicitly prohibits producing implementation details or making architectural decisions.",
-    "In the subagent prompt, add an output contract section defining the expected deliverable format (e.g., PRD/story template) and success criteria."
-  ],
+  "suggestions": [],
   "suggestions_error": null,
   "challenge": null,
   "reference_coverage": null

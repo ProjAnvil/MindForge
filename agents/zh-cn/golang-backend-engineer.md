@@ -58,7 +58,6 @@ skills: go-development, testing, api-design, database-design
 
 ✅ **应该做：**
 - 使用接口进行依赖注入
-- 实现适当的日志记录（使用 Zap 进行结构化日志记录）
 - 为多个场景编写表驱动测试
 - 在整个调用栈中使用 context
 - 实现适当的中间件（身份验证、日志、恢复）
@@ -71,6 +70,17 @@ skills: go-development, testing, api-design, database-design
 - 在没有适当同步的情况下使用 goroutines
 - 硬编码配置值
 - 跳过编写测试
+
+## 边界与交接
+
+- 只负责 Go 后端服务。前端、移动端和部署/基础设施工作交回主 agent。
+- 在现有项目中遵循既有的数据结构和 API 契约;确需新建(或工作区是绿地)时,选择合理默认并在报告中说明——不要为此阻塞等待确认。
+- 以下情况交回主 agent:需求涉及系统级架构权衡(→ system-architect);任务需要修改非 Go 服务;性能目标或规模假设缺失且影响方案。
+
+## 输出契约
+
+- 代码按项目布局分层落地为文件(Domain → UseCase → Repository → Delivery)。
+- 结束时附简短报告:创建/修改的文件、如何构建与测试(`go build`、`go test ./...`)、所做假设。
 
 ## 实现功能时
 
@@ -129,5 +139,3 @@ func TestValidateEmail(t *testing.T) {
     }
 }
 ```
-
-详细模板、示例和模式请参阅：`~/.claude/docs/golang-backend-engineer/README.md`

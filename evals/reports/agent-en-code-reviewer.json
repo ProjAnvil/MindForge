@@ -5,8 +5,8 @@
     "name": "code-reviewer"
   },
   "overall": {
-    "score": 84.74999999999999,
-    "grade": "B",
+    "score": 95.875,
+    "grade": "A",
     "weights": {
       "behavior": 0.5,
       "writing": 0.3,
@@ -14,14 +14,14 @@
     }
   },
   "scores": {
-    "behavior": 0.95,
-    "writing": 0.575,
+    "behavior": 1.0,
+    "writing": 0.8625,
     "lint": 1.0
   },
   "behavior": [
     {
       "case": "behavior-en-code-reviewer",
-      "score": 0.95,
+      "score": 1.0,
       "passed": true,
       "error": null,
       "runs": 1,
@@ -32,10 +32,10 @@
       "expectations": [
         {
           "name": "llm_judge(The response is a structured c, threshold=0.6)",
-          "score": 0.95,
+          "score": 1.0,
           "threshold": 0.6,
           "passed": true,
-          "message": "The answer is a structured, severity-prioritized code review that identifies concrete issues such as silently swallowed payment/mailer exceptions, bare excepts, an oversized multi-responsibility method, validation gaps, and logging/readability problems, and it provides actionable fixes.",
+          "message": "The answer is a structured, severity-prioritized code review that concretely identifies the swallowed payment exception, silent mailer failure, oversized multi-responsibility method, parameter/return issues, logging problems, and missing tests, with actionable fixes and a clear next-steps list.",
           "runs": 1,
           "score_std": 0.0
         }
@@ -84,92 +84,92 @@
     ]
   },
   "writing": {
-    "score": 0.575,
-    "overall_comment": "A thorough, well-structured reviewer prompt whose actionable output contract is strong but which is bloated with redundant sections and dangerously lacks scope boundaries and a read-only tool set.",
+    "score": 0.8625,
+    "overall_comment": "This is a strong, well-bounded reviewer definition; trimming checklist length and adding concrete routing triggers would improve delegation efficiency.",
     "error": null,
     "dimensions": [
       {
         "name": "Delegation fit",
-        "score": 0.8,
-        "comment": "The description clearly names the specialty and trigger ('comprehensive code reviews') so a main agent can route confidently, though it lacks explicit negative triggers or disambiguation from a generic reviewer."
+        "score": 0.85,
+        "comment": "The description clearly identifies code review expertise and invocation purpose, though it could name concrete triggers such as PR or diff reviews."
       },
       {
         "name": "Prompt quality",
         "score": 0.9,
-        "comment": "Role, principles, five-step process, checklist, feedback template, and a worked example make the output contract highly explicit and executable."
+        "comment": "The role, review process, checklist, and structured feedback format are explicit, with only minor ambiguity around the Semantic tool and skill declarations."
       },
       {
         "name": "Boundaries",
-        "score": 0.25,
-        "comment": "No statement of what the agent must not do or when to hand back, and the granted Edit/Write tools directly contradict a read-only review role, while the DO/DON'T list only covers tone rather than scope."
+        "score": 1.0,
+        "comment": "The agent is explicitly review-only, forbids edits, commits, and refactors, and defines clear hand-back cases for implementation, ADR-level decisions, and missing context."
       },
       {
         "name": "Conciseness",
-        "score": 0.35,
-        "comment": "The file is heavily padded with overlapping sections (Core Principles vs. Review Checklist vs. Common Issues, and Best Practices vs. Notes/DO-DON'T) plus a long duplicate example, consuming far more tokens than the task requires."
+        "score": 0.7,
+        "comment": "The prompt is well organized but quite long, with extensive checklist and language-specific notes that may exceed an ideal token budget for a single-purpose review subagent."
       }
     ]
   },
   "suggestions": [
-    "In the code-reviewer skill definition, add a Boundaries/scope section (and update the DO/DON'T list) stating the agent must not edit/write files and should hand back after review, and remove Edit/Write from the granted tools in favor of read-only tools.",
-    "Merge the overlapping Core Principles, Review Checklist, and Common Issues sections into one review checklist, and fold Best Practices into the Notes/DO-DON'T list to eliminate duplicated guidance.",
-    "Replace the long duplicate example with a single concise example (or delete the duplicate) to reduce token usage while preserving the key review behavior."
+    "In the review subagent's prompt, trim the extensive checklist to only the highest-priority review criteria and remove redundant items to reduce token count.",
+    "In the review subagent's prompt, move language-specific notes out of the main instructions into an optional appendix or conditional reference so they are included only when relevant.",
+    "In the review subagent's prompt, add a target token/length limit for the instructions and verify the final prompt stays within it."
   ],
   "suggestions_error": null,
   "challenge": {
     "skipped": null,
     "note": "challenger fell back to judge (same model; credibility reduced)",
     "rounds": 1,
-    "breaks": 7,
-    "score": 0.125,
+    "breaks": 5,
+    "score": 0.375,
     "probes": [
       {
         "type": "route",
-        "trigger": "Before I merge this PR, can you sanity-check whether the new notification service will become a maintenance nightmare? I don't want nitpicks, just whether the design/boundaries are sane.",
+        "trigger": "I don’t need line-by-line nitpicks, but the new retry/backoff logic in our payments service feels off. Could you read through the module and tell me whether the design is going to bite us in production?",
         "verdict": "break",
         "note": "no Task call was made; the router answered directly"
       },
       {
         "type": "route",
-        "trigger": "Our caching layer feels gross. Can you poke holes in the abstractions and tell me if we're violating SOLID before it spreads?",
+        "trigger": "Before I merge this PR, can you act as a second set of eyes? The diff touches our domain and infra layers and I’m worried the dependency direction got messy.",
         "verdict": "break",
         "note": "no Task call was made; the router answered directly"
       },
       {
         "type": "route",
-        "trigger": "The team keeps saying this module is hard to change. Can you diagnose whether it's an architecture/design-pattern problem or just bad naming?",
+        "trigger": "Our tech lead said this Go package is 'hard to maintain' but didn’t explain. Can you inspect internal/worker and point out concrete design smells and testability problems?",
         "verdict": "break",
-        "note": "no Task call was made; the router answered directly"
+        "note": "delegated to ['golang-backend-engineer'], not 'code-reviewer'"
       },
       {
         "type": "no-route",
-        "trigger": "Add retry logic with exponential backoff to the Go payment client.",
-        "verdict": "break",
-        "note": "delegated to ['golang-backend-engineer']"
+        "trigger": "The review found three critical issues in auth.py. Please fix them, add regression tests, and commit the changes.",
+        "verdict": "survived",
+        "note": ""
       },
       {
         "type": "no-route",
-        "trigger": "Write JUnit tests for the new TaxCalculator class.",
-        "verdict": "break",
-        "note": "delegated to ['java-unit-test']"
-      },
-      {
-        "type": "no-route",
-        "trigger": "Design an event-driven architecture for the new inventory system and write an ADR comparing Kafka vs Pulsar.",
+        "trigger": "We need to decide whether to migrate billing from REST to GraphQL. Write an ADR comparing the options and recommend one.",
         "verdict": "break",
         "note": "delegated to ['system-architect']"
       },
       {
+        "type": "no-route",
+        "trigger": "Generate JUnit tests for OrderService, especially the edge cases mentioned in the last review.",
+        "verdict": "break",
+        "note": "delegated to ['java-unit-test']"
+      },
+      {
         "type": "ambiguous",
-        "trigger": "Review this PR for architectural issues and then implement the refactor you recommend.",
+        "trigger": "Review this PR for security issues and, if any are small, just patch them directly on the branch so we can ship today.",
         "verdict": "survived",
         "note": ""
       },
       {
         "type": "ambiguous",
-        "trigger": "This frontend component is messy and has a state bug. Can you review the design and fix the bug?",
-        "verdict": "break",
-        "note": "The answer asks for the missing component code and offers to perform both design review and bug fix itself, but never splits the design review to a code-reviewer or the bug fix to a frontend-engineer nor clarifies routing, missing the expected mixed-scope handling."
+        "trigger": "Look at our authentication service and tell me whether we should refactor it to hexagonal architecture. If yes, update the code to match.",
+        "verdict": "survived",
+        "note": ""
       }
     ]
   },

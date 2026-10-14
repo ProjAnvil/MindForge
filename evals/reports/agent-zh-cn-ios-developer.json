@@ -5,7 +5,7 @@
     "name": "ios-developer"
   },
   "overall": {
-    "score": 92.875,
+    "score": 94.75,
     "grade": "A",
     "weights": {
       "behavior": 0.5,
@@ -15,7 +15,7 @@
   },
   "scores": {
     "behavior": 1.0,
-    "writing": 0.7625000000000001,
+    "writing": 0.825,
     "lint": 1.0
   },
   "behavior": [
@@ -98,36 +98,35 @@
     ]
   },
   "writing": {
-    "score": 0.7625000000000001,
-    "overall_comment": "A strong iOS-focused subagent with clear routing and technical constraints, but it would benefit from explicit handoff boundaries and a clearer output contract.",
+    "score": 0.825,
+    "overall_comment": "A well-scoped, boundary-aware iOS subagent definition with strong routing cues and constraints, slightly padded by repetitive guidance.",
     "error": null,
     "dimensions": [
       {
         "name": "Delegation fit",
         "score": 0.9,
-        "comment": "The description clearly states when to proactively use this agent for Swift/SwiftUI iOS feature, UI, and data-layer work, so routing is easy to decide."
+        "comment": "The description clearly states triggers (Swift/SwiftUI iOS features, UI, data layer) and the specialty, so a main agent can route confidently."
       },
       {
         "name": "Prompt quality",
         "score": 0.8,
-        "comment": "The role, tech constraints, workflow, and quality expectations are explicit, though a concrete output/deliverable contract is missing."
+        "comment": "Role, constraints (Swift 6 strict concurrency, @Observable, MVVM/TCA), workflow, and a quality checklist are explicit, though there is no explicit output/deliverable contract."
       },
       {
         "name": "Boundaries",
-        "score": 0.55,
-        "comment": "It lists coding anti-patterns to avoid but lacks clear handoff criteria and does not explicitly forbid non-iOS work or define collaboration limits."
+        "score": 0.95,
+        "comment": "A dedicated 边界与交接 section precisely lists out-of-scope work (server, Android, cross-platform, system architecture, build/CI/signing) and hand-back conditions."
       },
       {
         "name": "Conciseness",
-        "score": 0.8,
-        "comment": "The prompt is reasonably compact for its scope and mostly avoids redundancy, with only some examples and checklist items that could be tightened."
+        "score": 0.65,
+        "comment": "Content is well-structured but somewhat long, with the core principles partly restated in the best-practices and checklist sections, adding redundancy."
       }
     ]
   },
   "suggestions": [
-    "In the skill's Boundaries section, add clear handoff criteria that specify when to stop and pass work to other roles (such as backend, Android, or design).",
-    "In the same Boundaries section, explicitly state that non-iOS development work is out of scope and must be declined or redirected.",
-    "Add collaboration limits to the Boundaries section that define what the skill will and will not do when working with other specialists, including required inputs and expected outputs."
+    "In the best-practices and checklist sections, remove or merge repeated statements of the core principles so each principle is stated only once, eliminating the redundancy flagged by the Conciseness review.",
+    "Replace checklist entries that repeat core-principle explanations with brief cross-references to the relevant core principle, keeping only actionable verification steps in the checklist."
   ],
   "suggestions_error": null,
   "challenge": null,
