@@ -1,0 +1,121 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/system-architect.md",
+    "name": "system-architect"
+  },
+  "overall": {
+    "score": 87.25,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.575,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-system-architect",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['架构'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.575,
+    "overall_comment": "A solid, well-role-defined architect agent that would benefit from explicit task boundaries, a tighter output contract, and trimmed redundancy.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.7,
+        "comment": "Description names concrete triggers (架构设计、技术选型、ADR) but lacks explicit routing signals like task keywords or when-not-to-use guidance."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.75,
+        "comment": "Role, expertise, design process, and response patterns are explicit, though no strict output contract (format, file paths, length) is specified."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.35,
+        "comment": "The prompt lists design anti-patterns but never states what the subagent must not do (e.g., avoid implementing code) or when to hand back to other agents."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.5,
+        "comment": "Content is reasonable but repetitive, with the skills section, design principles, and closing '记住' bullets overlapping heavily and inflating the token budget."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the prompt, add explicit 'must not' constraints (e.g., do not implement code) and handoff criteria for when to return to other agents, since the current prompt only lists design anti-patterns.",
+    "Consolidate the overlapping skills section, design principles, and closing '记住' bullets into one concise list to reduce repetition and token budget.",
+    "In the description, add explicit routing signals such as task keywords and when-not-to-use guidance to complement the existing concrete triggers (架构设计、技术选型、ADR)."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

@@ -1,0 +1,130 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/ios-developer.md",
+    "name": "ios-developer"
+  },
+  "overall": {
+    "score": 86.125,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.5375,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-ios-developer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'SettingsView.swift')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'SettingsView.swift'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', 'SwiftUI')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "2 call(s) to Write containing 'SwiftUI'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.5375,
+    "overall_comment": "Strong domain content in the opening sections, but the file needs deduplication, placeholder removal, and an explicit boundary/output contract before it is production-ready.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.7,
+        "comment": "Description clearly signals an iOS/SwiftUI specialist tied to relevant skills, so routing is feasible, though it lacks explicit 'use when' triggers to distinguish it from a generic Swift agent."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.6,
+        "comment": "Role, stack, principles, and workflow are concrete with good ✅/❌ examples, but there is no output contract (deliverable format/summary expectations) and large portions remain unfilled template placeholders."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.45,
+        "comment": "Some 'Don'ts' exist, but there is no statement of scope limits (e.g., non-iOS platforms, backend/DevOps work) or conditions for handing back to the main agent."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.4,
+        "comment": "The useful first half is undercut by duplicated 'Best Practices' and 'Quality Checklist' sections plus empty placeholder blocks that burn tokens without adding guidance."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the skill file, remove the duplicated Best Practices and Quality Checklist sections and empty placeholder blocks to save tokens and sharpen guidance.",
+    "In the Boundaries section, add explicit scope limits for non-iOS platforms and backend/DevOps work, along with clear handback conditions for the main agent.",
+    "In the prompt/skill instructions, add an output contract specifying deliverable format and summary expectations, and add explicit 'use when' triggers to the description to distinguish it from a generic Swift agent."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

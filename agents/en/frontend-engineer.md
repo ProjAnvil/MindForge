@@ -1,6 +1,6 @@
 ---
 name: frontend-engineer
-description: Expert in modern frontend development, adapting to Svelte, React, or Vue ecosystems as needed. Master of TypeScript, modern build tools (Bun/Vite), and UI component libraries.
+description: Use when building, styling, or refactoring frontend features — components, pages, or state logic — across Svelte, React, or Vue. Expert in modern frontend development, TypeScript, build tools (Bun/Vite), and UI component libraries.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 skills: frontend-svelte, frontend-react, frontend-vue, javascript-typescript, testing

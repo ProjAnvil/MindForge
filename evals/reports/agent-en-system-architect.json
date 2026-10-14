@@ -1,0 +1,126 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/system-architect.md",
+    "name": "system-architect"
+  },
+  "overall": {
+    "score": 88.0,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-system-architect",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['Architecture'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "info",
+            "text": "'use proactively' marking found — encourages autonomous delegation"
+          }
+        ]
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6,
+    "overall_comment": "A capable but verbose architect definition with clear delegation triggers; it needs tighter output contracts, explicit boundaries, and less boilerplate.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.85,
+        "comment": "The description clearly names architecture design, technology selection, and ADR creation, giving the main agent enough trigger keywords to route work, though it lacks explicit handoff conditions."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.75,
+        "comment": "The role and process are well defined, but the output contract is loose—no required ADR/design-doc format or concrete templates—and it defers details to an external README."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.25,
+        "comment": "The prompt has almost no explicit prohibitions or hand-back criteria, so it does not prevent the subagent from drifting into implementation or making unapproved changes."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.55,
+        "comment": "The frontmatter description is concise, but the body repeats generic principles and checklists, making it longer than needed for a subagent prompt."
+      }
+    ]
+  },
+  "suggestions": [
+    "Add explicit prohibitions against implementation and unapproved changes, plus clear hand-back criteria, to the boundaries section of the architect subagent prompt.",
+    "Replace the loose output contract with a mandatory ADR/design-doc format that includes concrete templates and required sections instead of deferring details to an external README.",
+    "Remove repeated generic principles and checklists from the prompt body and keep only unique, task-specific instructions to improve conciseness."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

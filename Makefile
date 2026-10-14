@@ -32,9 +32,9 @@ help:
 	@echo "    make test-all                        Test all resources"
 	@echo "    make clean-all                       Clean all resources"
 	@echo ""
-	@echo "  Skill Evaluation (smelt):"
+	@echo "  Skill & Agent Evaluation (smelt):"
 	@echo "    make eval                            Deterministic evals (lint + plumbing, no LLM key)"
-	@echo "    make eval-llm                        Full evals incl. behavior cases (needs SMELT_API_KEY)"
+	@echo "    make eval-llm                        Full evals incl. agent routing/behavior cases (needs SMELT_API_KEY)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make init-agent AGENT=my-agent LANG=en"
@@ -242,14 +242,14 @@ clean-all:
 	done
 	@echo "✓ All resources cleaned"
 
-# Skill evaluation with smelt (evals/ project, uv-managed)
-# Deterministic: lint all SKILL.md + harness self-tests — safe for CI.
+# Skill & agent evaluation with smelt (evals/ project, uv-managed)
+# Deterministic: lint all SKILL.md + agent files + harness self-tests — safe for CI.
 eval:
 	@echo "Running deterministic skill evals (smelt)..."
 	@cd evals && uv sync --quiet && uv run pytest -m "not llm"
 	@echo "✓ Deterministic evals passed"
 
-# Full evaluation including real-model behavior cases.
+# Full evaluation including real-model behavior, agent routing, and evaluate reports.
 # Needs SMELT_API_KEY (shell env or evals/.env — see evals/.env.template).
 eval-llm:
 	@echo "Running full skill evals incl. LLM behavior cases..."

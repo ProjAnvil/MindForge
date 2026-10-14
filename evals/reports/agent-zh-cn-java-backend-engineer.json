@@ -1,0 +1,130 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/java-backend-engineer.md",
+    "name": "java-backend-engineer"
+  },
+  "overall": {
+    "score": 89.125,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6375,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-java-backend-engineer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'OrderService.java')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'OrderService.java'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', '@Service')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing '@Service'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6375,
+    "overall_comment": "A solid, well-scoped Java backend agent, but it needs explicit hand-back boundaries and de-duplication to fit the token budget.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.75,
+        "comment": "Description clearly names the tech stack and purpose, letting a main agent route Java/Spring tasks, though it doesn't differentiate from adjacent backend or API-design agents."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.8,
+        "comment": "Role, expertise areas, security/quality constraints, and a step-by-step code-generation workflow are explicit and actionable."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.5,
+        "comment": "Has a do/don't list and a strong 'reuse existing dependencies' rule, but never states what the agent must not do or when to hand back to the main agent (e.g., frontend, DevOps, unclear requirements)."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.5,
+        "comment": "Prompt is bloated with heavy repetition—dependency management, layering, and transaction rules appear three-plus times across principles, best practices, and do/don't sections."
+      }
+    ]
+  },
+  "suggestions": [
+    "Add an explicit out-of-scope/hand-back subsection to the agent prompt that states when to return to the main agent for frontend, DevOps, or unclear requirements, since Boundaries scored 0.5.",
+    "Consolidate the repeated dependency-management, layering, and transaction rules into a single section of the prompt to remove three-plus duplications and improve Conciseness.",
+    "Revise the agent description to distinguish Java/Spring backend implementation from adjacent backend or API-design agents so the main agent can route more precisely."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

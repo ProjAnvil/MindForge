@@ -1,0 +1,126 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/product-manager.md",
+    "name": "product-manager"
+  },
+  "overall": {
+    "score": 88.75,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.625,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-product-manager",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['作为'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "info",
+            "text": "'use proactively' marking found — encourages autonomous delegation"
+          }
+        ]
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.625,
+    "overall_comment": "A well-structured, concise PM persona that routes clearly and communicates role well, but would benefit from an explicit output contract and clear boundaries on what it should not decide.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.75,
+        "comment": "The description clearly lists trigger scenarios (requirements analysis, feature breakdown, user stories, scope planning), so a main agent can route here, though it lacks contrast with sibling agents or negative routing cues."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.65,
+        "comment": "The role, principles, and responsibilities are explicit with helpful examples, but there is no concrete output contract (e.g., PRD/user-story template or required deliverable format)."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.3,
+        "comment": "There is no explicit 'must not do' list or hand-back conditions—nothing stops it from drifting into technical solutioning or says when to defer to engineering/design."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.8,
+        "comment": "The prompt is compact and example-driven within a reasonable token budget, with only minor redundancy between the intro and the 'role' section."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the agent's system prompt/instructions, add a Boundaries section with an explicit 'must not do' list and hand-back conditions so it defers technical solutioning to engineering and design decisions to design.",
+    "In the agent's prompt, add a concrete output contract—such as a PRD/user-story template or required deliverable format—for each deliverable it produces.",
+    "In the agent description, add contrast with sibling agents and negative routing cues (e.g., when not to route here) to improve delegation fit."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

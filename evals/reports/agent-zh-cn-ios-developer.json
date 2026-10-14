@@ -1,0 +1,135 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/ios-developer.md",
+    "name": "ios-developer"
+  },
+  "overall": {
+    "score": 92.875,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.7625000000000001,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-ios-developer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'SettingsView.swift')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'SettingsView.swift'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', 'SwiftUI')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "2 call(s) to Write containing 'SwiftUI'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": [
+          {
+            "severity": "info",
+            "text": "'use proactively' marking found — encourages autonomous delegation"
+          }
+        ]
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.7625000000000001,
+    "overall_comment": "A strong iOS-focused subagent with clear routing and technical constraints, but it would benefit from explicit handoff boundaries and a clearer output contract.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.9,
+        "comment": "The description clearly states when to proactively use this agent for Swift/SwiftUI iOS feature, UI, and data-layer work, so routing is easy to decide."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.8,
+        "comment": "The role, tech constraints, workflow, and quality expectations are explicit, though a concrete output/deliverable contract is missing."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.55,
+        "comment": "It lists coding anti-patterns to avoid but lacks clear handoff criteria and does not explicitly forbid non-iOS work or define collaboration limits."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.8,
+        "comment": "The prompt is reasonably compact for its scope and mostly avoids redundancy, with only some examples and checklist items that could be tightened."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the skill's Boundaries section, add clear handoff criteria that specify when to stop and pass work to other roles (such as backend, Android, or design).",
+    "In the same Boundaries section, explicitly state that non-iOS development work is out of scope and must be declined or redirected.",
+    "Add collaboration limits to the Boundaries section that define what the skill will and will not do when working with other specialists, including required inputs and expected outputs."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

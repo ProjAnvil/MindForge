@@ -156,6 +156,10 @@ mindforge/
 ├── mcp/                 # MCP services collection
 │   ├── _template/
 │   └── mcp-*/
+├── evals/               # smelt evaluation suite (skills + agents, uv-managed)
+│   ├── tests/           # lint, routing, behavior, evaluate (pytest)
+│   ├── cases/           # doctor-ready module-level case files
+│   └── reports/         # committed evaluate reports (md + json)
 ├── docs/                # Documentation
 │   ├── README-zhcn.md   # Chinese README
 │   └── agents-detail/   # Detailed agent documentation
@@ -175,6 +179,40 @@ mindforge/
 │           └── frontend-engineer/README.md
 ├── Makefile             # Build and resource management
 └── setup-claude.sh      # Claude Code setup script (supports --lang parameter)
+```
+
+## 🧪 Evaluation
+
+The `evals/` directory is a uv-managed [Smelt](https://github.com/ProjAnvil/Smelt) harness
+covering both skills and the agent (subagent) definitions, in both languages:
+
+- **Static lint** (deterministic, no API key): every SKILL.md and every agent
+  file is linted against Claude Code's loading contract — for agents that
+  includes frontmatter validity (name/description/tools/model), and whether
+  each description actually routes (delegation triggers).
+- **Delegation routing** (LLM): a simulated main agent sees each language's
+  roster (names + descriptions) and must delegate specialty tasks to the
+  right subagent, refuse to steal a sibling's specialty, and keep trivial
+  tasks for itself.
+- **Behavior** (LLM): each agent file runs as a real subagent — the markdown
+  body is the system prompt and the `tools:` frontmatter allowlist is
+  enforced — with the six core Claude Code tools (Read/Grep/Glob/Bash/Edit/
+  Write) backed by an isolated case workspace.
+- **Evaluate reports**: full per-document evaluations (behavior + writing
+  review + lint + suggestions + adversarial routing probes) saved to
+  `evals/reports/`.
+
+```bash
+make eval        # deterministic evals: lint + plumbing (no API key, CI-safe)
+make eval-llm    # full evals incl. behavior/routing/evaluate (needs SMELT_API_KEY)
+```
+
+Configuration lives in `evals/.env` (see `evals/.env.template`). Doctor-ready
+case files for on-demand mutation checks (run from `evals/`):
+
+```bash
+uv run smelt run cases/en_agent_routing_cases.py -v
+uv run smelt doctor --agent ../agents/en/code-reviewer.md cases/en_agent_routing_cases.py
 ```
 
 ## 🛠️ Usage

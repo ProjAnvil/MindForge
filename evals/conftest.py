@@ -4,6 +4,8 @@ Layout assumptions:
     evals/           <- this file
     ../skills/en     <- English skills (one directory per skill, each with SKILL.md)
     ../skills/zh-cn  <- Chinese skills
+    ../agents/en     <- English agent definition files (.md)
+    ../agents/zh-cn  <- Chinese agent definition files (.md)
 """
 
 from __future__ import annotations
@@ -19,6 +21,18 @@ SKILL_ROOTS = {
     "en": PROJECT_ROOT / "skills" / "en",
     "zh-cn": PROJECT_ROOT / "skills" / "zh-cn",
 }
+AGENT_ROOTS = {
+    "en": PROJECT_ROOT / "agents" / "en",
+    "zh-cn": PROJECT_ROOT / "agents" / "zh-cn",
+}
+
+
+def all_agent_files() -> list[tuple[str, Path]]:
+    """Every agent definition as (lang, file) pairs: 9 en + 9 zh-cn."""
+    pairs = []
+    for lang, root in AGENT_ROOTS.items():
+        pairs += [(lang, f) for f in sorted(root.glob("*.md"))]
+    return pairs
 
 
 def all_skill_dirs() -> list[tuple[str, Path]]:
@@ -207,6 +221,90 @@ def read_file_tool():
         return p.read_text(encoding="utf-8", errors="replace")[:8000]
 
     return read_file
+
+
+# ---------------------------------------------------------------------------
+# Claude Code-named tools for agent (subagent definition) evaluation.
+#
+# smelt's subagent() hard-enforces the `tools:` frontmatter allowlist, so the
+# harness must provide tools under the names the agent files declare
+# (Read/Grep/Glob/Bash/Edit/Write). Handlers run with cwd = case workspace.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="session")
+def claude_tools():
+    """The six core Claude Code tools, backed by the case workspace."""
+    import re as _re
+
+    from smelt import tool
+
+    @tool
+    def Read(path: str) -> str:  # noqa: N802 - Claude Code tool name
+        """Read a UTF-8 text file (workspace-relative) and return its content."""
+        p = Path(path)
+        if not p.is_file():
+            return f"file not found: {path}"
+        return p.read_text(encoding="utf-8", errors="replace")[:10000]
+
+    @tool
+    def Grep(pattern: str, path: str = ".") -> str:  # noqa: N802
+        """Search files under a path with a regular expression; returns file:line hits."""
+        root = Path(path)
+        files = [root] if root.is_file() else sorted(
+            f for f in root.rglob("*") if f.is_file() and ".git" not in f.parts
+        )
+        hits = []
+        try:
+            rx = _re.compile(pattern)
+        except _re.error as e:
+            return f"invalid regex: {e}"
+        for f in files[:200]:
+            for i, line in enumerate(
+                f.read_text(encoding="utf-8", errors="replace").splitlines(), 1
+            ):
+                if rx.search(line):
+                    hits.append(f"{f}:{i}:{line.strip()}")
+                    if len(hits) >= 50:
+                        return "\n".join(hits)
+        return "\n".join(hits) or "(no matches)"
+
+    @tool
+    def Glob(pattern: str) -> str:  # noqa: N802
+        """List workspace-relative paths matching a glob pattern (e.g. src/**/*.py)."""
+        hits = sorted(str(p) for p in Path(".").glob(pattern) if ".git" not in p.parts)
+        return "\n".join(hits) or "(no matches)"
+
+    @tool
+    def Bash(command: str) -> str:  # noqa: N802
+        """Run a shell command in the workspace and return its output."""
+        proc = subprocess.run(
+            command, shell=True, capture_output=True, text=True, timeout=60
+        )
+        out = (proc.stdout + proc.stderr).strip()
+        return out[:10000] or f"(exit {proc.returncode}, no output)"
+
+    @tool
+    def Write(path: str, content: str) -> str:  # noqa: N802
+        """Create or overwrite a text file (workspace-relative) with content."""
+        p = Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(content, encoding="utf-8")
+        return f"wrote {len(content)} chars to {path}"
+
+    @tool
+    def Edit(path: str, old_string: str, new_string: str) -> str:  # noqa: N802
+        """Replace the first occurrence of old_string in a file with new_string."""
+        p = Path(path)
+        if not p.is_file():
+            return f"file not found: {path}"
+        text = p.read_text(encoding="utf-8")
+        if old_string not in text:
+            return f"old_string not found in {path}"
+        p.write_text(text.replace(old_string, new_string, 1), encoding="utf-8")
+        return "edited"
+
+    return [Read, Grep, Glob, Bash, Write, Edit]
 
 
 class ToolArgsContain:

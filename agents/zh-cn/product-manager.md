@@ -1,6 +1,6 @@
 ---
 name: product-manager
-description: 产品管理、需求分析、功能拆解和用户故事映射专家。
+description: 当需要需求分析、功能拆解、用户故事编写或产品范围规划时主动使用。产品管理、需求分析、功能拆解和用户故事映射专家。
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 skills: product-management, tech-documentation

@@ -1,0 +1,177 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/code-reviewer.md",
+    "name": "code-reviewer"
+  },
+  "overall": {
+    "score": 84.74999999999999,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 0.95,
+    "writing": 0.575,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-code-reviewer",
+      "score": 0.95,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "llm_judge(The response is a structured c, threshold=0.6)",
+          "score": 0.95,
+          "threshold": 0.6,
+          "passed": true,
+          "message": "The answer is a structured, severity-prioritized code review that identifies concrete issues such as silently swallowed payment/mailer exceptions, bare excepts, an oversized multi-responsibility method, validation gaps, and logging/readability problems, and it provides actionable fixes.",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.575,
+    "overall_comment": "A thorough, well-structured reviewer prompt whose actionable output contract is strong but which is bloated with redundant sections and dangerously lacks scope boundaries and a read-only tool set.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.8,
+        "comment": "The description clearly names the specialty and trigger ('comprehensive code reviews') so a main agent can route confidently, though it lacks explicit negative triggers or disambiguation from a generic reviewer."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.9,
+        "comment": "Role, principles, five-step process, checklist, feedback template, and a worked example make the output contract highly explicit and executable."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.25,
+        "comment": "No statement of what the agent must not do or when to hand back, and the granted Edit/Write tools directly contradict a read-only review role, while the DO/DON'T list only covers tone rather than scope."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.35,
+        "comment": "The file is heavily padded with overlapping sections (Core Principles vs. Review Checklist vs. Common Issues, and Best Practices vs. Notes/DO-DON'T) plus a long duplicate example, consuming far more tokens than the task requires."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the code-reviewer skill definition, add a Boundaries/scope section (and update the DO/DON'T list) stating the agent must not edit/write files and should hand back after review, and remove Edit/Write from the granted tools in favor of read-only tools.",
+    "Merge the overlapping Core Principles, Review Checklist, and Common Issues sections into one review checklist, and fold Best Practices into the Notes/DO-DON'T list to eliminate duplicated guidance.",
+    "Replace the long duplicate example with a single concise example (or delete the duplicate) to reduce token usage while preserving the key review behavior."
+  ],
+  "suggestions_error": null,
+  "challenge": {
+    "skipped": null,
+    "note": "challenger fell back to judge (same model; credibility reduced)",
+    "rounds": 1,
+    "breaks": 7,
+    "score": 0.125,
+    "probes": [
+      {
+        "type": "route",
+        "trigger": "Before I merge this PR, can you sanity-check whether the new notification service will become a maintenance nightmare? I don't want nitpicks, just whether the design/boundaries are sane.",
+        "verdict": "break",
+        "note": "no Task call was made; the router answered directly"
+      },
+      {
+        "type": "route",
+        "trigger": "Our caching layer feels gross. Can you poke holes in the abstractions and tell me if we're violating SOLID before it spreads?",
+        "verdict": "break",
+        "note": "no Task call was made; the router answered directly"
+      },
+      {
+        "type": "route",
+        "trigger": "The team keeps saying this module is hard to change. Can you diagnose whether it's an architecture/design-pattern problem or just bad naming?",
+        "verdict": "break",
+        "note": "no Task call was made; the router answered directly"
+      },
+      {
+        "type": "no-route",
+        "trigger": "Add retry logic with exponential backoff to the Go payment client.",
+        "verdict": "break",
+        "note": "delegated to ['golang-backend-engineer']"
+      },
+      {
+        "type": "no-route",
+        "trigger": "Write JUnit tests for the new TaxCalculator class.",
+        "verdict": "break",
+        "note": "delegated to ['java-unit-test']"
+      },
+      {
+        "type": "no-route",
+        "trigger": "Design an event-driven architecture for the new inventory system and write an ADR comparing Kafka vs Pulsar.",
+        "verdict": "break",
+        "note": "delegated to ['system-architect']"
+      },
+      {
+        "type": "ambiguous",
+        "trigger": "Review this PR for architectural issues and then implement the refactor you recommend.",
+        "verdict": "survived",
+        "note": ""
+      },
+      {
+        "type": "ambiguous",
+        "trigger": "This frontend component is messy and has a state bug. Can you review the design and fix the bug?",
+        "verdict": "break",
+        "note": "The answer asks for the missing component code and offers to perform both design review and bug fix itself, but never splits the design review to a code-reviewer or the bug fix to a frontend-engineer nor clarifies routing, missing the expected mixed-scope handling."
+      }
+    ]
+  },
+  "reference_coverage": null
+}

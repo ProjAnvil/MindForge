@@ -7,12 +7,13 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-smelt = { git = "https://github.com/ProjAnvil/Smelt.git", tag = "v0.5.1" }
+smelt = { git = "https://github.com/ProjAnvil/Smelt.git", tag = "v0.6.0" }
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
     "pytest-xdist>=3.8.0",
+    "pyyaml>=6",
 ]
 
 [tool.pytest.ini_options]

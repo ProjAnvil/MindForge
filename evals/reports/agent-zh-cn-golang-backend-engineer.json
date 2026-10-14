@@ -1,0 +1,130 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/golang-backend-engineer.md",
+    "name": "golang-backend-engineer"
+  },
+  "overall": {
+    "score": 89.125,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.6375,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-golang-backend-engineer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'main.go')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'main.go'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', 'healthz')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'healthz'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.6375,
+    "overall_comment": "这是一份技术内容扎实、路由信号清晰的 Go 后端 subagent 定义，但缺少明确的输出契约与职责边界，建议补充交付物格式和交接规则。",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.8,
+        "comment": "描述明确列出了 Fiber/Cobra/GORM/整洁架构等触发场景，主 agent 可以据此路由，但缺少何时不该使用的边界说明。"
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.7,
+        "comment": "角色、技术栈、核心原则和最佳实践都很明确，但没有定义输出契约（如交付物格式、报告结构）。"
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.35,
+        "comment": "只有代码层面的'不应该做'清单，缺少职责范围限制和何时交回主 agent 的交接条件。"
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.7,
+        "comment": "内容整体可读，但错误处理和 Zap 日志等要点重复出现，示例可精简以节省 token。"
+      }
+    ]
+  },
+  "suggestions": [
+    "In the skill prompt, add an explicit scope-and-handoff section that defines this agent's responsibilities and states when to return control to the main agent for cross-cutting decisions.",
+    "Add an output-contract section to the prompt specifying required deliverable format and report structure, such as assumptions, files changed, tests run, and risks.",
+    "Deduplicate the repeated error-handling and Zap logging guidance and shorten the examples in the skill text to reduce token usage."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

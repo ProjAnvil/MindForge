@@ -1,0 +1,121 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/product-manager.md",
+    "name": "product-manager"
+  },
+  "overall": {
+    "score": 88.75,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.625,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-product-manager",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "output_contains(['As a'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.625,
+    "overall_comment": "A well-scoped, clearly described PM agent with good role framing, but it needs explicit output contracts and boundary/handback rules to be production-ready.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.85,
+        "comment": "The description clearly names trigger scenarios (requirements analysis, feature breakdown, user stories, scope planning), giving a main agent enough signal to route reliably."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.6,
+        "comment": "Role, principles, and worked examples are strong, but there is no explicit output contract specifying the expected deliverable format (e.g., PRD/story template) or success criteria."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.2,
+        "comment": "The prompt never states what the subagent must not do (e.g., avoid implementation details or architectural decisions) nor when to hand back to the main agent."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.85,
+        "comment": "Content is tight and scannable with minimal filler, well within a reasonable token budget for a subagent prompt."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the subagent prompt, add a 'Handback criteria' section stating exactly when the subagent should stop and return control to the main agent.",
+    "In the subagent prompt, add a 'Must not do' section that explicitly prohibits producing implementation details or making architectural decisions.",
+    "In the subagent prompt, add an output contract section defining the expected deliverable format (e.g., PRD/story template) and success criteria."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

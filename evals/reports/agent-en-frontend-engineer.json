@@ -1,0 +1,130 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/frontend-engineer.md",
+    "name": "frontend-engineer"
+  },
+  "overall": {
+    "score": 88.75,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.625,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-frontend-engineer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'Counter.svelte')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "2 call(s) to Write containing 'Counter.svelte'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "output_contains(['.svelte'])",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.625,
+    "overall_comment": "A solid framework-aware frontend agent that routes well and sets clear standards, but it lacks an output contract and explicit scope boundaries or hand-back rules.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.85,
+        "comment": "The description clearly names triggers (building/styling/refactoring components, pages, state logic) and target frameworks, so a main agent can route confidently."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.6,
+        "comment": "Role, constraints, and standards are explicit, but there is no output contract describing the expected deliverable format or artifact."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.35,
+        "comment": "A generic DON'T list exists, but there are no hard limits (e.g., no backend/API changes, no deployment) or explicit hand-back/escalation conditions."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.7,
+        "comment": "Generally tight, though framework detection is repeated across Core Responsibilities, Framework-Specific Focus, and Workflow, and several bullet lists could be merged."
+      }
+    ]
+  },
+  "suggestions": [
+    "Add explicit hard limits and hand-back/escalation conditions to the Boundaries/DON'T list section, such as prohibitions on backend/API changes and deployment.",
+    "Add an output contract section to the prompt that specifies the expected deliverable format or artifact.",
+    "Consolidate repeated framework detection from Core Responsibilities, Framework-Specific Focus, and Workflow into a single section and merge overlapping bullet lists."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

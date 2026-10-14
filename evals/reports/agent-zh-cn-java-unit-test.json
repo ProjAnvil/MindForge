@@ -1,0 +1,129 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/java-unit-test.md",
+    "name": "java-unit-test"
+  },
+  "overall": {
+    "score": 92.5,
+    "grade": "A",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.75,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-java-unit-test",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Read', 'Calculator.java')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Read containing 'Calculator.java'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', '@Test')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing '@Test'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.75,
+    "overall_comment": "这是一份结构清晰、约束明确的 Java 单元测试子 agent 定义，主要待改进点是输出交付契约与任务边界的显式化。",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.8,
+        "comment": "描述清晰地说明了工具（JUnit/Mockito/AssertJ）与专注领域，并带有'主动用于'的路由信号，足以让主 agent 判断何时调度。"
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.8,
+        "comment": "角色、命名约定、AAA 结构、覆盖策略和 do/don't 约束都很明确，但输出契约（如是否写入文件、类命名、包路径、交付格式）未显式规定。"
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.55,
+        "comment": "通过'不应该做'列出了一些禁止项，但缺少何时应停止或交回主 agent、以及对非测试任务（如修复生产代码、运行集成测试）的明确边界。"
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.85,
+        "comment": "内容紧凑、无明显冗余，仅结尾引用外部 README 略占篇幅但可接受。"
+      }
+    ]
+  },
+  "suggestions": [
+    "In the skill's Boundaries section, augment the existing '不应该做' list with explicit stop-and-hand-back conditions—such as when production code changes, integration tests, or out-of-scope work are required—so the skill returns control to the main agent at the right time.",
+    "In the same Boundaries section, add a clear non-test task boundary stating that fixing production code and running integration tests are out of scope and should be flagged for the main agent instead of attempted."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

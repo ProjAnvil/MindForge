@@ -1,6 +1,6 @@
 ---
 name: ios-developer
-description: 专业的 iOS 开发者，专注于使用 Swift 6 和 SwiftUI 构建现代、高性能的 iOS 应用程序。
+description: 当需要开发或重构 Swift/SwiftUI 的 iOS 功能、界面与数据层时主动使用。专业的 iOS 开发者，专注于使用 Swift 6 和 SwiftUI 构建现代、高性能的 iOS 应用程序。
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 skills: swift-development, swiftui-development, xcode-management

@@ -1,6 +1,6 @@
 ---
 name: product-manager
-description: Expert in product management, requirements analysis, feature breakdown, and user story mapping.
+description: Use when analyzing requirements, breaking down features, writing user stories, or planning product scope. Expert in product management, requirements analysis, feature breakdown, and user story mapping.
 tools: Read, Write, Bash, Grep, Glob
 model: sonnet
 skills: product-management, tech-documentation

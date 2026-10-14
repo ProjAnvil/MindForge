@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-14
+
+### Added
+
+- **Agent (subagent) evaluation** — `evals/` upgraded to Smelt v0.6.0, which
+  treats Claude Code agent markdown as a first-class document kind, and the
+  18 agent files in `agents/{en,zh-cn}` are now under the same evaluation
+  pipeline as the skills:
+  - **Static lint** (deterministic, CI-safe): `AgentFrontmatterCheck`
+    (Claude Code load contract: name/description/tools/model validity,
+    unknown-field detection) plus `DelegationCheck` (description routes
+    correctly) over every agent file — all 18 score 100/A.
+  - **Delegation routing cases** (LLM): a simulated main agent over each
+    language's full roster must delegate specialty tasks to the right
+    subagent (`delegates_to`), not steal a sibling's specialty
+    (`no_delegation_to`, e.g. Python tests ≠ java-unit-test), and keep
+    trivial Q&A for itself (`no_delegation`).
+  - **Behavior cases** (LLM): every agent runs as a real subagent — body as
+    system prompt, `tools:` frontmatter allowlist hard-enforced — with the
+    six core Claude Code tools (Read/Grep/Glob/Bash/Edit/Write) backed by
+    an isolated case workspace; assertions pin tool-call evidence (files
+    actually written/read), not paraphrased final answers.
+  - **Evaluate reports**: full `evaluate_agent` runs (behavior + agent
+    writing review + lint + suggestions + adversarial routing probes) for
+    all 18 agents, saved to `evals/reports/agent-<lang>-<name>.{md,json}`.
+  - **Doctor-ready routing case files** per roster
+    (`evals/cases/{en,zh-cn}_agent_routing_cases.py`) for on-demand
+    mutation checks via `smelt doctor --agent`.
+- README gained an Evaluation section; `make eval` / `make eval-llm` now
+  cover agent lint/routing/behavior too.
+
+### Fixed
+
+- Five agent descriptions lacked delegation-trigger sentences and scored
+  95.5 on lint: added "Use when …" / 「当…时主动使用」 sentences to
+  frontend-engineer and product-manager (en), and frontend-engineer,
+  ios-developer, product-manager (zh-cn). All 18 agent files now lint at
+  100/A.
+
 ## [0.4.0] - 2026-10-09
 
 ### Added

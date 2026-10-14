@@ -1,0 +1,129 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/en/java-backend-engineer.md",
+    "name": "java-backend-engineer"
+  },
+  "overall": {
+    "score": 89.5,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.65,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-en-java-backend-engineer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "tool_args_contain('Write', 'OrderService.java')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "1 call(s) to Write containing 'OrderService.java'",
+          "runs": 1,
+          "score_std": 0.0
+        },
+        {
+          "name": "tool_args_contain('Write', '@Service')",
+          "score": 1.0,
+          "threshold": 1.0,
+          "passed": true,
+          "message": "2 call(s) to Write containing '@Service'",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.65,
+    "overall_comment": "Strong Java-backend role prompt with clear stack expertise, but it needs handoff boundaries and tighter de-duplication to be an efficient subagent definition.",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.8,
+        "comment": "The description names the stack and use case, so routing is mostly clear, though it could state concrete triggers like Java/Spring REST API or MyBatis work more explicitly."
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.85,
+        "comment": "Role, technology constraints, and a step-by-step generation contract are explicit, though the output format and completion criteria could be more formal."
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.35,
+        "comment": "It lists coding anti-patterns but never states explicit delegation boundaries or when to hand back, such as frontend, DevOps, or architecture-ownership work."
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.6,
+        "comment": "The description is concise, but the prompt repeats layered architecture, transaction, and dependency-reuse guidance enough to bloat the token budget."
+      }
+    ]
+  },
+  "suggestions": [
+    "In the Java backend engineer prompt, add a short \"Boundaries and handoff\" section that explicitly lists frontend, DevOps, and architecture-ownership work as out of scope and states when to hand back to the user or route to the appropriate specialist.",
+    "In the Java backend engineer prompt, consolidate the repeated layered-architecture, transaction, and dependency-reuse guidance into one concise subsection to reduce token usage without losing the existing rules."
+  ],
+  "suggestions_error": null,
+  "challenge": null,
+  "reference_coverage": null
+}

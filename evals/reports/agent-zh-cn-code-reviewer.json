@@ -1,0 +1,177 @@
+{
+  "kind": "agent",
+  "skill": {
+    "path": "/Users/yuhaochen/Documents/codebase/projanvil/MindForge/agents/zh-cn/code-reviewer.md",
+    "name": "code-reviewer"
+  },
+  "overall": {
+    "score": 88.75,
+    "grade": "B",
+    "weights": {
+      "behavior": 0.5,
+      "writing": 0.3,
+      "lint": 0.2
+    }
+  },
+  "scores": {
+    "behavior": 1.0,
+    "writing": 0.625,
+    "lint": 1.0
+  },
+  "behavior": [
+    {
+      "case": "behavior-zh-cn-code-reviewer",
+      "score": 1.0,
+      "passed": true,
+      "error": null,
+      "runs": 1,
+      "run_scores": [],
+      "run_passed": [],
+      "pass_hat": null,
+      "score_std": 0.0,
+      "expectations": [
+        {
+          "name": "llm_judge(回复是一份结构化的代码评审：指出了给定代码的具体问题——例如, threshold=0.6)",
+          "score": 1.0,
+          "threshold": 0.6,
+          "passed": true,
+          "message": "The answer is a structured, severity-ordered code review that identifies concrete issues in service.py—such as silently swallowed payment exceptions, an overburdened method with many dependencies, poor return semantics, magic strings/log formatting, and missing tests—and provides actionable remediation steps.",
+          "runs": 1,
+          "score_std": 0.0
+        }
+      ]
+    }
+  ],
+  "lint": {
+    "total_score": 100.0,
+    "grade": "A",
+    "checks": [
+      {
+        "check_id": "agent-frontmatter",
+        "name": "Agent frontmatter (Claude Code load contract)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "metadata",
+        "name": "Metadata (frontmatter / name / description)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "delegation",
+        "name": "Delegation (description routes correctly)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "structure",
+        "name": "Document structure (sections / substance)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      },
+      {
+        "check_id": "clarity",
+        "name": "Clarity (placeholders / length)",
+        "score": 100.0,
+        "passed": true,
+        "messages": []
+      }
+    ]
+  },
+  "writing": {
+    "score": 0.625,
+    "overall_comment": "内容专业、输出模板扎实,但边界模糊、工具权限与审查定位不符,且篇幅冗长重复,建议精简并明确只读权限与交接规则。",
+    "error": null,
+    "dimensions": [
+      {
+        "name": "Delegation fit",
+        "score": 0.85,
+        "comment": "描述清晰界定了架构/设计模式/代码质量审查的专长领域,主智能体可据此判断何时路由,但未点明具体触发场景(如 PR 审查、重构评审)。"
+      },
+      {
+        "name": "Prompt quality",
+        "score": 0.9,
+        "comment": "角色定位、审查重点、流程步骤与反馈模板(含代码审查总结结构)都写得非常明确,输出契约清晰可执行。"
+      },
+      {
+        "name": "Boundaries",
+        "score": 0.45,
+        "comment": "虽列出沟通层面的「不应该做」清单,却缺少范围边界与交接条件,尤其授予了 Edit/Write 工具与「只审查不建议改代码」的定位存在潜在冲突。"
+      },
+      {
+        "name": "Conciseness",
+        "score": 0.3,
+        "comment": "篇幅过长且高度重复(两处「最佳实践」、多处内容交叠),远超必要 token 预算,大量条目可合并精简。"
+      }
+    ]
+  },
+  "suggestions": [
+    "In the skill's tool permissions, remove Edit/Write or explicitly restrict them to non-mutating use to resolve the conflict with the 'review only, do not suggest code changes' positioning.",
+    "In the skill prompt, add explicit scope boundaries and handoff conditions so reviewers know what is in-scope, out-of-scope, and when to stop or escalate.",
+    "In the skill content, merge the two 'best practices' sections and overlapping items into one concise checklist to reduce token usage."
+  ],
+  "suggestions_error": null,
+  "challenge": {
+    "skipped": null,
+    "note": "challenger fell back to judge (same model; credibility reduced)",
+    "rounds": 1,
+    "breaks": 5,
+    "score": 0.375,
+    "probes": [
+      {
+        "type": "route",
+        "trigger": "I have a PR that technically works but feels gross. Before I merge, can you play architecture skeptic and tell me where it will hurt in six months? No edits, just a prioritized review of abstraction boundaries, SOLID, and hidden coupling.",
+        "verdict": "survived",
+        "note": ""
+      },
+      {
+        "type": "route",
+        "trigger": "Our new hire wrote this module. I suspect it is a God object and maybe Singleton abuse. Can you inspect it and tell me if I am overreacting, with concrete file/line examples and suggestions?",
+        "verdict": "break",
+        "note": "no Task call was made; the router answered directly"
+      },
+      {
+        "type": "route",
+        "trigger": "Take a look at this Go package. I do not need implementation work, but I need an expert opinion on package organization, interface design, and whether error handling and concurrency patterns follow best practices.",
+        "verdict": "break",
+        "note": "no Task call was made; the router answered directly"
+      },
+      {
+        "type": "no-route",
+        "trigger": "Refactor this 500-line Java class into smaller classes and apply the Strategy pattern.",
+        "verdict": "survived",
+        "note": ""
+      },
+      {
+        "type": "no-route",
+        "trigger": "Write unit tests for this Java service with JUnit, Mockito, and AssertJ, aiming for 90% coverage.",
+        "verdict": "break",
+        "note": "delegated to ['java-unit-test']"
+      },
+      {
+        "type": "no-route",
+        "trigger": "Design a new microservice architecture for our payments platform and write ADRs comparing gRPC vs REST.",
+        "verdict": "break",
+        "note": "delegated to ['system-architect']"
+      },
+      {
+        "type": "ambiguous",
+        "trigger": "Review this Svelte component for accessibility and state management; if there are issues, please fix them.",
+        "verdict": "break",
+        "note": "The answer sensibly asks for the missing component code, but it does not resolve the review-vs-implementation ambiguity or split the work between code-reviewer for review findings and frontend-engineer for Svelte fixes as expected, instead routing all review and fixes to frontend-engineer."
+      },
+      {
+        "type": "ambiguous",
+        "trigger": "Our Java service has a SAST finding for SQL injection. Assess whether it is exploitable and then patch it.",
+        "verdict": "survived",
+        "note": ""
+      }
+    ]
+  },
+  "reference_coverage": null
+}

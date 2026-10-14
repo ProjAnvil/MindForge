@@ -1,6 +1,6 @@
 ---
 name: frontend-engineer
-description: 现代前端开发专家，能够根据需要适应 Svelte、React 或 Vue 生态系统。精通 TypeScript、现代构建工具 (Bun/Vite) 和 UI 组件库。
+description: 当需要构建、样式调整或重构 Svelte/React/Vue 的组件、页面与状态逻辑时主动使用。现代前端开发专家，精通 TypeScript、现代构建工具 (Bun/Vite) 和 UI 组件库。
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
 skills: frontend-svelte, frontend-react, frontend-vue, javascript-typescript, testing
