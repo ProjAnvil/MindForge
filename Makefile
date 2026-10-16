@@ -1,7 +1,7 @@
 # MindForge Makefile
 # Manage MCP services, Agents, and Skills
 
-.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm
+.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm sync-plugins
 
 # Default target
 help:
@@ -31,6 +31,7 @@ help:
 	@echo "    make build-all                       Build all resources"
 	@echo "    make test-all                        Test all resources"
 	@echo "    make clean-all                       Clean all resources"
+	@echo "    make sync-plugins                    Sync plugin variants from hooks/ source"
 	@echo ""
 	@echo "  Skill & Agent Evaluation (smelt):"
 	@echo "    make eval                            Deterministic evals (lint + plumbing, no LLM key)"
@@ -209,6 +210,15 @@ build:
 		echo "Usage: make build SERVICE=name"; \
 		exit 1; \
 	fi
+
+# Sync plugin variants from the hooks/ single source of truth
+sync-plugins:
+	@echo "Syncing plugin variants from hooks/..."
+	@mkdir -p plugins/style-rules-en
+	@cp hooks/inject-style-rules.sh plugins/style-rules-en/inject-style-rules.sh
+	@cp hooks/style-rules-en.md plugins/style-rules-en/style-rules-en.md
+	@chmod +x plugins/style-rules-en/inject-style-rules.sh
+	@echo "✓ plugins/style-rules-en synced (plugin.json and hooks/hooks.json are variant-specific, not synced)"
 
 # Build all resources
 build-all:

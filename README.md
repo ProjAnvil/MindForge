@@ -56,6 +56,23 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **en** - English
 - **zh-cn** - Simplified Chinese
 
+### 🧩 Install as a Plugin (Claude Code & Codex)
+
+The controlled-writing style rules hook is also distributed as a plugin. Both Claude Code and Codex read the same marketplace manifest (`.claude-plugin/marketplace.json`), so one repository serves both harnesses:
+
+```bash
+# Claude Code (inside a session)
+/plugin marketplace add ProjAnvil/MindForge
+/plugin install style-rules@mindforge          # Chinese + English rules
+/plugin install style-rules-en@mindforge       # English rules only
+
+# Codex (from your shell)
+codex plugin marketplace add ProjAnvil/MindForge
+codex plugin add style-rules@mindforge
+```
+
+Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required. Restart the harness afterwards. If you modify `hooks/`, run `make sync-plugins` to refresh the `style-rules-en` variant.
+
 ## 🤖 Available Agents
 
 - **@code-reviewer** - Expert code reviewer (software architecture, design patterns, code quality, SOLID principles)

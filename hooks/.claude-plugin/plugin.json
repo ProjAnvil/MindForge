@@ -1,0 +1,8 @@
+{
+  "name": "style-rules",
+  "description": "Controlled-writing style rules (Chinese spec + English ASD-STE100) injected into the main session and all subagents via hooks. Language: zh-cn (default) injects Chinese + English rules; an 'en' variant can pass 'en' as the command argument.",
+  "version": "0.7.0",
+  "author": {
+    "name": "MindForge"
+  }
+}

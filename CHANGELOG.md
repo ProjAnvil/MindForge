@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-16
+
+### Added
+
+- **Plugin distribution via marketplace manifest**
+  (`.claude-plugin/marketplace.json`): the repo now doubles as a plugin
+  marketplace, and both Claude Code and Codex read the same manifest
+  (verified empirically: `codex plugin marketplace add` discovers
+  `style-rules@mindforge`). Install paths: `/plugin marketplace add
+  ProjAnvil/MindForge` + `/plugin install style-rules@mindforge`
+  (Claude Code), or `codex plugin marketplace add` + `codex plugin add`
+  (Codex). No symlinks or `settings.json` merging required.
+- **Language variants as separate plugins**: `style-rules` (source
+  `./hooks`, Chinese + English, the default) and `style-rules-en`
+  (source `./plugins/style-rules-en`, English-only via the `en` CLI
+  argument). Each plugin is self-contained; `make sync-plugins`
+  regenerates the variant from the `hooks/` single source of truth.
+- **Codex adapter** (`.codex-plugin/hooks.json`): context-mode-style
+  manifest at the repo root registering `SessionStart` and
+  `UserPromptSubmit` hooks via `${PLUGIN_ROOT}` for whole-repo plugin
+  installs. Plugin `hooks/hooks.json` commands now use
+  `${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}` so the same manifest works
+  under either harness. Note: end-to-end hook firing inside Codex could
+  not be verified (usage limit); installation and discovery are
+  verified.
+- **README**: new "Install as a Plugin" section covering both
+  harnesses and both language variants.
+
 ## [0.7.0] - 2026-10-16
 
 ### Added

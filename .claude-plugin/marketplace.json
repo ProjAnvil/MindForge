@@ -1,0 +1,20 @@
+{
+  "name": "mindforge",
+  "owner": {
+    "name": "yuhaochen"
+  },
+  "plugins": [
+    {
+      "name": "style-rules",
+      "source": "./hooks",
+      "description": "Controlled-writing style rules (Chinese spec + English ASD-STE100) injected into the main session and all subagents via SessionStart / UserPromptSubmit / SubagentStart hooks.",
+      "version": "0.7.0"
+    },
+    {
+      "name": "style-rules-en",
+      "source": "./plugins/style-rules-en",
+      "description": "Controlled-writing style rules (English ASD-STE100 only) injected into the main session and all subagents. English-only variant.",
+      "version": "0.7.0"
+    }
+  ]
+}

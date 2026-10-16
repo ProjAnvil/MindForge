@@ -1,0 +1,8 @@
+{
+  "name": "style-rules-en",
+  "description": "Controlled-writing style rules (English ASD-STE100 only) injected into the main session and all subagents via hooks. English-only variant of style-rules.",
+  "version": "0.7.0",
+  "author": {
+    "name": "MindForge"
+  }
+}
