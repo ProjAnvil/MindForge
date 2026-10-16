@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-16
+
+### Added
+
+- **Controlled-writing style rules hook** (`hooks/`): the Chinese
+  controlled-writing spec and English ASD-STE100 rules are now injected
+  into Claude Code context via hooks, covering both the main session and
+  subagents. Injection language follows `setup-claude.sh`'s `--lang`
+  parameter via a deploy-time marker file (`hooks/style-rules.lang`);
+  priority is CLI argument > marker > `zh-cn` default:
+  `en` injects the English rules only, `zh-cn` (also the default when
+  the marker is missing or unknown) injects Chinese + English.
+  `hooks/style-rules-zh.md` and `hooks/style-rules-en.md` are the
+  per-language sources of truth; `hooks/inject-style-rules.sh` composes
+  them per the marker and emits the
+  `hookSpecificOutput.additionalContext` JSON (pure-bash JSON escaping,
+  no jq/python dependency, Windows GitBash compatible, fails open when
+  rule files are missing); `hooks/settings-hooks.json` holds the hook
+  configuration fragment; `hooks/test-inject-style-rules.sh` covers all
+  three events, both languages, and edge cases (12 tests).
+  `setup-claude.sh` Step 6 links the hook files into `~/.claude/hooks/`,
+  writes the language marker, removes the obsolete single-file
+  `style-rules.md` link from earlier installs, and idempotently merges
+  the hooks config into `~/.claude/settings.json` (python3 merge with
+  soft fallback, foreign hook entries preserved). Events:
+  `SessionStart` (session start, resume, clear, compact),
+  `UserPromptSubmit` (every turn, compaction-resistant), `SubagentStart`
+  (all subagent types, injected before the subagent's first prompt).
+
 ## [0.6.0] - 2026-10-14
 
 ### Added
