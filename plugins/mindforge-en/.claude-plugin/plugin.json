@@ -1,0 +1,8 @@
+{
+  "name": "mindforge-en",
+  "description": "MindForge agents and skills (English): 9 subagents and 18 skills covering code review, frontend/backend/mobile engineering, architecture, testing, and product management. Pair with style-rules@mindforge for the controlled-writing hook.",
+  "version": "0.8.1",
+  "author": {
+    "name": "MindForge"
+  }
+}

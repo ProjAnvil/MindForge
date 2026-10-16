@@ -211,14 +211,28 @@ build:
 		exit 1; \
 	fi
 
-# Sync plugin variants from the hooks/ single source of truth
+# Sync plugin variants from the hooks/, agents/, skills/ single sources of truth
 sync-plugins:
-	@echo "Syncing plugin variants from hooks/..."
+	@echo "Syncing plugin variants from sources..."
 	@mkdir -p plugins/style-rules
 	@cp hooks/inject-style-rules.sh plugins/style-rules/inject-style-rules.sh
 	@cp hooks/style-rules-en.md plugins/style-rules/style-rules-en.md
 	@chmod +x plugins/style-rules/inject-style-rules.sh
 	@echo "✓ plugins/style-rules synced (style-rules-zh-cn lives in hooks/ and needs no sync)"
+	@for lang in en zh-cn; do \
+		echo "Syncing plugins/mindforge-$$lang..."; \
+		mkdir -p plugins/mindforge-$$lang; \
+		rm -rf plugins/mindforge-$$lang/agents plugins/mindforge-$$lang/skills; \
+		cp -R agents/$$lang plugins/mindforge-$$lang/agents; \
+		cp -R skills/$$lang plugins/mindforge-$$lang/skills; \
+		rm -rf plugins/mindforge-$$lang/skills/*/evals; \
+		rm -f plugins/mindforge-$$lang/agents/.DS_Store; \
+		if [ -d skills/scripts/xcode-management ]; then \
+			rm -rf plugins/mindforge-$$lang/skills/xcode-management/scripts; \
+			cp -R skills/scripts/xcode-management plugins/mindforge-$$lang/skills/xcode-management/scripts; \
+		fi; \
+		echo "✓ plugins/mindforge-$$lang synced (agents + skills, evals stripped)"; \
+	done
 
 # Build all resources
 build-all:

@@ -58,20 +58,32 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 
 ### 🧩 Install as a Plugin (Claude Code & Codex)
 
-The controlled-writing style rules hook is also distributed as a plugin. Both Claude Code and Codex read the same marketplace manifest (`.claude-plugin/marketplace.json`), so one repository serves both harnesses:
+Agents, skills, and the controlled-writing style rules hook are all distributed as plugins. Both Claude Code and Codex read the same marketplace manifest (`.claude-plugin/marketplace.json`), so one repository serves both harnesses:
 
 ```bash
 # Claude Code (inside a session)
 /plugin marketplace add ProjAnvil/MindForge
-/plugin install style-rules@mindforge          # English rules (default)
-/plugin install style-rules-zh-cn@mindforge    # Chinese + English rules
+
+# Agents + skills bundles (pick your language)
+/plugin install mindforge-en@mindforge             # 9 agents + 19 skills (English)
+/plugin install mindforge-zh-cn@mindforge          # 9 agents + 19 skills (Chinese)
+
+# Controlled-writing style rules hook
+/plugin install style-rules@mindforge              # English rules (default)
+/plugin install style-rules-zh-cn@mindforge        # Chinese + English rules
 
 # Codex (from your shell)
 codex plugin marketplace add ProjAnvil/MindForge
+codex plugin add mindforge-zh-cn@mindforge
 codex plugin add style-rules-zh-cn@mindforge
 ```
 
-Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required. Restart the harness afterwards. If you modify `hooks/`, run `make sync-plugins` to refresh the `style-rules` variant (the `style-rules-zh-cn` plugin lives in `hooks/` itself).
+Notes:
+
+- Plugin agents and skills are namespaced, e.g. `/mindforge-en:git-guru` and `mindforge-en:code-reviewer`, so they never conflict with personal or project ones.
+- Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required.
+- Restart the harness after installing.
+- If you modify `hooks/`, `agents/`, or `skills/`, run `make sync-plugins` to refresh the plugin bundles (the `style-rules-zh-cn` plugin lives in `hooks/` and needs no sync).
 
 ## 🤖 Available Agents
 

@@ -5,16 +5,28 @@
   },
   "plugins": [
     {
+      "name": "mindforge-en",
+      "source": "./plugins/mindforge-en",
+      "description": "MindForge agents and skills (English): 9 subagents and 19 skills covering code review, frontend/backend/mobile engineering, architecture, testing, and product management.",
+      "version": "0.8.1"
+    },
+    {
+      "name": "mindforge-zh-cn",
+      "source": "./plugins/mindforge-zh-cn",
+      "description": "MindForge 中文版：9 个子代理和 19 个技能，覆盖代码评审、前端/后端/移动端工程、架构、测试与产品管理。",
+      "version": "0.8.1"
+    },
+    {
       "name": "style-rules",
       "source": "./plugins/style-rules",
       "description": "Controlled-writing style rules (English ASD-STE100 only) injected into the main session and all subagents via SessionStart / UserPromptSubmit / SubagentStart hooks. Default English variant.",
-      "version": "0.8.0"
+      "version": "0.8.1"
     },
     {
       "name": "style-rules-zh-cn",
       "source": "./hooks",
       "description": "受控写作规范（中文规范 + English ASD-STE100）注入主会话与所有 subagent。中文变体。",
-      "version": "0.8.0"
+      "version": "0.8.1"
     }
   ]
 }

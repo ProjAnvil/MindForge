@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] - 2026-10-16
+
+### Added
+
+- **Agents and skills as installable plugins**: two bundle plugins join
+  the marketplace — `mindforge-en` (source `./plugins/mindforge-en`,
+  9 agents + 19 skills, English) and `mindforge-zh-cn` (source
+  `./plugins/mindforge-zh-cn`, 9 agents + 19 skills, Chinese). Bundles
+  are generated from the `agents/<lang>` and `skills/<lang>` sources by
+  `make sync-plugins` (evals stripped, shared `skills/scripts/`
+  re-attached into the `xcode-management` skill). Plugin agents and
+  skills are namespaced (`/mindforge-en:git-guru`,
+  `mindforge-en:code-reviewer`) to avoid conflicts. The style-rules
+  hook plugins remain separate so installing a bundle never
+  double-injects writing rules.
+- **README**: "Install as a Plugin" section now covers the bundles and
+  namespacing.
+
+### Changed
+
+- All four plugins bumped to 0.8.1
+  (`mindforge-en`, `mindforge-zh-cn`, `style-rules`, `style-rules-zh-cn`).
+
 ## [0.8.0] - 2026-10-16
 
 ### Added

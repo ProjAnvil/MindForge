@@ -1,7 +1,7 @@
 {
   "name": "style-rules-zh-cn",
   "description": "受控写作规范（中文规范 + English ASD-STE100）通过 SessionStart / UserPromptSubmit / SubagentStart hooks 注入主会话与所有 subagent。中文变体。",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "author": {
     "name": "MindForge"
   }
