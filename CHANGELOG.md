@@ -12,16 +12,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Plugin distribution via marketplace manifest**
   (`.claude-plugin/marketplace.json`): the repo now doubles as a plugin
   marketplace, and both Claude Code and Codex read the same manifest
-  (verified empirically: `codex plugin marketplace add` discovers
-  `style-rules@mindforge`). Install paths: `/plugin marketplace add
-  ProjAnvil/MindForge` + `/plugin install style-rules@mindforge`
+  (verified empirically: `codex plugin marketplace add` discovers the
+  plugins). Install paths: `/plugin marketplace add
+  ProjAnvil/MindForge` + `/plugin install <name>@mindforge`
   (Claude Code), or `codex plugin marketplace add` + `codex plugin add`
   (Codex). No symlinks or `settings.json` merging required.
 - **Language variants as separate plugins**: `style-rules` (source
-  `./hooks`, Chinese + English, the default) and `style-rules-en`
-  (source `./plugins/style-rules-en`, English-only via the `en` CLI
-  argument). Each plugin is self-contained; `make sync-plugins`
-  regenerates the variant from the `hooks/` single source of truth.
+  `./plugins/style-rules`, English ASD-STE100 only, the default) and
+  `style-rules-zh-cn` (source `./hooks`, Chinese + English). The
+  injection script's default language changed from `zh-cn` to `en` to
+  match the repo-wide default (`setup-claude.sh` defaults to `--lang=en`);
+  the zh plugin passes `zh-cn` explicitly via its hook command. Each
+  plugin is self-contained; `make sync-plugins` regenerates the
+  `style-rules` variant from the `hooks/` single source of truth
+  (`style-rules-zh-cn` lives in `hooks/` and needs no sync).
 - **Codex adapter** (`.codex-plugin/hooks.json`): context-mode-style
   manifest at the repo root registering `SessionStart` and
   `UserPromptSubmit` hooks via `${PLUGIN_ROOT}` for whole-repo plugin

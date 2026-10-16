@@ -9,7 +9,7 @@
 #   1. command-line argument ($1): en | zh-cn (used by plugin variants)
 #   2. the marker file style-rules.lang next to this script
 #      (written by setup-claude.sh from its --lang parameter)
-#   3. default: zh-cn
+#   3. default: en
 # en    -> inject English rules only
 # zh-cn -> inject Chinese + English rules
 #
@@ -30,8 +30,8 @@ if [ ! -f "$RULES_EN" ]; then
     exit 0
 fi
 
-# Choose language: argument > marker > default zh-cn.
-LANG_CODE="zh-cn"
+# Choose language: argument > marker > default en.
+LANG_CODE="en"
 if [ $# -ge 1 ]; then
     case "$1" in
         en|zh-cn) LANG_CODE="$1" ;;

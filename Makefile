@@ -214,11 +214,11 @@ build:
 # Sync plugin variants from the hooks/ single source of truth
 sync-plugins:
 	@echo "Syncing plugin variants from hooks/..."
-	@mkdir -p plugins/style-rules-en
-	@cp hooks/inject-style-rules.sh plugins/style-rules-en/inject-style-rules.sh
-	@cp hooks/style-rules-en.md plugins/style-rules-en/style-rules-en.md
-	@chmod +x plugins/style-rules-en/inject-style-rules.sh
-	@echo "✓ plugins/style-rules-en synced (plugin.json and hooks/hooks.json are variant-specific, not synced)"
+	@mkdir -p plugins/style-rules
+	@cp hooks/inject-style-rules.sh plugins/style-rules/inject-style-rules.sh
+	@cp hooks/style-rules-en.md plugins/style-rules/style-rules-en.md
+	@chmod +x plugins/style-rules/inject-style-rules.sh
+	@echo "✓ plugins/style-rules synced (style-rules-zh-cn lives in hooks/ and needs no sync)"
 
 # Build all resources
 build-all:

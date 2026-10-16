@@ -76,13 +76,13 @@ validate "en marker, SubagentStart (English only)" "en" \
 
 # --- marker edge cases ---
 
-validate "missing marker defaults to zh-cn" "none" \
+validate "missing marker defaults to en" "none" \
     '{"hook_event_name":"UserPromptSubmit"}' \
-    "UserPromptSubmit" "yes" "yes"
+    "UserPromptSubmit" "no" "yes"
 
-validate "unknown marker defaults to zh-cn" "fr" \
+validate "unknown marker defaults to en" "fr" \
     '{"hook_event_name":"UserPromptSubmit"}' \
-    "UserPromptSubmit" "yes" "yes"
+    "UserPromptSubmit" "no" "yes"
 
 validate "marker with whitespace/newline" "zh-cn
 " \
@@ -111,7 +111,17 @@ rm -rf "$MISSING_ZH"
 # Plain-text stdout JSON contains no raw newlines (single JSON object rule)
 out="$(printf '{"hook_event_name":"UserPromptSubmit"}' | bash "$HOOK")"
 lines="$(printf '%s' "$out" | wc -l | tr -d ' ')"
-check "single-line JSON output (repo dir, no marker -> zh-cn)" "0" "$lines"
+check "single-line JSON output (repo dir, no marker -> en)" "0" "$lines"
+
+# --- argument overrides marker ---
+
+validate "arg zh-cn overrides en marker" "en" \
+    '{"hook_event_name":"UserPromptSubmit"}' \
+    "UserPromptSubmit" "yes" "yes" "zh-cn"
+
+validate "arg en overrides zh-cn marker" "zh-cn" \
+    '{"hook_event_name":"UserPromptSubmit"}' \
+    "UserPromptSubmit" "no" "yes" "en"
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"

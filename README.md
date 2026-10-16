@@ -63,15 +63,15 @@ The controlled-writing style rules hook is also distributed as a plugin. Both Cl
 ```bash
 # Claude Code (inside a session)
 /plugin marketplace add ProjAnvil/MindForge
-/plugin install style-rules@mindforge          # Chinese + English rules
-/plugin install style-rules-en@mindforge       # English rules only
+/plugin install style-rules@mindforge          # English rules (default)
+/plugin install style-rules-zh-cn@mindforge    # Chinese + English rules
 
 # Codex (from your shell)
 codex plugin marketplace add ProjAnvil/MindForge
-codex plugin add style-rules@mindforge
+codex plugin add style-rules-zh-cn@mindforge
 ```
 
-Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required. Restart the harness afterwards. If you modify `hooks/`, run `make sync-plugins` to refresh the `style-rules-en` variant.
+Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required. Restart the harness afterwards. If you modify `hooks/`, run `make sync-plugins` to refresh the `style-rules` variant (the `style-rules-zh-cn` plugin lives in `hooks/` itself).
 
 ## 🤖 Available Agents
 
