@@ -1,7 +1,7 @@
 {
   "name": "style-rules-zh-cn",
   "description": "中文写作规范 + 翻译腔防御：受控写作规范注入主会话与 subagent；zh-guard 术语字典（TSV 数据飞轮，支持正则词条）+ 出口检测 + term-dict MCP 查询服务（lookup_term / check_text / add_term）。安装时字典迁移到 ~/.claude/zh-guard/。fail-open。",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "author": {
     "name": "MindForge"
   },

@@ -65,6 +65,12 @@ def parse(lines):
             cells = [c.strip() for c in re.split(r"\s{2,}", line, 1)]
             if len(cells) == 2:
                 cells += [""]
+        # 手改时常用 Tab 缩进整行，丢掉行首的空单元格，别当成坏词条
+        while cells and not cells[0]:
+            cells.pop(0)
+        if not cells:
+            out.append(("blank", ""))
+            continue
         while len(cells) < 3:
             cells.append("")
         out.append(("row", cells[:3]))

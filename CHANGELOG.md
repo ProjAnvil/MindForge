@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.6] - 2026-10-19
+
+### Added
+
+- **`eval-tidy-dict.py`** — evaluation harness for the tidy step, since claims
+  about a maintenance tool need numbers. It builds a dirty "before" copy from
+  the current dictionary programmatically (duplicate rows, ragged whitespace,
+  BOM, stray blank lines), runs tidy to get "after", and compares:
+  - **behaviour equivalence**: each corpus sentence is run through the real L2
+    hook with both dictionaries; verdicts must be identical. 20-sentence
+    labeled corpus (11 block / 9 pass) covering real uses, clean Chinese, and
+    the quote / code-block exemptions. Custom corpus via `--corpus`.
+  - **cost**: L1 injection chars, tokens (tiktoken when available, documented
+    estimator otherwise, backend printed in the header) and entry count.
+  - **time**: hook end-to-end latency (mean, min, stdev over N rounds) plus a
+    separate micro-benchmark of dictionary parsing, because end-to-end is
+    dominated by interpreter startup (~150 ms, ±8 ms noise) while the part
+    tidy actually affects is ~0.03 ms.
+  - `--json` for CI diffing, `--rounds` to tune noise, `--source` to evaluate
+    another dictionary.
+- `test_eval_tidy_dict.py` (5 functions): the harness is trustworthy itself —
+  balanced corpus, dirty builder actually dirty, behaviour equivalence, no
+  injection regression, tokenizer and timing usable.
+
+### Changed / Fixed
+
+- `tidy-dict.py` parse: rows indented with a leading tab (common when editing
+  by hand) produced a bogus empty first column and were reported as broken
+  entries. Leading empty cells are now dropped and the row is normalized.
+
+### Notes
+
+- Measured result worth recording as a negative finding: de-duplication does
+  not save injection tokens — the loader already merges by unique key, so
+  before/after injection cost is identical. Tidy buys file hygiene and
+  readability, not runtime. The token lever sits in the 30-entry injection cap
+  plus the term-dict MCP pull layer.
+
 ## [0.9.5] - 2026-10-19
 
 ### Added

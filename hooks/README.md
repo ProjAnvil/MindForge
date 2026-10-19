@@ -12,6 +12,7 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写（按地道措辞重写整句） |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 | 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
+| 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
 
@@ -86,6 +87,33 @@ python3 hooks/tidy-dict.py --path myspace.tsv   # 只处理指定文件
 4. **体检**：坏正则、缺第二列、重复词条，逐条报告；`--check` 时非零退出。
 
 只读体检不会动文件，可以随便跑。排版是幂等的：再跑一次不会有新变化。
+
+### 整理到底有用没用：eval-tidy-dict.py
+
+道理讲再多不如一组数。`eval-tidy-dict.py` 用当前字典程序化地造一份「整理前」
+的脏副本（重复词条、参差空白、BOM、多余空行），再跑一遍 tidy 得到「整理后」，
+然后对比三件事：
+
+| 维度 | 怎么看 | 当前实测 |
+|---|---|---|
+| 行为等价 | 20 条标注语料逐条跑真实 L2，判定必须一模一样 | 完全一致，precision/recall/F1 = 1.0 |
+| 成本 | L1 注入的字符数 / token 数 / 词条数 | 持平，不反弹 |
+| 耗时 | hook 端到端（含解释器启动）+ 字典解析单独计时 | 端到端 ~150 ms（噪声 ±8 ms），字典解析 0.028 → 0.023 ms |
+
+```
+python3 hooks/eval-tidy-dict.py                  # 打印对比表
+python3 hooks/eval-tidy-dict.py --json           # 机器可读指标，CI 里 diff 用
+python3 hooks/eval-tidy-dict.py --rounds 30      # 计时多跑几轮压噪声
+python3 hooks/eval-tidy-dict.py --corpus X.tsv   # 换成自己的语料（句子<TAB>block\|pass）
+```
+
+token 计数优先用 `tiktoken`（装了更准），没装就用标注清楚的估算公式，表头会写明
+用的是哪个。语料默认 20 条，覆盖三类：真用了直译词、干净的中文、豁免区（引号
+提及和代码块）。
+
+一个值得记的**负结果**：想靠去重省 token 是省不出来的——加载层本来就按唯一键
+合并。整理改的是文件卫生和可读性，不是运行开销；真正的 token 杠杆在「注入上限
+30 条 + term-dict MCP 拉模式」这一层。
 - **期望写法怎么写**（第二列，最容易写坏的一列）：
 
   1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
@@ -119,7 +147,10 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 python3 hooks/test_zh_guard.py         # zh-guard hooks（16 项）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
+python3 hooks/test_eval_tidy_dict.py   # 评测工具自身（5 项）
 bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）
+
+python3 hooks/eval-tidy-dict.py        # 整理前后的效果/成本/耗时评测
 ```
 
 改 hook 前先补测试（TDD）。
