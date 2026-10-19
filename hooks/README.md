@@ -4,14 +4,37 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 
 ## 结构
 
-| 组件 | 文件 | 事件 | 职责 |
+| 组件 | 文件 | 事件/通道 | 职责 |
 |---|---|---|---|
 | 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit / SubagentStart | 注入受控写作规范（中文+英文） |
 | L0 字典 | terminology.tsv | - | 术语字典（数据飞轮，仓库内维护） |
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 负面清单 |
 | L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写 |
+| 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
+
+## term-dict MCP 服务
+
+插件清单声明了 `mcpServers`（`${CLAUDE_PLUGIN_ROOT}` 定位），装插件即得，
+工具自动命名空间化。纯 Python stdio 实现，零依赖，系统 `python3` 即可运行。
+与 L1/L2 共享同一份合并字典（含 `re:` 正则词条），每次调用现读，`add_term`
+入库后立即可查、下轮注入生效。
+
+| 工具 | 用途 |
+|---|---|
+| `lookup_term(query)` | 双向查词：英文/中文子串匹配直译词、期望写法、说明 |
+| `check_text(text)` | 交付前自查：L2 同款检测（代码块与引号提及豁免） |
+| `add_term(term, expected, note)` | 数据飞轮：追加用户词条，term 支持 `re:` 前缀 |
+
+定位：拉模式知识层，不替代 L1（推送预防）与 L2（外部检测）——
+模型感知不到自己在说翻译腔（P3），不会总记得主动查询，外部检测仍是兜底。
+
+符号链接部署（`setup-claude.sh`）不自动注册 MCP，手动执行：
+
+```
+claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
+```
 
 ## 安装
 
@@ -56,8 +79,9 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py        # zh-guard（13 项）
-bash hooks/test-inject-style-rules.sh # 写作规范（14 项）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（15 项）
+python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
+bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）
 ```
 
 改 hook 前先补测试（TDD）。

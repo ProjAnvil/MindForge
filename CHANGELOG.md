@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-10-19
+
+### Added
+
+- **term-dict MCP server** (`hooks/term-dict-server.py`): the
+  terminology dictionary is now also queryable on demand via MCP —
+  a pull-mode knowledge layer complementing L1 (push injection) and
+  L2 (external detection). Pure-Python stdio implementation
+  (JSON-RPC 2.0, zero dependencies, system `python3`), registered in
+  the plugin manifest's `mcpServers` (context-mode-proven
+  `${CLAUDE_PLUGIN_ROOT}` pattern), so installing
+  `style-rules-zh-cn@mindforge` provides it with no extra setup.
+  Shares the merged dictionary (bundled + user, `re:` regex entries,
+  install-time migration) and re-reads it on every call.
+- **Tools**: `lookup_term(query)` — bidirectional substring lookup
+  across direct-translation terms, expected writings, and notes
+  (case-insensitive); `check_text(text)` — pre-delivery self-check
+  with the same detection semantics as L2 (code/quote exemptions,
+  regex entries); `add_term(term, expected, note)` — appends to the
+  user dictionary (data flywheel; tab/newline sanitized; effective on
+  the next injected turn and immediately queryable).
+- **Tests**: end-to-end stdio JSON-RPC suite driving the real server
+  (5 test functions, 21 assertions): handshake, tool listing, lookup
+  cases, check exemptions, flywheel add + immediate query/detect,
+  TSV-injection sanitization, unknown-tool error handling.
+- `setup-claude.sh` links the server file and prints the manual MCP
+  registration command for symlink deployments.
+
 ## [0.9.2] - 2026-10-19
 
 ### Added

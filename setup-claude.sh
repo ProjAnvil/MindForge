@@ -353,6 +353,10 @@ if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
     create_symlink "$MINDFORGE_HOOKS_DIR/inject.py" "$CLAUDE_HOOKS_DIR/inject.py" "hooks/inject.py"
     create_symlink "$MINDFORGE_HOOKS_DIR/inspect.py" "$CLAUDE_HOOKS_DIR/inspect.py" "hooks/inspect.py"
     create_symlink "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$CLAUDE_HOOKS_DIR/terminology.tsv" "hooks/terminology.tsv"
+    create_symlink "$MINDFORGE_HOOKS_DIR/term-dict-server.py" "$CLAUDE_HOOKS_DIR/term-dict-server.py" "hooks/term-dict-server.py"
+
+    echo -e "${BLUE}zh-guard MCP（可选，符号链接部署不自动注册）:${NC}"
+    echo "  claude mcp add term-dict -- python3 \"\$HOME/.claude/hooks/term-dict-server.py\""
 
     # zh-guard: install-time migration of the terminology dictionary
     # to ~/.claude/zh-guard/ (user-editable, never overwritten)
