@@ -1,0 +1,8 @@
+{
+  "name": "zh-guard",
+  "description": "中文翻译腔防御：L0 术语字典（TSV 数据飞轮）+ L1 UserPromptSubmit 注入 + L2 Stop/SubagentStop 出口检测。命中直译词（病灶实验、幽灵词元、令牌数等）即要求重写。fail-open 设计，任何异常不阻断会话。zh-cn 专用。",
+  "version": "0.9.0",
+  "author": {
+    "name": "MindForge"
+  }
+}

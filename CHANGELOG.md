@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-10-19
+
+### Added
+
+- **zh-guard plugin** (`./plugins/zh-guard`): Chinese translationese
+  defense, ported from the production-verified WorkBuddy implementation
+  (spec: zh-guard-spec-v2.0). Three layers, all fail-open:
+  - L0 terminology dictionary (`terminology.tsv`, TSV data flywheel):
+    24 entries — the original 15 plus ground-truth mistranslations
+    (地面真实/地面真相/地面真值 → 真值), 机械胳膊/机器人胳膊 → 机械臂,
+    死因 → 失败原因, 病症 → 症状, 引擎盖下 → 底层实现,
+    健全性检查 → 合理性检查.
+  - L1 `inject.py` (UserPromptSubmit): injects the terminology rules
+    and the dictionary negative list every turn.
+  - L2 `inspect.py` (Stop + SubagentStop): inspects
+    `last_assistant_message`, blocks on dictionary hits with rewrite
+    instructions (code blocks and quoted mentions exempted; anti-loop:
+    same message once per session, max 3 blocks per 10-minute window).
+- **User dictionary override**: entries in
+  `~/.claude/zh-guard/terminology.tsv` merge with the plugin defaults
+  (user entries win), surviving plugin updates. Kill switch:
+  `ZH_GUARD_OFF=1` env or `~/.claude/zh-guard/OFF` file.
+- 12-test suite covering injection format, blocking/passing, code and
+  quote exemptions, fail-open, anti-loop, kill switch, and user-dict
+  merge/override.
+
 ## [0.8.1] - 2026-10-16
 
 ### Added

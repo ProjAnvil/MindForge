@@ -1,0 +1,29 @@
+﻿# zh-guard 术语字典（数据飞轮）
+# 格式：直译词<TAB>期望写法<TAB>说明
+# 匹配规则：第一列按字面子串匹配 assistant 消息（代码块与引号提及除外），命中即触发重写反馈。
+# 维护：会话里看到新的直译 bad case，就补一行。以 # 开头的行是注释。
+# 用户自定义词条请放 ~/.claude/zh-guard/terminology.tsv（与插件自带字典合并，用户条目优先）。
+病灶实验	消融实验（ablation study 的社区定译）	ML 语境 ablation 误直译为病灶
+病灶研究	消融实验（ablation study 的社区定译）	同上
+病灶分析	消融分析（ablation analysis）	同上
+幽灵词元	ghost token（保留英文）	无定译，保留英文
+幽灵工人	ghost worker（保留英文）	无定译，保留英文
+幽灵节点	ghost node（保留英文）	无定译，保留英文
+幽灵层	ghost layer（保留英文）	无定译，保留英文
+幽灵网络	ghost network（保留英文，指被裁剪出的子网时说「剪枝子网」）	无定译
+腿式机器人	足式机器人	robotics 惯用译法
+腿式运动	足式运动	locomotion 惯用译法
+令牌数	token 数（保留英文）	AI 语境 token 误译为令牌
+令牌限制	token 上限（保留英文）	同上
+令牌化	tokenization（保留英文）	同上
+大的语言模型	大语言模型	逐字直译语序错误
+神经织网	neural lace（保留英文）	生造直译
+地面真实	真值（ground truth 的社区定译）	ML 评测语境 ground truth 误直译
+地面真相	真值（ground truth）	同上
+地面真值	真值（ground truth）	同上
+机械胳膊	机械臂	robotics 语境 robot arm 误译
+机器人胳膊	机械臂	同上
+死因	失败原因/崩溃原因（技术语境）	技术语境 cause of death 误直译；医学语境豁免靠引号提及规则
+病症	症状（技术语境 symptom 的定译）	symptom 误译为病症；医疗语境为合法用法
+引擎盖下	底层实现（under the hood 的意译）	比喻字面直译
+健全性检查	合理性检查（sanity check 的惯用译法）	技术语境直译

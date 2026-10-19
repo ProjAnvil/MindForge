@@ -72,6 +72,9 @@ Agents, skills, and the controlled-writing style rules hook are all distributed 
 /plugin install style-rules@mindforge              # English rules (default)
 /plugin install style-rules-zh-cn@mindforge        # Chinese + English rules
 
+# Chinese translationese guard (terminology dictionary + output inspection)
+/plugin install zh-guard@mindforge                 # blocks literal-translation terms
+
 # Codex (from your shell)
 codex plugin marketplace add ProjAnvil/MindForge
 codex plugin add mindforge-zh-cn@mindforge
