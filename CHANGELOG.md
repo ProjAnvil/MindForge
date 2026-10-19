@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.5] - 2026-10-19
+
+### Added
+
+- **`tidy-dict.py` — dictionary tidy / lint tool.** Keeping a TSV readable by
+  hand was painful; this does it in one command:
+  - aligns the three columns (padding before the tab, CJK counted as two
+    columns) while leaving comments and section headers untouched;
+  - normalizes BOM / whitespace / line endings;
+  - dedupes entries keeping the last occurrence, matching the runtime merge
+    semantics (user wins) and reporting each removal;
+  - lints: invalid regex entries, rows missing the target column, duplicate
+    keys. `--check` exits non-zero for real errors (pre-commit friendly);
+    the read-only pass never modifies files; rendering is idempotent.
+  - Defaults to both dictionaries (bundled + user); `--path` targets one.
+- The bundled dictionary is reorganized into commented sections
+  (ML/evaluation, serving & distributed, robotics, LLM & token, stiff
+  technical metaphors, machine-register wording) and column-aligned.
+- **New entries**: 锚定 → 锁定 / 以 X 为基准 (anchor; Chinese engineers do not
+  say it — 锚点 in frontend page anchors stays legitimate, noted),
+  遗留缺口 → 剩下的待办 (remaining gap), 结构性缺陷 → 设计上的问题
+  (structural defect).
+- L1 gains rule 5 on register: write like a person — 剩下的待办 / 发现的问题,
+  not machine nouns lifted from English sentence shapes.
+- User-added dictionary entries are now shown first in the L1 negative list,
+  so they are not squeezed out by the 30-entry cap.
+- Tests: `test_tidy_dict.py` (5 functions, 14 checks) covering parse/dedupe,
+  error reporting, alignment idempotence, exit codes, and the real bundled
+  dictionary staying clean and tidied.
+
 ## [0.9.4] - 2026-10-19
 
 ### Changed

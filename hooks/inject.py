@@ -123,6 +123,8 @@ try:
         正则词条（re: 前缀）以模式串形式展示给模型。
         """
         merged = {}
+        user_only = []
+        first = True
         for path in dict_paths():
             with open(path, encoding="utf-8-sig") as f:
                 for line in f:
@@ -130,17 +132,19 @@ try:
                     if not line or line.startswith("#"):
                         continue
                     parts = [p.strip() for p in line.split("\t")]
-                    if len(parts) >= 2 and parts[0] and parts[1]:
-                        term = parts[0]
-                        if term.startswith("re:"):
-                            term = humanize_regex(term[3:])
-                        merged[term] = parts[1]
-                    elif parts and parts[0]:
-                        term = parts[0]
-                        if term.startswith("re:"):
-                            term = humanize_regex(term[3:])
-                        merged.setdefault(term, "")
-        return list(merged.items())
+                    if not parts or not parts[0]:
+                        continue
+                    term = parts[0]
+                    if term.startswith("re:"):
+                        term = humanize_regex(term[3:])
+                    target = parts[1] if len(parts) >= 2 else ""
+                    if not first and term not in merged:
+                        user_only.append((term, target))
+                    merged[term] = target
+            first = False
+        # 用户自加的词条排在最前面：超出 MAX_SHOWN 时先牺牲自带词条。
+        rest = [(k, v) for k, v in merged.items() if k not in dict(user_only)]
+        return user_only + rest
 
     MAX_SHOWN = 30
 
@@ -161,7 +165,10 @@ try:
             "3. 禁止字面直译英文黑话。\n"
             "4. 以下直译词禁用，按箭头右侧的写法表达；右侧是高亮条款所指的中文措辞，"
             "拿不准就保留英文原词："
-            + (pairs + more if pairs else "暂无")
+            + (pairs + more if pairs else "暂无") +
+            "\n5. 措辞要像人在说话：说「剩下的待办」「发现的问题」「这儿有个 bug」，"
+            "别端着写成「遗留缺口」「结构性缺陷」这类从英文句型硬搬过来的词。"
+            "一句话里如果名词叠着名词，就拆成短句直说。"
         )
 
     def main():

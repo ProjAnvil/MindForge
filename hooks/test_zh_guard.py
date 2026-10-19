@@ -101,6 +101,14 @@ def test_l2_blocks_new_entries():
     body = proc2.stdout.decode("utf-8") + proc2.stderr.decode("utf-8")
     check("L2 拦截钉死/范围守卫", proc2.returncode == 2 and "敲定" in body and "作用域守卫" in body,
           body[:200])
+    proc3 = run_hook(
+        INSPECT,
+        {"session_id": "t2d", "last_assistant_message": "这里还有一个遗留缺口需要补齐。"},
+        env,
+    )
+    body3 = proc3.stdout.decode("utf-8") + proc3.stderr.decode("utf-8")
+    check("L2 拦截机器腔措辞（遗留缺口）",
+          proc3.returncode == 2 and "剩下的待办" in body3, body3[:200])
 
 
 def test_l2_passes_clean_message():
@@ -198,6 +206,7 @@ def test_user_dict_merge():
         ctx = json.loads(proc2.stdout.decode("utf-8"))["hookSpecificOutput"]["additionalContext"]
         check("L1 负面清单含用户新增词条", "用户生造词" in ctx, ctx[-200:])
         check("L1 负面清单给出期望写法（箭头→）", "→" in ctx, ctx[-200:])
+        check("L1 注入措辞规则（第 5 条）", "剩下的待办" in ctx, ctx[-200:])
     finally:
         shutil.rmtree(home, ignore_errors=True)
 

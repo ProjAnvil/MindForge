@@ -11,6 +11,7 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
 | L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写（按地道措辞重写整句） |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
+| 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
 
@@ -65,6 +66,26 @@ claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
   （如 `re:第\s*\d+\s*刀`），无效正则自动跳过。
   词条要写精确（「病灶实验」而非「病灶」），避免误伤医学等合法语境。
   会话里看到新直译词 → 补一行 → 当轮注入即生效。
+
+### 手动整理字典：tidy-dict.py
+
+字典是给人看的文件，手改之后跑一遍体检 + 排版：
+
+```
+python3 hooks/tidy-dict.py                      # 只读体检，打印报告
+python3 hooks/tidy-dict.py --write              # 体检 + 写回排版（对齐、去重）
+python3 hooks/tidy-dict.py --check              # 有硬错误时退出码 1（可挂 pre-commit）
+python3 hooks/tidy-dict.py --path myspace.tsv   # 只处理指定文件
+```
+
+默认同时处理自带字典和 `~/.claude/zh-guard/` 下的用户字典。它会：
+
+1. **排版**：按最宽词条补空格，三列对齐（中文按两格宽算），注释和分组原样保留；
+2. **归一化**：去 BOM、去多余空白、约定行尾；
+3. **去重**：同一词条保留最后一次出现（与运行时「用户条目优先」一致）；
+4. **体检**：坏正则、缺第二列、重复词条，逐条报告；`--check` 时非零退出。
+
+只读体检不会动文件，可以随便跑。排版是幂等的：再跑一次不会有新变化。
 - **期望写法怎么写**（第二列，最容易写坏的一列）：
 
   1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
@@ -97,6 +118,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ```
 python3 hooks/test_zh_guard.py         # zh-guard hooks（16 项）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
+python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
 bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）
 ```
 
