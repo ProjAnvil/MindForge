@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""zh-guard L1 注入层：UserPromptSubmit hook（MindForge 插件版）。
+"""zh-guard L1 注入层：UserPromptSubmit hook（MindForge style-rules-zh-cn 插件内）。
 
 职责：每轮用户输入触发，向会话注入中文术语规范（additionalContext），
 在生成阶段压住直译术语。预防为主，零延迟。
 
-字典来源（优先级从高到低）：
-  1. 环境变量 ZH_GUARD_DICT 指定的单个文件；
-  2. 插件自带 terminology.tsv + 用户目录 ZH_GUARD_HOME/terminology.tsv
-     （默认 ~/.claude/zh-guard/，两者合并，用户条目优先）。
+字典（install 时迁移模型）：
+  1. 插件自带 terminology.tsv 是发布源；
+  2. 首次运行时若 ~/.claude/zh-guard/terminology.tsv 不存在，
+     自动把插件自带字典复制过去（安装迁移，不覆盖已有用户词条）；
+  3. 运行时合并读取插件自带 + 用户目录（用户条目优先），
+     插件更新带来的新词条自动生效；
+  4. ZH_GUARD_DICT 环境变量可指定单一字典文件（调试用）。
 
 设计原则（fail-open）：任何异常一律静默退出 0，绝不阻断用户输入。
 停用方式：export ZH_GUARD_OFF=1，或创建 OFF 文件（ZH_GUARD_HOME/ 或插件目录）。
 """
 import json
 import os
+import shutil
 import sys
 
 try:
@@ -31,6 +35,18 @@ try:
         if os.path.exists(os.path.join(HERE, "OFF")):
             return True
         return os.path.exists(os.path.join(guard_home(), "OFF"))
+
+    def ensure_user_dict():
+        """安装迁移：用户字典不存在时，从插件自带字典复制过去。绝不覆盖。"""
+        try:
+            home = guard_home()
+            user = os.path.join(home, "terminology.tsv")
+            bundled = os.path.join(HERE, "terminology.tsv")
+            if not os.path.exists(user) and os.path.exists(bundled):
+                os.makedirs(home, exist_ok=True)
+                shutil.copyfile(bundled, user)
+        except Exception:
+            pass
 
     def dict_paths():
         """返回字典文件路径列表：插件自带在前，用户覆盖在后。"""
@@ -77,6 +93,7 @@ try:
     def main():
         if is_off():
             sys.exit(0)
+        ensure_user_dict()
         raw = sys.stdin.read()
         if not raw.strip():
             sys.exit(0)

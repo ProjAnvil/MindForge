@@ -70,10 +70,7 @@ Agents, skills, and the controlled-writing style rules hook are all distributed 
 
 # Controlled-writing style rules hook
 /plugin install style-rules@mindforge              # English rules (default)
-/plugin install style-rules-zh-cn@mindforge        # Chinese + English rules
-
-# Chinese translationese guard (terminology dictionary + output inspection)
-/plugin install zh-guard@mindforge                 # blocks literal-translation terms
+/plugin install style-rules-zh-cn@mindforge        # Chinese + English rules + translationese guard (zh-guard)
 
 # Codex (from your shell)
 codex plugin marketplace add ProjAnvil/MindForge
@@ -83,6 +80,7 @@ codex plugin add style-rules-zh-cn@mindforge
 
 Notes:
 
+- `style-rules-zh-cn` bundles the zh-guard translationese defense: a TSV terminology dictionary (data flywheel) maintained at `hooks/terminology.tsv`, injected every turn (L1) and enforced on output (L2, Stop/SubagentStop). On install the dictionary migrates to `~/.claude/zh-guard/terminology.tsv` (never overwritten); user entries win and plugin updates still deliver new entries.
 - Plugin agents and skills are namespaced, e.g. `/mindforge-en:git-guru` and `mindforge-en:code-reviewer`, so they never conflict with personal or project ones.
 - Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required.
 - Restart the harness after installing.

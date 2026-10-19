@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""zh-guard L2 出口层：Stop / SubagentStop hook（MindForge 插件版）。
+"""zh-guard L2 出口层：Stop / SubagentStop hook（MindForge style-rules-zh-cn 插件内）。
 
 职责：agent 回答结束时触发，检查 last_assistant_message。
 命中术语字典中的直译词时，返回 continue:false + 重写指引（exit 2），
 迫使 agent 修正后重新输出。未命中或任何异常时放行。
 
-字典来源：与 inject.py 相同（插件自带 + 用户 ZH_GUARD_HOME 覆盖，合并，
-用户条目优先；ZH_GUARD_DICT 环境变量可指定单文件）。
+字典（install 时迁移模型，与 inject.py 相同）：
+  1. 插件自带 terminology.tsv 是发布源；
+  2. 首次运行时若 ~/.claude/zh-guard/terminology.tsv 不存在，自动复制过去；
+  3. 运行时合并读取插件自带 + 用户目录（用户条目优先）；
+  4. ZH_GUARD_DICT 环境变量可指定单一字典文件（调试用）。
 
 防循环：
   1. 同一内容（hash 相同）只阻断一次；
@@ -20,6 +23,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
 import time
 
@@ -44,6 +48,18 @@ try:
         if os.path.exists(os.path.join(HERE, "OFF")):
             return True
         return os.path.exists(os.path.join(guard_home(), "OFF"))
+
+    def ensure_user_dict():
+        """安装迁移：用户字典不存在时，从插件自带字典复制过去。绝不覆盖。"""
+        try:
+            home = guard_home()
+            user = os.path.join(home, "terminology.tsv")
+            bundled = os.path.join(HERE, "terminology.tsv")
+            if not os.path.exists(user) and os.path.exists(bundled):
+                os.makedirs(home, exist_ok=True)
+                shutil.copyfile(bundled, user)
+        except Exception:
+            pass
 
     def dict_paths():
         """返回字典文件路径列表：插件自带在前，用户覆盖在后。"""
@@ -126,6 +142,7 @@ try:
     def main():
         if is_off():
             sys.exit(0)
+        ensure_user_dict()
         raw = sys.stdin.read()
         try:
             payload = json.loads(raw)

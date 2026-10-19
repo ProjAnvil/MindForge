@@ -46,9 +46,14 @@ def check(name, condition, detail=""):
 
 
 def temp_env():
-    """隔离状态目录，避免污染真实会话状态。"""
+    """隔离状态目录与用户目录，避免污染真实会话状态。"""
     state_dir = tempfile.mkdtemp(prefix="zh-guard-test-")
-    return {"ZH_GUARD_STATE_DIR": state_dir}, state_dir
+    home_dir = tempfile.mkdtemp(prefix="zh-guard-home-")
+    env = {
+        "ZH_GUARD_STATE_DIR": state_dir,
+        "ZH_GUARD_HOME": home_dir,
+    }
+    return env, state_dir
 
 
 def cleanup(state_dir):
@@ -203,6 +208,35 @@ def test_off_file_in_guard_home():
     try:
         proc = run_hook(INSPECT, {"session_id": "t13", "last_assistant_message": "病灶实验"}, env)
         check("ZH_GUARD_HOME/OFF 文件停用 L2", proc.returncode == 0, "rc=%d" % proc.returncode)
+    finally:
+        shutil.rmtree(home, ignore_errors=True)
+
+
+def test_install_time_migration():
+    """安装迁移：首次运行把插件自带字典复制到 ZH_GUARD_HOME，之后不覆盖。"""
+    env, sd = temp_env()
+    home = tempfile.mkdtemp(prefix="zh-guard-home-")
+    env["ZH_GUARD_HOME"] = home
+    try:
+        user_dict = os.path.join(home, "terminology.tsv")
+        check("迁移前用户字典不存在", not os.path.exists(user_dict))
+        run_hook(INJECT, {"prompt": "hi", "session_id": "t14"}, env)
+        check("首次运行后字典迁移到 ZH_GUARD_HOME", os.path.exists(user_dict))
+        with open(user_dict, encoding="utf-8") as f:
+            content = f.read()
+        check("迁移内容含插件词条（病灶实验）", "病灶实验" in content)
+        with open(user_dict, "a", encoding="utf-8") as f:
+            f.write("迁移后新增词\t正确写法\t用户补充\n")
+        run_hook(INJECT, {"prompt": "hi", "session_id": "t15"}, env)
+        with open(user_dict, encoding="utf-8") as f:
+            content2 = f.read()
+        check("已有用户字典不被覆盖（迁移后新增词保留）", "迁移后新增词" in content2)
+        proc = run_hook(
+            INSPECT,
+            {"session_id": "t16", "last_assistant_message": "这里出现了迁移后新增词。"},
+            env,
+        )
+        check("迁移后的用户词条参与 L2 检测", proc.returncode == 2, "rc=%d" % proc.returncode)
     finally:
         shutil.rmtree(home, ignore_errors=True)
 

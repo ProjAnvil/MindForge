@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-10-19
+
+### Changed
+
+- **zh-guard merged into the style-rules-zh-cn plugin** (`./hooks`):
+  the standalone `zh-guard` plugin is removed; the dictionary
+  (`terminology.tsv`), L1 (`inject.py`), and L2 (`inspect.py`) now live
+  alongside the style-rules hook files, shipped and installed as one
+  plugin. Chinese users install `style-rules-zh-cn@mindforge` once and
+  get both.
+- **Install-time dictionary migration** (all three channels):
+  the dictionary is maintained in the repo at `hooks/terminology.tsv`
+  (distribution source). On install it lands at
+  `~/.claude/zh-guard/terminology.tsv` — explicitly copied by
+  `setup-claude.sh`, or lazily on the first hook run for Claude
+  marketplace and Codex marketplace installs. Migration never
+  overwrites an existing user dictionary; at runtime the bundled and
+  user dictionaries merge (user entries win), so plugin updates
+  deliver new entries without losing user flywheel entries.
+- `setup-claude.sh` Step 6 links `inject.py`, `inspect.py`, and
+  `terminology.tsv` into `~/.claude/hooks/`, migrates the dictionary,
+  and the settings merge now deduplicates on all three hook commands
+  (inject-style-rules.sh, inject.py, inspect.py).
+
+### Fixed
+
+- Test suite isolation: tests now set `ZH_GUARD_HOME` to a temp dir,
+  so runs never touch the real `~/.claude/zh-guard/`.
+
 ## [0.9.0] - 2026-10-19
 
 ### Added

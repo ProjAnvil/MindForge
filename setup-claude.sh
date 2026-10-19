@@ -350,6 +350,20 @@ if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
     create_symlink "$MINDFORGE_HOOKS_DIR/inject-style-rules.sh" "$CLAUDE_HOOKS_DIR/inject-style-rules.sh" "hooks/inject-style-rules.sh"
     create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-zh.md" "$CLAUDE_HOOKS_DIR/style-rules-zh.md" "hooks/style-rules-zh.md"
     create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-en.md" "$CLAUDE_HOOKS_DIR/style-rules-en.md" "hooks/style-rules-en.md"
+    create_symlink "$MINDFORGE_HOOKS_DIR/inject.py" "$CLAUDE_HOOKS_DIR/inject.py" "hooks/inject.py"
+    create_symlink "$MINDFORGE_HOOKS_DIR/inspect.py" "$CLAUDE_HOOKS_DIR/inspect.py" "hooks/inspect.py"
+    create_symlink "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$CLAUDE_HOOKS_DIR/terminology.tsv" "hooks/terminology.tsv"
+
+    # zh-guard: install-time migration of the terminology dictionary
+    # to ~/.claude/zh-guard/ (user-editable, never overwritten)
+    ZH_GUARD_DIR="$CLAUDE_DIR/zh-guard"
+    create_dir "$ZH_GUARD_DIR"
+    if [ ! -f "$ZH_GUARD_DIR/terminology.tsv" ] && [ -f "$MINDFORGE_HOOKS_DIR/terminology.tsv" ]; then
+        cp "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$ZH_GUARD_DIR/terminology.tsv"
+        echo -e "${GREEN}+${NC} zh-guard terminology.tsv (installed to ~/.claude/zh-guard/)"
+    elif [ -f "$ZH_GUARD_DIR/terminology.tsv" ]; then
+        echo -e "${GREEN}✓${NC} zh-guard terminology.tsv (kept existing user dictionary)"
+    fi
 
     # Write language marker: en -> English rules only; zh-cn -> Chinese + English
     printf '%s' "$LANG_CODE" > "$CLAUDE_HOOKS_DIR/style-rules.lang"
@@ -370,7 +384,7 @@ if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
 import json, sys
 
 settings_path, fragment_path = sys.argv[1], sys.argv[2]
-marker = "inject-style-rules.sh"
+markers = ("inject-style-rules.sh", ".claude/hooks/inject.py", ".claude/hooks/inspect.py")
 
 with open(settings_path, encoding="utf-8") as f:
     settings = json.load(f)
@@ -382,7 +396,7 @@ for event, groups in fragment.get("hooks", {}).items():
     kept = []
     for g in hooks.get(event, []):
         cmds = [h.get("command", "") for h in g.get("hooks", []) if isinstance(h, dict)]
-        if any(marker in c for c in cmds):
+        if any(any(m in c for m in markers) for c in cmds):
             continue  # drop previously merged group
         kept.append(g)
     hooks[event] = kept + groups
