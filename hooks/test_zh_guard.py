@@ -181,12 +181,12 @@ def test_kill_switch():
 
 
 def test_user_dict_merge():
-    """用户目录字典：新增词条生效 + 同名词条覆盖插件默认。"""
+    """用户目录字典：自加词条生效 + 同名词条不再被旧副本锁死（见版本同步）。"""
     env, sd = temp_env()
     home = tempfile.mkdtemp(prefix="zh-guard-home-")
     env["ZH_GUARD_HOME"] = home
     with open(os.path.join(home, "terminology.tsv"), "w", encoding="utf-8") as f:
-        f.write("用户生造词\t正确写法\t测试新增\n病灶实验\t用户覆盖写法\t覆盖插件默认\n")
+        f.write("用户生造词\t正确写法\t测试新增\n")
     try:
         proc = run_hook(
             INSPECT,
@@ -194,16 +194,53 @@ def test_user_dict_merge():
             env,
         )
         check("用户目录新增词条被 L2 拦截", proc.returncode == 2, "rc=%d" % proc.returncode)
-        proc_ovr = run_hook(
-            INSPECT,
-            {"session_id": "t11b", "last_assistant_message": "我们做了一次病灶实验。"},
-            env,
-        )
-        body = (proc_ovr.stdout.decode("utf-8") + proc_ovr.stderr.decode("utf-8"))
-        check("用户词条覆盖插件默认（期望写法）", "用户覆盖写法" in body, body[:300])
         proc2 = run_hook(INJECT, {"prompt": "hi", "session_id": "t12"}, env)
         ctx = json.loads(proc2.stdout.decode("utf-8"))["hookSpecificOutput"]["additionalContext"]
         check("L1 负面清单含用户新增词条", "用户生造词" in ctx, ctx[-200:])
+        check("L1 负面清单给出期望写法（箭头→）", "→" in ctx, ctx[-200:])
+    finally:
+        shutil.rmtree(home, ignore_errors=True)
+
+
+def test_dict_version_sync():
+    """字典版本同步：@sync 变化时刷新自带词条，但保留用户自加的词条。
+
+    没有这套机制，出厂时被复制走的旧写法会把后续的修正永久挡在外面。
+    """
+    env, sd = temp_env()
+    home = tempfile.mkdtemp(prefix="zh-guard-home-")
+    env["ZH_GUARD_HOME"] = home
+    user_dict = os.path.join(home, "terminology.tsv")
+    with open(user_dict, "w", encoding="utf-8") as f:
+        f.write(
+            "# 用户旧字典（无 @sync 标记，模拟旧版本安装）\n"
+            "下一刀\t下一个削减项\t旧写法\n"
+            "用户自加词\t用户自己的写法\t用户补充\n"
+        )
+    try:
+        run_hook(INJECT, {"prompt": "hi", "session_id": "t17"}, env)
+        with open(user_dict, encoding="utf-8") as f:
+            content = f.read()
+        check("版本落后时把新版自带词条同步到用户字典",
+              "下一处可以精简的部分" in content, content[:300])
+        check("用户自加词条在同步后保留", "用户自加词\t用户自己的写法" in content, content[:300])
+        check("同步后用户字典带上 @sync 标记", "# @sync" in content, content[:300])
+        proc = run_hook(
+            INSPECT,
+            {"session_id": "t18", "last_assistant_message": "下一刀砍在推理预算上。"},
+            env,
+        )
+        body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+        check("修正后的期望写法真正进入 L2 提示（不是旧写法）",
+              proc.returncode == 2 and "下一处可以精简的部分" in body
+              and "下一个削减项" not in body, body[:300])
+        # 版本号一致时不应再改动用户字典
+        with open(user_dict, "a", encoding="utf-8") as f:
+            f.write("手动加的行\t手动写法\t手工补充\n")
+        run_hook(INJECT, {"prompt": "hi", "session_id": "t19"}, env)
+        with open(user_dict, encoding="utf-8") as f:
+            content2 = f.read()
+        check("@sync 一致时不动用户字典", "手动加的行\t手动写法" in content2, content2[-200:])
     finally:
         shutil.rmtree(home, ignore_errors=True)
 

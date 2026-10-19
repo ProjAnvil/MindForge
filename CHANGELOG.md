@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.4] - 2026-10-19
+
+### Changed
+
+- **Dictionary rewrites: expected writings now read like real Chinese.**
+  The second column had drifted into machine-generated, literal-for-literal
+  renderings (`下一刀 → 下一个削减项`). Every entry is rewritten to wording
+  a Chinese technical writer would actually produce, and the English gloss
+  / rationale moved out of the target column into the notes column:
+  - `幽灵词元/工人/节点/层/网络 → ghost token / ghost worker / ghost node /
+    ghost layer / ghost network` (no established rendering → keep English,
+    per style rule #2), with the contextual alternatives in the notes
+    (e.g. 失联节点 for a lost node still counted by the cluster);
+  - `下一刀 / 下一道砍 / re:第\s*\d+\s*刀 → 下一处可以精简的部分 /
+    第 N 处可以精简的部分` (cut in cost/scope contexts means trim, not knife);
+  - `死因 → 崩溃原因`, `钉死 → 敲定`, `令牌化 → token 化`,
+    `健全性检查 → 合理性检查`, `地面真值 → 真值`, and more.
+  Note-column guidance only: translations are suggestions, not literal
+  substitutions — rewrite the sentence.
+- **Dictionary typo/json-safe writing rules documented** in the TSV header
+  and README: target column must be (1) wording a real Chinese writer uses,
+  (2) a drop-in replacement with no parentheticals, (3) English kept where
+  no established rendering exists, (4) community terms used when they exist.
+- L2 rewrite instructions now say explicitly to rewrite the sentence using
+  the suggested wording rather than doing word-for-word substitution.
+
+### Added
+
+- **L1 injects the expected writing alongside the banned term**
+  (`「A→B」` pairs). Previously rule 4 promised the expected writing in
+  parentheses but only listed the terms — the model saw what to avoid and
+  not what to write. Regex entries are rendered human-readably
+  (`第\s*\d+\s*刀` → `第N刀`). Cap remains 30 entries; beyond that the
+  injection points at `term-dict` MCP's `lookup_term`.
+- **Dictionary version sync**: the bundled dictionary carries a
+  `# @sync <version>` marker. Local copies lacking it (older installs) or
+  behind it are refreshed from the bundled one at the next hook run, with
+  user-added entries (keys absent from the bundled file) preserved. Without
+  this, a bad writing shipped to users could never be corrected — a locally
+  copied row shadows every later bundled fix. Users who want full control
+  keep their own keys or use `ZH_GUARD_DICT`.
+- Tests: dictionary version sync (5 checks), L1 expected-writing pairs
+  (1 check); user-dictionary test adjusted to the new semantics
+  (user-only additions win; 16 test functions total).
+
 ## [0.9.3] - 2026-10-19
 
 ### Added

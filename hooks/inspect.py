@@ -23,7 +23,6 @@ import hashlib
 import json
 import os
 import re
-import shutil
 import sys
 import time
 
@@ -50,14 +49,60 @@ try:
         return os.path.exists(os.path.join(guard_home(), "OFF"))
 
     def ensure_user_dict():
-        """安装迁移：用户字典不存在时，从插件自带字典复制过去。绝不覆盖。"""
+        """安装迁移 + 版本同步。
+
+        1. 用户字典不存在：复制插件自带字典过去；
+        2. 已存在且 @sync 版本与自带字典一致：不动；
+        3. 版本不一致（插件升级带来了新词条或改了写法）：以新版自带字典为底，
+           再把用户自加的词条（第一列不在自带字典里的行）追加回去。
+
+        用户对自带词条本身的本地改写会被新版覆盖——这是刻意的：字典要能迭代，
+        否则「下一刀 → 下一个削减项」这种机器写法一旦被复制出厂就再也修不掉。
+        想完全自己掌控字典，用 ZH_GUARD_DICT 指向自己的文件。
+        """
         try:
             home = guard_home()
             user = os.path.join(home, "terminology.tsv")
             bundled = os.path.join(HERE, "terminology.tsv")
-            if not os.path.exists(user) and os.path.exists(bundled):
+            if not os.path.exists(bundled):
+                return
+            with open(bundled, encoding="utf-8") as f:
+                bundled_text = f.read()
+            if not os.path.exists(user):
                 os.makedirs(home, exist_ok=True)
-                shutil.copyfile(bundled, user)
+                with open(user, "w", encoding="utf-8") as f:
+                    f.write(bundled_text)
+                return
+            marker = ""
+            for line in bundled_text.splitlines():
+                if line.startswith("@sync") or line.startswith("# @sync"):
+                    marker = line.strip()
+                    break
+            with open(user, encoding="utf-8") as f:
+                user_text = f.read()
+            if marker and marker in user_text:
+                return
+            bundled_keys = set()
+            for line in bundled_text.splitlines():
+                line = line.lstrip("\ufeff")
+                if not line or line.startswith("#"):
+                    continue
+                key = line.split("\t")[0].strip()
+                if key:
+                    bundled_keys.add(key)
+            kept = []
+            for line in user_text.splitlines():
+                line = line.lstrip("\ufeff")
+                if not line or line.startswith("#"):
+                    continue
+                key = line.split("\t")[0].strip()
+                if key and key not in bundled_keys:
+                    kept.append(line)
+            text = bundled_text if bundled_text.endswith("\n") else bundled_text + "\n"
+            if kept:
+                text += "\n# 以下为用户自加词条（字典升级时自动保留）\n" + "\n".join(kept) + "\n"
+            with open(user, "w", encoding="utf-8") as f:
+                f.write(text)
         except Exception:
             pass
 
@@ -194,7 +239,8 @@ try:
         fixes = "；".join("%s→%s" % (bad, good) for bad, good in hits[:10])
         reason = (
             "你的上一条回复包含字面直译的术语，不是地道中文，需要重写。"
-            "修正以下术语：" + fixes + "。"
+            "按箭头右侧的写法表达（右侧是自然的中文措辞，要据此重写整句，"
+            "不要做机械的词到词替换）：" + fixes + "。"
             "其余内容、结论和代码保持不变，"
             "输出修正后的完整回复。"
             "再次提醒：有中文社区定译用定译，无定译保留英文原词，"

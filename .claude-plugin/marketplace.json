@@ -25,8 +25,8 @@
     {
       "name": "style-rules-zh-cn",
       "source": "./hooks",
-      "description": "中文写作规范 + 翻译腔防御（zh-guard）：受控写作规范注入；术语字典（TSV 数据飞轮，支持正则）+ 出口检测 + term-dict MCP 查询服务。安装时字典迁移到 ~/.claude/zh-guard/。fail-open。",
-      "version": "0.9.3"
+      "description": "中文写作规范 + 翻译腔防御（zh-guard）：受控写作规范注入；术语字典（TSV 数据飞轮，支持正则，采集地道中文写法）+ 出口检测 + term-dict MCP 查询服务。字典带版本同步，升级时保留用户自加词条。fail-open。",
+      "version": "0.9.4"
     }
   ]
 }

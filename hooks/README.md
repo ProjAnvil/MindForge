@@ -8,8 +8,8 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 |---|---|---|---|
 | 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit / SubagentStart | 注入受控写作规范（中文+英文） |
 | L0 字典 | terminology.tsv | - | 术语字典（数据飞轮，仓库内维护） |
-| L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 负面清单 |
-| L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写 |
+| L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
+| L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写（按地道措辞重写整句） |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
@@ -45,19 +45,35 @@ claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
 
 依赖系统 `python3`。
 
-## 字典的安装时迁移
+## 字典：安装迁移 + 版本同步
 
 - **发布源**：本目录 `terminology.tsv`（在 MindForge 仓库内维护）。
-- **安装时迁移**：首次 hook 运行（或 `setup-claude.sh` 安装）时，
-  字典被复制到 `~/.claude/zh-guard/terminology.tsv`，绝不覆盖已有文件。
-- **运行时合并**：读取插件自带 + `~/.claude/zh-guard/` 两份字典，
-  用户条目优先。插件更新带来的新词条自动生效，用户词条不丢。
+- **安装时迁移**：首次 hook 运行时，字典被复制到
+  `~/.claude/zh-guard/terminology.tsv`。
+- **版本同步**：自带字典里有一行 `# @sync <版本>`。当本地副本缺这个标记
+  （旧版本安装）或版本落后时，hook 会把自带字典刷新到本地，
+  **并保留用户自加的词条**（第一列不在自带字典里的行）。
+
+  这是刻意的取舍：否则出厂时被复制走的写法（曾经的
+  `下一刀 → 下一个削减项`）会永久屏蔽后续修正。用户对自带词条的本地改写
+  会在字典升级时被新版覆盖；想完全自控请用自己的 key，或用
+  `ZH_GUARD_DICT` 指向自己的字典文件。
+- **运行时合并**：读取插件自带 + `~/.claude/zh-guard/` 两份字典，用户条目优先。
 - **用户词条**：直接编辑 `~/.claude/zh-guard/terminology.tsv`。
   格式：TSV 三列 `直译词<TAB>期望写法<TAB>说明`，`#` 开头为注释。
   带可变数字等模式用正则词条：第一列以 `re:` 开头
   （如 `re:第\s*\d+\s*刀`），无效正则自动跳过。
   词条要写精确（「病灶实验」而非「病灶」），避免误伤医学等合法语境。
   会话里看到新直译词 → 补一行 → 当轮注入即生效。
+- **期望写法怎么写**（第二列，最容易写坏的一列）：
+
+  1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
+     反例 `下一刀 → 下一个削减项`；正例 `下一刀 → 下一处可以精简的部分`。
+  2. 要能直接替换原文里的直译词，所以不带括号注释、不写整句模板。
+  3. 拿不准译法的名词保留英文原词：token、agent、hook、ghost token 不译。
+  4. 有社区定译的用定译：ablation study=消融实验，ground truth=真值。
+
+  英文原词和括号里的一句解释请放第三列（说明），不要塞进第二列。
 - **回馈上游**：通用性强的词条欢迎提交回 MindForge 仓库的
   `hooks/terminology.tsv`。
 
@@ -79,7 +95,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（15 项）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（16 项）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）
 ```
