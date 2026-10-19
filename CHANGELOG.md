@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-10-19
+
+### Added
+
+- **Regex dictionary entries**: terms whose first column starts with
+  `re:` are matched as regular expressions, covering variable-number
+  patterns that literal substring matching cannot (e.g. 「第36刀」,
+  「第 128 刀」 → the whole 第N刀 class via `re:第\s*\d+\s*刀`).
+  Invalid regexes are skipped per entry (fail-open). L2 rewrite
+  instructions cite the actually matched text; L1's negative list
+  shows the pattern.
+- **New dictionary entries**: 下一刀, 下一道砍 (next-cut
+  mistranslations in cost/scope contexts), and the regex entry above.
+
 ## [0.9.1] - 2026-10-19
 
 ### Changed

@@ -63,7 +63,10 @@ try:
         return paths
 
     def load_bad_terms():
-        """合并读字典第一列，返回去重直译词列表。用户条目优先。"""
+        """合并读字典第一列，返回去重直译词列表。用户条目优先。
+
+        正则词条（re: 前缀）以模式串形式展示给模型。
+        """
         seen = {}
         for path in dict_paths():
             with open(path, encoding="utf-8-sig") as f:
@@ -73,7 +76,10 @@ try:
                         continue
                     parts = line.split("\t")
                     if parts and parts[0].strip():
-                        seen[parts[0].strip()] = True
+                        term = parts[0].strip()
+                        if term.startswith("re:"):
+                            term = term[3:]
+                        seen[term] = True
         return list(seen.keys())
 
     def build_context(terms):

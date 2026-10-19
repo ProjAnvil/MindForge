@@ -241,6 +241,42 @@ def test_install_time_migration():
         shutil.rmtree(home, ignore_errors=True)
 
 
+def test_regex_entries():
+    """正则词条：第N刀 整类拦截，无效正则跳过。"""
+    env, sd = temp_env()
+    cases = [
+        ("按照计划，第36刀砍在推理预算上。", 2, "第36刀"),
+        ("第 128 刀之后预算见底了。", 2, "第 128 刀"),
+        ("下一步削减测试预算。", 0, ""),
+        ("我们继续做消融实验。", 0, ""),
+    ]
+    for i, (msg, want_rc, want_hit) in enumerate(cases):
+        proc = run_hook(INSPECT, {"session_id": "t-re%d" % i, "last_assistant_message": msg}, env)
+        check("正则词条：「%s」期望 rc=%d" % (msg[:14], want_rc),
+              proc.returncode == want_rc, "rc=%d" % proc.returncode)
+        if want_rc == 2 and want_hit:
+            body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+            check("阻断理由含实际命中文本（%s）" % want_hit, want_hit in body, body[:200])
+
+
+def test_regex_invalid_pattern_skipped():
+    """用户字典里的无效正则不崩溃、不拦截（fail-open）。"""
+    env, sd = temp_env()
+    home = tempfile.mkdtemp(prefix="zh-guard-home-")
+    env["ZH_GUARD_HOME"] = home
+    with open(os.path.join(home, "terminology.tsv"), "w", encoding="utf-8") as f:
+        f.write("re:第[刀\t第 N 次削减\t未闭合括号的坏正则\n")
+    try:
+        proc = run_hook(
+            INSPECT,
+            {"session_id": "t-badre", "last_assistant_message": "正常的一句中文，第36刀应该被插件正则拦截。"},
+            env,
+        )
+        check("无效正则跳过后仍由插件有效词条拦截", proc.returncode == 2, "rc=%d" % proc.returncode)
+    finally:
+        shutil.rmtree(home, ignore_errors=True)
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:

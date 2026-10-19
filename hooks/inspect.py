@@ -76,7 +76,11 @@ try:
         return paths
 
     def load_dict():
-        """合并读取 [(直译词, 期望写法), ...]。用户条目覆盖插件默认。"""
+        """合并读取 [(词, 期望写法, 是否正则), ...]。用户条目覆盖插件默认。
+
+        第一列以 re: 开头表示正则词条（匹配可变模式，如 第N刀），
+        其余按字面子串匹配。无效正则在使用处跳过（fail-open）。
+        """
         merged = {}
         for path in dict_paths():
             with open(path, encoding="utf-8-sig") as f:
@@ -87,7 +91,13 @@ try:
                     parts = [p.strip() for p in line.split("\t")]
                     if len(parts) >= 2 and parts[0]:
                         merged[parts[0]] = parts[1]
-        return list(merged.items())
+        out = []
+        for bad, good in merged.items():
+            if bad.startswith("re:"):
+                out.append((bad[3:], good, True))
+            else:
+                out.append((bad, good, False))
+        return out
 
     def strip_code(text):
         """去掉围栏代码块、行内代码与引号内提及，只检查自然语言部分。
@@ -158,7 +168,17 @@ try:
             sys.exit(0)
 
         text = strip_code(msg)
-        hits = [(bad, good) for bad, good in pairs if bad in text]
+        hits = []
+        for bad, good, is_regex in pairs:
+            if is_regex:
+                try:
+                    m = re.search(bad, text)
+                except re.error:
+                    continue  # 无效正则：跳过该词条（fail-open）
+                if m:
+                    hits.append((m.group(0), good))
+            elif bad in text:
+                hits.append((bad, good))
         if not hits:
             sys.exit(0)
 

@@ -25,8 +25,8 @@
     {
       "name": "style-rules-zh-cn",
       "source": "./hooks",
-      "description": "中文写作规范 + 翻译腔防御（zh-guard）：受控写作规范注入主会话与 subagent；术语字典（TSV 数据飞轮）+ 出口检测，命中直译词（病灶实验、幽灵词元等）即要求重写。安装时字典迁移到 ~/.claude/zh-guard/。fail-open。",
-      "version": "0.9.1"
+      "description": "中文写作规范 + 翻译腔防御（zh-guard）：受控写作规范注入主会话与 subagent；术语字典（TSV 数据飞轮，支持正则词条）+ 出口检测，命中直译词（病灶实验、幽灵词元等）即要求重写。安装时字典迁移到 ~/.claude/zh-guard/。fail-open。",
+      "version": "0.9.2"
     }
   ]
 }
