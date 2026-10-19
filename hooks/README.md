@@ -13,6 +13,7 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 | 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
 | 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
+| 方案成本评测 | eval-zh-guard.py | 手动运行 | 装 vs 不装（含空字典）：token、耗时、拦截代价 |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
 
@@ -46,6 +47,44 @@ claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
 ```
 
 依赖系统 `python3`。
+
+## 这套东西到底要花多少：eval-zh-guard.py
+
+装了它，每轮多付多少 token、多等多少毫秒。三个对照组，把账算到能归因为止：
+
+| 对照组 | 是什么 | 量的东西 |
+|---|---|---|
+| 基线 | 完全没装这套 hook | 恒为 0，对比的零点 |
+| 空字典 | hook 装了，但字典一张词条都没有 | 5 条规则文本 + hook 引擎的成本 |
+| 完整字典 | hook + 现在的字典 | 前两者 + 字典本身的边际成本 |
+
+```
+python3 hooks/eval-zh-guard.py               # 打印对比表
+python3 hooks/eval-zh-guard.py --json        # 机器可读，CI diff 用
+python3 hooks/eval-zh-guard.py --rounds 20   # 计时轮数
+python3 hooks/eval-zh-guard.py --turns 10 50 # 折算成几轮对话的累计 token
+```
+
+当前实测（`estimate` 后端，见下）：
+
+| 每轮成本 | 基线 | 空字典 | 完整字典 |
+|---|---|---|---|
+| 注入字符 / token | 0 | 312 / 204 | 720 / **452** |
+| 其中字典带来的边际 | — | 0 | **248 token** |
+| L1 耗时（净，扣掉解释器启动） | 0 | ~17 ms | ~26 ms |
+| L2 耗时（净） | 0 | ≈同上 | ~26 ms |
+
+另外，**最贵的一项不在注入，而在拦截**：一旦命中，那条回复白写一遍还要重写一遍
+（约 236 token）+ 重写指令 128 token，单次约 364 token；防循环上限是 10 分钟 3 次，
+最坏窗口约 1092 token。所以省钱的优先级是：先让模型少踩词（规则注入 + term-dict
+MCP 查词），再砍注入文本，几十毫秒那个量级不值得动。
+
+token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估算
+（`中文字符 + 1.3 × 英日词数`），表头会标注用的是哪个。注意 tiktoken 首次使用要联网
+下载词表，离线环境会落到估算。
+
+（另有一个 `eval-tidy-dict.py`，只评测 tidy 整理前后的行为等价性，与上面的方案级
+成本不是一回事。）
 
 ## 字典：安装迁移 + 版本同步
 
@@ -147,10 +186,12 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 python3 hooks/test_zh_guard.py         # zh-guard hooks（16 项）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
-python3 hooks/test_eval_tidy_dict.py   # 评测工具自身（5 项）
+python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）
+python3 hooks/test_eval_zh_guard.py    # 方案成本评测工具自身（6 项）
 bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）
 
-python3 hooks/eval-tidy-dict.py        # 整理前后的效果/成本/耗时评测
+python3 hooks/eval-zh-guard.py         # 装 vs 不装：token 与耗时对比
+python3 hooks/eval-tidy-dict.py        # 整理前后：行为等价 + 成本对比
 ```
 
 改 hook 前先补测试（TDD）。

@@ -7,41 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.6] - 2026-10-19
 
+> 说明：本版本号曾被一次发布的草稿占用（内容跑了题，release 与 tag 均已撤回），
+> 现在是用同一个版本号发出的正式内容。
+
 ### Added
 
-- **`eval-tidy-dict.py`** — evaluation harness for the tidy step, since claims
-  about a maintenance tool need numbers. It builds a dirty "before" copy from
-  the current dictionary programmatically (duplicate rows, ragged whitespace,
-  BOM, stray blank lines), runs tidy to get "after", and compares:
-  - **behaviour equivalence**: each corpus sentence is run through the real L2
-    hook with both dictionaries; verdicts must be identical. 20-sentence
-    labeled corpus (11 block / 9 pass) covering real uses, clean Chinese, and
-    the quote / code-block exemptions. Custom corpus via `--corpus`.
-  - **cost**: L1 injection chars, tokens (tiktoken when available, documented
-    estimator otherwise, backend printed in the header) and entry count.
-  - **time**: hook end-to-end latency (mean, min, stdev over N rounds) plus a
-    separate micro-benchmark of dictionary parsing, because end-to-end is
-    dominated by interpreter startup (~150 ms, ±8 ms noise) while the part
-    tidy actually affects is ~0.03 ms.
-  - `--json` for CI diffing, `--rounds` to tune noise, `--source` to evaluate
-    another dictionary.
-- `test_eval_tidy_dict.py` (5 functions): the harness is trustworthy itself —
-  balanced corpus, dirty builder actually dirty, behaviour equivalence, no
-  injection regression, tokenizer and timing usable.
+- **`eval-zh-guard.py`** — cost evaluation of the whole scheme, not of the
+  tidy step: what does installing zh-guard actually cost per turn. Three arms,
+  so the numbers can be attributed:
+  - **baseline** (nothing installed) — structurally 0, the zero point;
+  - **empty dictionary** (hooks on, zero entries) — the 5 rule lines plus the
+    hook engine;
+  - **full dictionary** — the above plus the dictionary's marginal cost.
+  Reports injection chars / tokens / entries, the per-turn marginal token cost
+  of the dictionary itself, accumulated tokens over N turns, end-to-end hook
+  latency with mean/min, and "net" latency with a bare-interpreter baseline
+  subtracted (interpreter startup dominates).
+- **Interception cost** is measured separately, because it is the expensive
+  part and none of the above captures it: once a reply is blocked it is thrown
+  away and rewritten (2 × reply tokens) plus the rewrite instruction —
+  ≈364 tokens per block on the sample reply, ≈1092 tokens in a worst-case
+  10-minute window at the loop-protection cap of 3.
+- `test_eval_zh_guard.py` (6 functions): baseline is zero and the interpreter
+  baseline is positive; an empty dictionary still costs rule tokens; the
+  dictionary has a measurable marginal cost; verdicts follow the dictionary
+  (empty passes everything, full blocks hits, quote mentions stay exempt);
+  timing splits startup from logic; interception cost arithmetic holds.
+
+### Notes
+
+- Measured locally (estimate tokenizer): injection 0 → 204 → 452 tokens per
+  turn across the three arms; the dictionary itself accounts for 248 of those.
+  Net hook latency is tens of milliseconds; end-to-end ~150 ms is almost all
+  interpreter startup.
+- Priority implied by the numbers: reduce how often the model trips a term
+  (rule injection + term-dict MCP lookup) before trimming injection text; the
+  milliseconds are not worth optimising.
+- `pip install tiktoken` gives true counts automatically (the tool detects and
+  reports the backend). Offline environments fall back to the documented
+  estimator — tiktoken downloads its BPE table on first use, which a
+  network-blocked sandbox will kill.
 
 ### Changed / Fixed
 
 - `tidy-dict.py` parse: rows indented with a leading tab (common when editing
   by hand) produced a bogus empty first column and were reported as broken
-  entries. Leading empty cells are now dropped and the row is normalized.
-
-### Notes
-
-- Measured result worth recording as a negative finding: de-duplication does
-  not save injection tokens — the loader already merges by unique key, so
-  before/after injection cost is identical. Tidy buys file hygiene and
-  readability, not runtime. The token lever sits in the 30-entry injection cap
-  plus the term-dict MCP pull layer.
+  entries. Leading empty cells are now dropped.
 
 ## [0.9.5] - 2026-10-19
 
