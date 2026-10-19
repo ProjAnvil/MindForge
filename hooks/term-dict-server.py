@@ -233,7 +233,7 @@ def handle_request(msg):
                         "protocolVersion", PROTOCOL_VERSION
                     ),
                     "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "term-dict", "version": "0.10.0"},
+                    "serverInfo": {"name": "term-dict", "version": "0.9.3"},
                 },
             }
         if method == "ping":

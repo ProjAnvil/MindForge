@@ -93,6 +93,14 @@ def test_l2_blocks_new_entries():
         env,
     )
     check("L2 拦截新增词条（死因/机器人胳膊/病症）", proc.returncode == 2, "rc=%d" % proc.returncode)
+    proc2 = run_hook(
+        INSPECT,
+        {"session_id": "t2c", "last_assistant_message": "先把接口钉死，再实现范围守卫。"},
+        env,
+    )
+    body = proc2.stdout.decode("utf-8") + proc2.stderr.decode("utf-8")
+    check("L2 拦截钉死/范围守卫", proc2.returncode == 2 and "敲定" in body and "作用域守卫" in body,
+          body[:200])
 
 
 def test_l2_passes_clean_message():
