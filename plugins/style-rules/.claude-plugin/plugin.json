@@ -1,7 +1,7 @@
 {
   "name": "style-rules",
   "description": "Controlled-writing style rules (English ASD-STE100 only) injected into the main session and all subagents via SessionStart / UserPromptSubmit / SubagentStart hooks. Default English variant.",
-  "version": "0.8.1",
+  "version": "0.9.7",
   "author": {
     "name": "MindForge"
   }

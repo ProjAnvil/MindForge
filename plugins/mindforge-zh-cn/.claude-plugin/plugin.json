@@ -1,7 +1,7 @@
 {
   "name": "mindforge-zh-cn",
   "description": "MindForge 中文版 agents 与 skills：9 个子代理和 18 个技能，覆盖代码评审、前端/后端/移动端工程、架构、测试与产品管理。配合 style-rules-zh-cn@mindforge 使用可获得受控写作规范注入。",
-  "version": "0.8.1",
+  "version": "0.9.7",
   "author": {
     "name": "MindForge"
   }

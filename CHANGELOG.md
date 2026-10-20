@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Notes
 
+- **Version sync across the marketplace** — the previous push bumped the
+  style-rules-zh-cn manifest but missed the marketplace entry (still 0.9.6),
+  and the three sibling plugins (mindforge-en, mindforge-zh-cn, style-rules)
+  trailed at 0.8.1. All four plugins and their marketplace entries are now
+  aligned at 0.9.7.
 - Verified against a real zcode install before the fix: the plugin loads, its
   hooks execute (session_start / user_prompt hook phases in the logs), and the
   term-dict MCP server connects via stdio — the only complaints were the two
