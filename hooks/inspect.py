@@ -2,8 +2,12 @@
 """zh-guard L2 出口层：Stop / SubagentStop hook（MindForge style-rules-zh-cn 插件内）。
 
 职责：agent 回答结束时触发，检查 last_assistant_message。
-命中术语字典中的直译词时，返回 continue:false + 重写指引（exit 2），
-迫使 agent 修正后重新输出。未命中或任何异常时放行。
+命中术语字典中的直译词时，迫使 agent 修正后重新输出：
+
+  - Claude Code：返回 continue:false + 重写指引（exit 2）；
+  - zcode（检测 ZCODE_PLUGIN_ROOT）：返回 decision:"block" + reason，
+    zcode 的 Stop 契约里 continue:false 语义是「允许结束」，不能输出。
+    未命中或任何异常时放行。
 
 字典（install 时迁移模型，与 inject.py 相同）：
   1. 插件自带 terminology.tsv 是发布源；
@@ -208,6 +212,11 @@ try:
             sys.exit(0)
         session_id = payload.get("session_id") or "default"
 
+        # 平台检测：zcode 只向插件进程注入 ZCODE_PLUGIN_ROOT。
+        # zcode 的 Stop 契约是 decision:block（continue:false 在那里
+        # 语义相反，会把拦截整个废掉），必须分开输出。
+        is_zcode = bool(os.environ.get("ZCODE_PLUGIN_ROOT"))
+
         pairs = load_dict()
         if not pairs:
             sys.exit(0)
@@ -246,11 +255,17 @@ try:
             "再次提醒：有中文社区定译用定译，无定译保留英文原词，"
             "禁止字面直译英文黑话。"
         )
-        body = json.dumps({
-            "continue": False,
-            "reason": reason,
-            "stopReason": reason,
-        }, ensure_ascii=False)
+        if is_zcode:
+            body = json.dumps({
+                "decision": "block",
+                "reason": reason,
+            }, ensure_ascii=False)
+        else:
+            body = json.dumps({
+                "continue": False,
+                "reason": reason,
+                "stopReason": reason,
+            }, ensure_ascii=False)
         sys.stdout.write(body + "\n")
         sys.stderr.write(reason + "\n")
         sys.exit(2)

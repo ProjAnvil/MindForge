@@ -2,202 +2,240 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.9.7] - 2026-10-20
+
+### Fixed
+
+- **zcode dead hook registrations** — zcode supports only 7 hook events and has no
+  SubagentStart/SubagentStop, so the plugin shipped two never-firing registrations
+  that zcode flagged as dead config on every startup. Hooks are now split per
+  platform: `hooks/hooks.json` keeps only events all platforms support
+  (SessionStart / UserPromptSubmit / Stop); the Claude-only subagent events moved
+  to `hooks/subagent-hooks.json`, declared via the `hooks` field of
+  `.claude-plugin/plugin.json` (merged with auto-discovery, so Claude Code
+  behavior is unchanged).
+- **L2 Stop contract on zcode** — inspect.py used to emit `continue:false`, which
+  on zcode means "allow the stop" and would have silently disabled the exit
+  guard. It now detects `ZCODE_PLUGIN_ROOT` and emits zcode's `decision:"block"`
+  + reason contract instead. Claude Code output is unchanged.
+
+### Added
+
+- `.zcode-plugin/plugin.json` — a zcode-specific manifest (preferred by zcode
+  over the Claude one) without a `hooks` field, so zcode never loads the
+  Claude-only subagent hook file; term-dict MCP is declared with
+  `${ZCODE_PLUGIN_ROOT}`.
+- Two tests in `test_zh_guard.py` (16 → 18 items): a zcode Stop contract test
+  (decision:block, no continue:false, clean message passes) and a structure
+  guard (hooks/hooks.json may only contain zcode-supported event names;
+  subagent-hooks.json must hold exactly the two subagent events; manifests
+  must declare/omit the hooks field accordingly).
+
+### Notes
+
+- Verified against a real zcode install before the fix: the plugin loads, its
+  hooks execute (session_start / user_prompt hook phases in the logs), and the
+  term-dict MCP server connects via stdio — the only complaints were the two
+  dead registrations. `hooks.enabled: true` in `~/.zcode/cli/config.json` is
+  required only for user-level hooks, not for plugin hooks.
 
 ## [0.9.6] - 2026-10-19
 
-> 说明：本版本号曾被一次发布的草稿占用（内容跑了题，release 与 tag 均已撤回），
+> 说明：本版本号曾被一次发布的草稿占用（内容跑了题，release 与 tag 均已撤回），  
 > 现在是用同一个版本号发出的正式内容。
 
 ### Added
 
-- **`eval-zh-guard.py`** — cost evaluation of the whole scheme, not of the
-  tidy step: what does installing zh-guard actually cost per turn. Three arms,
+- **`eval-zh-guard.py`** — cost evaluation of the whole scheme, not of the  
+  tidy step: what does installing zh-guard actually cost per turn. Three arms,  
   so the numbers can be attributed:
   - **baseline** (nothing installed) — structurally 0, the zero point;
-  - **empty dictionary** (hooks on, zero entries) — the 5 rule lines plus the
+  - **empty dictionary** (hooks on, zero entries) — the 5 rule lines plus the  
     hook engine;
-  - **full dictionary** — the above plus the dictionary's marginal cost.
-  Reports injection chars / tokens / entries, the per-turn marginal token cost
-  of the dictionary itself, accumulated tokens over N turns, end-to-end hook
-  latency with mean/min, and "net" latency with a bare-interpreter baseline
-  subtracted (interpreter startup dominates).
-- **Interception cost** is measured separately, because it is the expensive
-  part and none of the above captures it: once a reply is blocked it is thrown
-  away and rewritten (2 × reply tokens) plus the rewrite instruction —
-  ≈364 tokens per block on the sample reply, ≈1092 tokens in a worst-case
+  - **full dictionary** — the above plus the dictionary's marginal cost.  
+    Reports injection chars / tokens / entries, the per-turn marginal token cost  
+    of the dictionary itself, accumulated tokens over N turns, end-to-end hook  
+    latency with mean/min, and "net" latency with a bare-interpreter baseline  
+    subtracted (interpreter startup dominates).
+- **Interception cost** is measured separately, because it is the expensive  
+  part and none of the above captures it: once a reply is blocked it is thrown  
+  away and rewritten (2 × reply tokens) plus the rewrite instruction —  
+  ≈364 tokens per block on the sample reply, ≈1092 tokens in a worst-case  
   10-minute window at the loop-protection cap of 3.
-- `test_eval_zh_guard.py` (6 functions): baseline is zero and the interpreter
-  baseline is positive; an empty dictionary still costs rule tokens; the
-  dictionary has a measurable marginal cost; verdicts follow the dictionary
-  (empty passes everything, full blocks hits, quote mentions stay exempt);
+- `test_eval_zh_guard.py` (6 functions): baseline is zero and the interpreter  
+  baseline is positive; an empty dictionary still costs rule tokens; the  
+  dictionary has a measurable marginal cost; verdicts follow the dictionary  
+  (empty passes everything, full blocks hits, quote mentions stay exempt);  
   timing splits startup from logic; interception cost arithmetic holds.
 
 ### Notes
 
-- Measured locally (estimate tokenizer): injection 0 → 204 → 452 tokens per
-  turn across the three arms; the dictionary itself accounts for 248 of those.
-  Net hook latency is tens of milliseconds; end-to-end ~150 ms is almost all
+- Measured locally (estimate tokenizer): injection 0 → 204 → 452 tokens per  
+  turn across the three arms; the dictionary itself accounts for 248 of those.  
+  Net hook latency is tens of milliseconds; end-to-end ~150 ms is almost all  
   interpreter startup.
-- Priority implied by the numbers: reduce how often the model trips a term
-  (rule injection + term-dict MCP lookup) before trimming injection text; the
+- Priority implied by the numbers: reduce how often the model trips a term  
+  (rule injection + term-dict MCP lookup) before trimming injection text; the  
   milliseconds are not worth optimising.
-- `pip install tiktoken` gives true counts automatically (the tool detects and
-  reports the backend). Offline environments fall back to the documented
-  estimator — tiktoken downloads its BPE table on first use, which a
+- `pip install tiktoken` gives true counts automatically (the tool detects and  
+  reports the backend). Offline environments fall back to the documented  
+  estimator — tiktoken downloads its BPE table on first use, which a  
   network-blocked sandbox will kill.
 
 ### Changed / Fixed
 
-- `tidy-dict.py` parse: rows indented with a leading tab (common when editing
-  by hand) produced a bogus empty first column and were reported as broken
+- `tidy-dict.py` parse: rows indented with a leading tab (common when editing  
+  by hand) produced a bogus empty first column and were reported as broken  
   entries. Leading empty cells are now dropped.
 
 ## [0.9.5] - 2026-10-19
 
 ### Added
 
-- **`tidy-dict.py` — dictionary tidy / lint tool.** Keeping a TSV readable by
+- **`tidy-dict.py` — dictionary tidy / lint tool.** Keeping a TSV readable by  
   hand was painful; this does it in one command:
-  - aligns the three columns (padding before the tab, CJK counted as two
+  - aligns the three columns (padding before the tab, CJK counted as two  
     columns) while leaving comments and section headers untouched;
   - normalizes BOM / whitespace / line endings;
-  - dedupes entries keeping the last occurrence, matching the runtime merge
+  - dedupes entries keeping the last occurrence, matching the runtime merge  
     semantics (user wins) and reporting each removal;
-  - lints: invalid regex entries, rows missing the target column, duplicate
-    keys. `--check` exits non-zero for real errors (pre-commit friendly);
+  - lints: invalid regex entries, rows missing the target column, duplicate  
+    keys. `--check` exits non-zero for real errors (pre-commit friendly);  
     the read-only pass never modifies files; rendering is idempotent.
   - Defaults to both dictionaries (bundled + user); `--path` targets one.
-- The bundled dictionary is reorganized into commented sections
-  (ML/evaluation, serving & distributed, robotics, LLM & token, stiff
+- The bundled dictionary is reorganized into commented sections  
+  (ML/evaluation, serving & distributed, robotics, LLM & token, stiff  
   technical metaphors, machine-register wording) and column-aligned.
-- **New entries**: 锚定 → 锁定 / 以 X 为基准 (anchor; Chinese engineers do not
-  say it — 锚点 in frontend page anchors stays legitimate, noted),
-  遗留缺口 → 剩下的待办 (remaining gap), 结构性缺陷 → 设计上的问题
+- **New entries**: 锚定 → 锁定 / 以 X 为基准 (anchor; Chinese engineers do not  
+  say it — 锚点 in frontend page anchors stays legitimate, noted),  
+  遗留缺口 → 剩下的待办 (remaining gap), 结构性缺陷 → 设计上的问题  
   (structural defect).
-- L1 gains rule 5 on register: write like a person — 剩下的待办 / 发现的问题,
+- L1 gains rule 5 on register: write like a person — 剩下的待办 / 发现的问题,  
   not machine nouns lifted from English sentence shapes.
-- User-added dictionary entries are now shown first in the L1 negative list,
+- User-added dictionary entries are now shown first in the L1 negative list,  
   so they are not squeezed out by the 30-entry cap.
-- Tests: `test_tidy_dict.py` (5 functions, 14 checks) covering parse/dedupe,
-  error reporting, alignment idempotence, exit codes, and the real bundled
+- Tests: `test_tidy_dict.py` (5 functions, 14 checks) covering parse/dedupe,  
+  error reporting, alignment idempotence, exit codes, and the real bundled  
   dictionary staying clean and tidied.
 
 ## [0.9.4] - 2026-10-19
 
 ### Changed
 
-- **Dictionary rewrites: expected writings now read like real Chinese.**
-  The second column had drifted into machine-generated, literal-for-literal
-  renderings (`下一刀 → 下一个削减项`). Every entry is rewritten to wording
-  a Chinese technical writer would actually produce, and the English gloss
+- **Dictionary rewrites: expected writings now read like real Chinese.**  
+  The second column had drifted into machine-generated, literal-for-literal  
+  renderings (`下一刀 → 下一个削减项`). Every entry is rewritten to wording  
+  a Chinese technical writer would actually produce, and the English gloss  
   / rationale moved out of the target column into the notes column:
   - `幽灵词元/工人/节点/层/网络 → ghost token / ghost worker / ghost node /
-    ghost layer / ghost network` (no established rendering → keep English,
-    per style rule #2), with the contextual alternatives in the notes
+    ghost layer / ghost network` (no established rendering → keep English,  
+    per style rule #2), with the contextual alternatives in the notes  
     (e.g. 失联节点 for a lost node still counted by the cluster);
   - `下一刀 / 下一道砍 / re:第\s*\d+\s*刀 → 下一处可以精简的部分 /
     第 N 处可以精简的部分` (cut in cost/scope contexts means trim, not knife);
-  - `死因 → 崩溃原因`, `钉死 → 敲定`, `令牌化 → token 化`,
-    `健全性检查 → 合理性检查`, `地面真值 → 真值`, and more.
-  Note-column guidance only: translations are suggestions, not literal
-  substitutions — rewrite the sentence.
-- **Dictionary typo/json-safe writing rules documented** in the TSV header
-  and README: target column must be (1) wording a real Chinese writer uses,
-  (2) a drop-in replacement with no parentheticals, (3) English kept where
+  - `死因 → 崩溃原因`, `钉死 → 敲定`, `令牌化 → token 化`,  
+    `健全性检查 → 合理性检查`, `地面真值 → 真值`, and more.  
+    Note-column guidance only: translations are suggestions, not literal  
+    substitutions — rewrite the sentence.
+- **Dictionary typo/json-safe writing rules documented** in the TSV header  
+  and README: target column must be (1) wording a real Chinese writer uses,  
+  (2) a drop-in replacement with no parentheticals, (3) English kept where  
   no established rendering exists, (4) community terms used when they exist.
-- L2 rewrite instructions now say explicitly to rewrite the sentence using
+- L2 rewrite instructions now say explicitly to rewrite the sentence using  
   the suggested wording rather than doing word-for-word substitution.
 
 ### Added
 
-- **L1 injects the expected writing alongside the banned term**
-  (`「A→B」` pairs). Previously rule 4 promised the expected writing in
-  parentheses but only listed the terms — the model saw what to avoid and
-  not what to write. Regex entries are rendered human-readably
-  (`第\s*\d+\s*刀` → `第N刀`). Cap remains 30 entries; beyond that the
+- **L1 injects the expected writing alongside the banned term**  
+  (`「A→B」` pairs). Previously rule 4 promised the expected writing in  
+  parentheses but only listed the terms — the model saw what to avoid and  
+  not what to write. Regex entries are rendered human-readably  
+  (`第\s*\d+\s*刀` → `第N刀`). Cap remains 30 entries; beyond that the  
   injection points at `term-dict` MCP's `lookup_term`.
-- **Dictionary version sync**: the bundled dictionary carries a
-  `# @sync <version>` marker. Local copies lacking it (older installs) or
-  behind it are refreshed from the bundled one at the next hook run, with
-  user-added entries (keys absent from the bundled file) preserved. Without
-  this, a bad writing shipped to users could never be corrected — a locally
-  copied row shadows every later bundled fix. Users who want full control
+- **Dictionary version sync**: the bundled dictionary carries a  
+  `# @sync <version>` marker. Local copies lacking it (older installs) or  
+  behind it are refreshed from the bundled one at the next hook run, with  
+  user-added entries (keys absent from the bundled file) preserved. Without  
+  this, a bad writing shipped to users could never be corrected — a locally  
+  copied row shadows every later bundled fix. Users who want full control  
   keep their own keys or use `ZH_GUARD_DICT`.
-- Tests: dictionary version sync (5 checks), L1 expected-writing pairs
-  (1 check); user-dictionary test adjusted to the new semantics
+- Tests: dictionary version sync (5 checks), L1 expected-writing pairs  
+  (1 check); user-dictionary test adjusted to the new semantics  
   (user-only additions win; 16 test functions total).
 
 ## [0.9.3] - 2026-10-19
 
 ### Added
 
-- **term-dict MCP server** (`hooks/term-dict-server.py`): the
-  terminology dictionary is now also queryable on demand via MCP —
-  a pull-mode knowledge layer complementing L1 (push injection) and
-  L2 (external detection). Pure-Python stdio implementation
-  (JSON-RPC 2.0, zero dependencies, system `python3`), registered in
-  the plugin manifest's `mcpServers` (context-mode-proven
-  `${CLAUDE_PLUGIN_ROOT}` pattern), so installing
-  `style-rules-zh-cn@mindforge` provides it with no extra setup.
-  Shares the merged dictionary (bundled + user, `re:` regex entries,
+- **term-dict MCP server** (`hooks/term-dict-server.py`): the  
+  terminology dictionary is now also queryable on demand via MCP —  
+  a pull-mode knowledge layer complementing L1 (push injection) and  
+  L2 (external detection). Pure-Python stdio implementation  
+  (JSON-RPC 2.0, zero dependencies, system `python3`), registered in  
+  the plugin manifest's `mcpServers` (context-mode-proven  
+  `${CLAUDE_PLUGIN_ROOT}` pattern), so installing  
+  `style-rules-zh-cn@mindforge` provides it with no extra setup.  
+  Shares the merged dictionary (bundled + user, `re:` regex entries,  
   install-time migration) and re-reads it on every call.
-- **Tools**: `lookup_term(query)` — bidirectional substring lookup
-  across direct-translation terms, expected writings, and notes
-  (case-insensitive); `check_text(text)` — pre-delivery self-check
-  with the same detection semantics as L2 (code/quote exemptions,
-  regex entries); `add_term(term, expected, note)` — appends to the
-  user dictionary (data flywheel; tab/newline sanitized; effective on
+- **Tools**: `lookup_term(query)` — bidirectional substring lookup  
+  across direct-translation terms, expected writings, and notes  
+  (case-insensitive); `check_text(text)` — pre-delivery self-check  
+  with the same detection semantics as L2 (code/quote exemptions,  
+  regex entries); `add_term(term, expected, note)` — appends to the  
+  user dictionary (data flywheel; tab/newline sanitized; effective on  
   the next injected turn and immediately queryable).
-- **Tests**: end-to-end stdio JSON-RPC suite driving the real server
-  (5 test functions, 21 assertions): handshake, tool listing, lookup
-  cases, check exemptions, flywheel add + immediate query/detect,
+- **Tests**: end-to-end stdio JSON-RPC suite driving the real server  
+  (5 test functions, 21 assertions): handshake, tool listing, lookup  
+  cases, check exemptions, flywheel add + immediate query/detect,  
   TSV-injection sanitization, unknown-tool error handling.
-- **New dictionary entries**: 钉死 → 敲定/固定 (nail down),
+- **New dictionary entries**: 钉死 → 敲定/固定 (nail down),  
   范围守卫 → 作用域守卫 (scope guard).
-- `setup-claude.sh` links the server file and prints the manual MCP
+- `setup-claude.sh` links the server file and prints the manual MCP  
   registration command for symlink deployments.
 
 ## [0.9.2] - 2026-10-19
 
 ### Added
 
-- **Regex dictionary entries**: terms whose first column starts with
-  `re:` are matched as regular expressions, covering variable-number
-  patterns that literal substring matching cannot (e.g. 「第36刀」,
-  「第 128 刀」 → the whole 第N刀 class via `re:第\s*\d+\s*刀`).
-  Invalid regexes are skipped per entry (fail-open). L2 rewrite
-  instructions cite the actually matched text; L1's negative list
+- **Regex dictionary entries**: terms whose first column starts with  
+  `re:` are matched as regular expressions, covering variable-number  
+  patterns that literal substring matching cannot (e.g. 「第36刀」,  
+  「第 128 刀」 → the whole 第N刀 class via `re:第\s*\d+\s*刀`).  
+  Invalid regexes are skipped per entry (fail-open). L2 rewrite  
+  instructions cite the actually matched text; L1's negative list  
   shows the pattern.
-- **New dictionary entries**: 下一刀, 下一道砍 (next-cut
+- **New dictionary entries**: 下一刀, 下一道砍 (next-cut  
   mistranslations in cost/scope contexts), and the regex entry above.
 
 ## [0.9.1] - 2026-10-19
 
 ### Changed
 
-- **zh-guard merged into the style-rules-zh-cn plugin** (`./hooks`):
-  the standalone `zh-guard` plugin is removed; the dictionary
-  (`terminology.tsv`), L1 (`inject.py`), and L2 (`inspect.py`) now live
-  alongside the style-rules hook files, shipped and installed as one
-  plugin. Chinese users install `style-rules-zh-cn@mindforge` once and
+- **zh-guard merged into the style-rules-zh-cn plugin** (`./hooks`):  
+  the standalone `zh-guard` plugin is removed; the dictionary  
+  (`terminology.tsv`), L1 (`inject.py`), and L2 (`inspect.py`) now live  
+  alongside the style-rules hook files, shipped and installed as one  
+  plugin. Chinese users install `style-rules-zh-cn@mindforge` once and  
   get both.
-- **Install-time dictionary migration** (all three channels):
-  the dictionary is maintained in the repo at `hooks/terminology.tsv`
-  (distribution source). On install it lands at
-  `~/.claude/zh-guard/terminology.tsv` — explicitly copied by
-  `setup-claude.sh`, or lazily on the first hook run for Claude
-  marketplace and Codex marketplace installs. Migration never
-  overwrites an existing user dictionary; at runtime the bundled and
-  user dictionaries merge (user entries win), so plugin updates
+- **Install-time dictionary migration** (all three channels):  
+  the dictionary is maintained in the repo at `hooks/terminology.tsv`  
+  (distribution source). On install it lands at  
+  `~/.claude/zh-guard/terminology.tsv` — explicitly copied by  
+  `setup-claude.sh`, or lazily on the first hook run for Claude  
+  marketplace and Codex marketplace installs. Migration never  
+  overwrites an existing user dictionary; at runtime the bundled and  
+  user dictionaries merge (user entries win), so plugin updates  
   deliver new entries without losing user flywheel entries.
-- `setup-claude.sh` Step 6 links `inject.py`, `inspect.py`, and
-  `terminology.tsv` into `~/.claude/hooks/`, migrates the dictionary,
-  and the settings merge now deduplicates on all three hook commands
+- `setup-claude.sh` Step 6 links `inject.py`, `inspect.py`, and  
+  `terminology.tsv` into `~/.claude/hooks/`, migrates the dictionary,  
+  and the settings merge now deduplicates on all three hook commands  
   (inject-style-rules.sh, inject.py, inspect.py).
 
 ### Fixed
+
 
 - Test suite isolation: tests now set `ZH_GUARD_HOME` to a temp dir,
   so runs never touch the real `~/.claude/zh-guard/`.
@@ -408,6 +446,7 @@ stays 100/A; all behavior and routing cases pass.
     mutation checks via `smelt doctor --agent`.
 - README gained an Evaluation section; `make eval` / `make eval-llm` now
   cover agent lint/routing/behavior too.
+
 
 ### Fixed
 

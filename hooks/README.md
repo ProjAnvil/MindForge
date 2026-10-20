@@ -6,16 +6,48 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 
 | 组件 | 文件 | 事件/通道 | 职责 |
 |---|---|---|---|
-| 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit / SubagentStart | 注入受控写作规范（中文+英文） |
+| 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit（+ SubagentStart，仅 Claude） | 注入受控写作规范（中文+英文） |
 | L0 字典 | terminology.tsv | - | 术语字典（数据飞轮，仓库内维护） |
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
-| L2 出口检测 | inspect.py | Stop / SubagentStop | 命中直译词要求重写（按地道措辞重写整句） |
+| L2 出口检测 | inspect.py | Stop（+ SubagentStop，仅 Claude） | 命中直译词要求重写（按地道措辞重写整句） |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 | 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
 | 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
 | 方案成本评测 | eval-zh-guard.py | 手动运行 | 装 vs 不装（含空字典）：token、耗时、拦截代价 |
 
 所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
+
+## 多平台
+
+hook 配置按平台拆分：
+
+- `hooks/hooks.json`（标准位置，Claude Code 与 zcode 都自动加载）只含三平台
+  都支持的事件：SessionStart、UserPromptSubmit、Stop。
+- `hooks/subagent-hooks.json` 只含 Claude Code 支持的 SubagentStart /
+  SubagentStop，由 `.claude-plugin/plugin.json` 的 `hooks` 字段声明
+  （与自动发现的 hooks.json 合并加载，Claude Code 行为不变）。
+
+### zcode
+
+zcode 直接装本插件（`.claude-plugin/plugin.json` 在其 manifest 查找列表内）。
+`.zcode-plugin/plugin.json` 专为 zcode 准备：不带 `hooks` 字段，zcode 优先读它，
+只会自动加载 `hooks/hooks.json`，不会再看到自己没有的事件
+（SubagentStart / SubagentStop 在 zcode 属于永不触发的死配置）。
+
+- 注入（SessionStart / UserPromptSubmit）：zcode 同样解析
+  `hookSpecificOutput.additionalContext`，脚本原样可用。
+- MCP：zcode 自动启动 term-dict。
+- Stop：zcode 的契约是 `decision:"block"` + reason；`continue:false` 在 zcode
+  里语义相反（允许结束）。inspect.py 检测 `ZCODE_PLUGIN_ROOT` 自动切换输出。
+- 子代理：zcode 没有子代理事件，规范注入与 L2 覆盖不到子代理。
+- 用户级 config 里的 hook 需要 `hooks.enabled: true`；插件 hook 跟随插件
+  启停，不需要。更新插件后新建 session 才生效（hook 配置有会话快照）。
+
+### Kimi Code
+
+尚未适配。配置在 `~/.kimi-code/config.toml` 的 `[[hooks]]`（仅 4 个字段），
+注入机制是 stdout 纯文本附加到上下文，只有 PreToolUse / Stop /
+UserPromptSubmit 三个事件可阻断，其余全是观察型（fire-and-forget）。
 
 ## term-dict MCP 服务
 
@@ -183,7 +215,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（16 项）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（18 项，含 zcode Stop 契约与文件结构守卫）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
 python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）

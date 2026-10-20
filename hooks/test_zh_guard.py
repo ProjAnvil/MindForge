@@ -331,6 +331,71 @@ def test_regex_invalid_pattern_skipped():
         shutil.rmtree(home, ignore_errors=True)
 
 
+def test_l2_zcode_stop_contract():
+    """zcode 的 Stop 契约：decision:block + reason 续跑一轮。
+
+    zcode 不认 continue:false（那里语义是「允许结束」），
+    输出格式错了会让 L2 在 zcode 上整个失效。
+    检测方式：环境变量 ZCODE_PLUGIN_ROOT（zcode 只向插件进程注入）。
+    """
+    env, sd = temp_env()
+    env["ZCODE_PLUGIN_ROOT"] = os.path.join(sd, "fake-zcode-root")
+    proc = run_hook(
+        INSPECT,
+        {"session_id": "t-zc1", "last_assistant_message": "我们对网络做病灶实验。"},
+        env,
+    )
+    check("zcode 下 L2 命中仍阻断（exit 2）", proc.returncode == 2, "rc=%d" % proc.returncode)
+    try:
+        out = json.loads(proc.stdout.decode("utf-8"))
+    except Exception:
+        out = {}
+    check("zcode 下输出 decision=block", out.get("decision") == "block",
+          proc.stdout.decode("utf-8")[:200])
+    check("zcode 下不输出 continue:false", out.get("continue") is not False,
+          proc.stdout.decode("utf-8")[:200])
+    check("zcode 下 reason 带修正指引（消融实验）",
+          "消融实验" in out.get("reason", ""), str(out.get("reason", ""))[:200])
+    check("zcode 下 stderr 仍写阻断理由", "消融实验" in proc.stderr.decode("utf-8"),
+          proc.stderr.decode("utf-8")[:200])
+    proc2 = run_hook(
+        INSPECT,
+        {"session_id": "t-zc2", "last_assistant_message": "重试逻辑已修复，重复请求降到 7 次。"},
+        env,
+    )
+    check("zcode 下干净消息放行（exit 0）", proc2.returncode == 0, "rc=%d" % proc2.returncode)
+
+
+ZCODE_EVENTS = {
+    "SessionStart", "UserPromptSubmit", "PreToolUse", "PermissionRequest",
+    "PostToolUse", "PostToolUseFailure", "Stop",
+}
+
+
+def test_plugin_hook_files_structure():
+    """hook 文件按平台拆分：标准文件只放 zcode 支持的事件，子代理事件单独给 Claude。"""
+    with open(os.path.join(HERE, "hooks", "hooks.json"), encoding="utf-8") as f:
+        core = json.load(f).get("hooks", {})
+    bad = sorted(set(core) - ZCODE_EVENTS)
+    check("hooks/hooks.json 只含 zcode 支持的事件", not bad, "多出：%s" % bad)
+    with open(os.path.join(HERE, "hooks", "subagent-hooks.json"), encoding="utf-8") as f:
+        sub = json.load(f).get("hooks", {})
+    check("subagent-hooks.json 恰好含 SubagentStart/SubagentStop",
+          set(sub) == {"SubagentStart", "SubagentStop"}, "实际：%s" % sorted(sub))
+    with open(os.path.join(HERE, ".claude-plugin", "plugin.json"), encoding="utf-8") as f:
+        m = json.load(f)
+    check("Claude manifest 声明 subagent-hooks.json", m.get("hooks") == "./hooks/subagent-hooks.json",
+          str(m.get("hooks")))
+    zcode_manifest = os.path.join(HERE, ".zcode-plugin", "plugin.json")
+    check(".zcode-plugin/plugin.json 存在", os.path.exists(zcode_manifest), zcode_manifest)
+    if os.path.exists(zcode_manifest):
+        with open(zcode_manifest, encoding="utf-8") as f:
+            zm = json.load(f)
+        check("zcode manifest 不声明额外 hooks（避免死配置）", "hooks" not in zm, str(zm.get("hooks")))
+        check("zcode manifest 保留 term-dict MCP", "term-dict" in zm.get("mcpServers", {}),
+              str(zm.get("mcpServers", {}).keys()))
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
