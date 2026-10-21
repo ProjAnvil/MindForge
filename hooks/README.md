@@ -101,10 +101,10 @@ python3 hooks/eval-zh-guard.py --turns 10 50 # 折算成几轮对话的累计 to
 
 | 每轮成本 | 基线 | 空字典 | 完整字典 |
 |---|---|---|---|
-| 注入字符 / token | 0 | 312 / 204 | 720 / **452** |
-| 其中字典带来的边际 | — | 0 | **248 token** |
-| L1 耗时（净，扣掉解释器启动） | 0 | ~17 ms | ~26 ms |
-| L2 耗时（净） | 0 | ≈同上 | ~26 ms |
+| 注入字符 / token | 0 | 409 / 254 | 851 / **533** |
+| 其中字典带来的边际 | — | 0 | **279 token** |
+| L1 耗时（净，扣掉解释器启动） | 0 | ~30 ms | ~25 ms |
+| L2 耗时（净） | 0 | ≈同上 | ~27 ms |
 
 另外，**最贵的一项不在注入，而在拦截**：一旦命中，那条回复白写一遍还要重写一遍
 （约 236 token）+ 重写指令 128 token，单次约 364 token；防循环上限是 10 分钟 3 次，
@@ -184,7 +184,7 @@ token 计数优先用 `tiktoken`（装了更准），没装就用标注清楚的
 
 一个值得记的**负结果**：想靠去重省 token 是省不出来的——加载层本来就按唯一键
 合并。整理改的是文件卫生和可读性，不是运行开销；真正的 token 杠杆在「注入上限
-30 条 + term-dict MCP 拉模式」这一层。
+40 条 + term-dict MCP 拉模式」这一层。
 - **期望写法怎么写**（第二列，最容易写坏的一列）：
 
   1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
@@ -215,7 +215,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（18 项，含 zcode Stop 契约与文件结构守卫）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（20 项，含 zcode Stop 契约、文件结构守卫、新词条）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
 python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）

@@ -146,7 +146,7 @@ try:
         rest = [(k, v) for k, v in merged.items() if k not in dict(user_only)]
         return user_only + rest
 
-    MAX_SHOWN = 30
+    MAX_SHOWN = 40
 
     def build_context(entries):
         shown = entries[:MAX_SHOWN]
@@ -168,7 +168,10 @@ try:
             + (pairs + more if pairs else "暂无") +
             "\n5. 措辞要像人在说话：说「剩下的待办」「发现的问题」「这儿有个 bug」，"
             "别端着写成「遗留缺口」「结构性缺陷」这类从英文句型硬搬过来的词。"
-            "一句话里如果名词叠着名词，就拆成短句直说。"
+            "汇报进展说「大致了解了」，别写「已初步清楚」。"
+            "\n6. 英文名词短语别硬拼成中文合成词：slot key 说「slot 的 key」，"
+            "key-value 就写 key-value，不写「槽键」「键-值关系」。"
+            "名词叠着名词时，拆成短句直说。"
         )
 
     def main():

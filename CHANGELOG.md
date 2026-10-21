@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Dictionary: four new translationese entries from live bad cases — 槽位→插槽 / slot,
+  槽键→slot 的 key, 键-值关系→key-value, 已初步清楚→大致了解了 (`@sync` bumped to
+  0.9.8 so installed dictionaries refresh on the next hook run).
+- L1 injection gains a sixth rule against hard-compounded noun-phrase
+  translations (slot key→「槽键」-style compounds) and rule 5 now names the
+  公文腔 progress phrase 「大致了解了」 explicitly.
+- The per-turn injection cap is raised from 30 to 40 entries. With 32+ bundled
+  entries the old cap had already cut the 机器腔 group out of the injected
+  list; the new entries would never have been visible to the model.
+
+### Notes
+
+- Cost re-measured (estimate backend): full-dictionary injection is now
+  851 chars / 533 tokens per turn, dictionary marginal 279 tokens,
+  net hook latency unchanged at ~25–30 ms.
+
 ## [0.9.7] - 2026-10-20
 
 ### Fixed

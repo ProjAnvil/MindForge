@@ -396,6 +396,33 @@ def test_plugin_hook_files_structure():
               str(zm.get("mcpServers", {}).keys()))
 
 
+def test_l2_blocks_new_translationese():
+    """新补的直译词条：槽位 / 槽键 / 键-值关系 / 已初步清楚。"""
+    env, sd = temp_env()
+    cases = [
+        ("每个槽位对应一个插件。", "插槽"),
+        ("配置按槽键存储。", "slot 的 key"),
+        ("存储为键-值关系。", "key-value"),
+        ("机制已初步清楚。", "大致了解"),
+    ]
+    for i, (msg, want) in enumerate(cases):
+        proc = run_hook(INSPECT, {"session_id": "t-new%d" % i, "last_assistant_message": msg}, env)
+        body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+        check("L2 拦截新词条（%s）" % msg[:12],
+              proc.returncode == 2 and want in body, body[:200])
+
+
+def test_l1_injection_new_rules_and_wider_cap():
+    """注入规则覆盖生硬翻译腔；展示上限放宽后尾部词条不再被截掉。"""
+    env, sd = temp_env()
+    proc = run_hook(INJECT, {"prompt": "hi", "session_id": "t-l1new"}, env)
+    ctx = json.loads(proc.stdout.decode("utf-8"))["hookSpecificOutput"]["additionalContext"]
+    check("L1 注入含规则六（别硬拼合成词）", "硬拼" in ctx and "slot 的 key" in ctx, ctx[:400])
+    check("L1 注入含规则五新措辞（大致了解了）", "大致了解了" in ctx, ctx[:400])
+    check("L1 展示尾部词条（槽位→，验证上限放宽）", "槽位→" in ctx, ctx[-300:])
+    check("L1 注入仍保留既有规则（剩下的待办）", "剩下的待办" in ctx, ctx[:400])
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:
