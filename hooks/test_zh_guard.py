@@ -505,6 +505,51 @@ def test_prompt_judge_config():
     check("判官 prompt 声明 ok/reason 返回契约", '"ok"' in p and "reason" in p, p[:120])
 
 
+def test_project_level_dict():
+    """项目级词典：cwd 向上找 mindforge.zh-dict.tsv，优先级最高。
+
+    三级结构：内置 → 用户级 → 项目级（后者覆盖前者）；
+    向上查找在含 .git 的项目根停止，根之外的词典不生效。
+    """
+    base = tempfile.mkdtemp(prefix="zh-guard-proj-")
+    proj = os.path.join(base, "proj")
+    sub = os.path.join(proj, "sub", "deep")
+    os.makedirs(os.path.join(proj, ".git"))
+    os.makedirs(sub)
+    with open(os.path.join(proj, "mindforge.zh-dict.tsv"), "w", encoding="utf-8") as f:
+        f.write("项目黑词\t项目写法\t项目词条\n"
+                "病灶实验\t项目覆盖写法\t项目覆盖内置\n")
+    with open(os.path.join(base, "mindforge.zh-dict.tsv"), "w", encoding="utf-8") as f:
+        f.write("外部黑词\t外部写法\t不应被发现\n")
+    env, sd = temp_env()
+    try:
+        proc = run_hook(INSPECT, {"session_id": "pj1", "cwd": sub,
+                                  "last_assistant_message": "这里出现了项目黑词。"}, env)
+        check("项目级词条被 L2 拦截（cwd 在子目录，向上发现）",
+              proc.returncode == 2, "rc=%d" % proc.returncode)
+        proc2 = run_hook(INSPECT, {"session_id": "pj2", "cwd": sub,
+                                   "last_assistant_message": "我们对网络做病灶实验。"}, env)
+        body = proc2.stdout.decode("utf-8") + proc2.stderr.decode("utf-8")
+        check("项目级覆盖内置词条（用项目覆盖写法）",
+              proc2.returncode == 2 and "项目覆盖写法" in body
+              and "消融实验" not in body, body[:200])
+        proc3 = run_hook(INSPECT, {"session_id": "pj3", "cwd": sub,
+                                   "last_assistant_message": "这里出现了外部黑词。"}, env)
+        check("项目根之外不查（.git 边界）", proc3.returncode == 0, "rc=%d" % proc3.returncode)
+        proc4 = run_hook(INJECT, {"prompt": "hi", "session_id": "pj4", "cwd": sub}, env)
+        ctx = json.loads(proc4.stdout.decode("utf-8"))["hookSpecificOutput"]["additionalContext"]
+        check("L1 注入含项目级词条", "项目黑词→项目写法" in ctx, ctx[:200])
+        check("L1 展示顺序：项目级排在内置前",
+              ctx.index("项目黑词") < ctx.index("神经织网"), ctx[:300])
+        proc5 = run_hook(INSPECT_FILE, {
+            "session_id": "pj5", "cwd": sub, "tool_name": "Write",
+            "tool_input": {"file_path": "/x/a.md", "content": "这里出现了项目黑词。"},
+        }, env)
+        check("文件写检测同样吃到项目级词条", proc5.returncode == 2, "rc=%d" % proc5.returncode)
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:

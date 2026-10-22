@@ -7,7 +7,8 @@
     python3 tidy-dict.py --write              # 体检 + 写回排版后的文件
     python3 tidy-dict.py --write --path FILE  # 指定文件，不用两边的默认路径
 
-默认处理两个文件：自带字典（本目录）和用户字典（~/.claude/zh-guard/）。
+默认处理三个文件：自带字典（本目录）、用户字典（~/.claude/zh-guard/）
+和项目级词典（cwd 向上发现的 mindforge.zh-dict.tsv，找到才处理）。
 
 做的事：
   1. 排版：三列按宽度对齐（补空格到 Tab 前），注释行原样保留；
@@ -28,6 +29,7 @@ MAX_COL = 28  # 对齐时列宽上限，避免长词条把表格撑爆
 
 
 def default_paths():
+    from zh_guard_common import find_project_dict
     paths = [os.path.join(HERE, "terminology.tsv")]
     home = os.environ.get(
         "ZH_GUARD_HOME",
@@ -36,6 +38,9 @@ def default_paths():
     user = os.path.join(home, "terminology.tsv")
     if os.path.exists(user):
         paths.append(user)
+    project = find_project_dict(os.getcwd())
+    if project:
+        paths.append(project)
     return paths
 
 

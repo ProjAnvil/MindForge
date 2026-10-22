@@ -7,7 +7,8 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | 组件 | 文件 | 事件/通道 | 职责 |
 |---|---|---|---|
 | 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit（+ SubagentStart，仅 Claude） | 注入受控写作规范（中文+英文） |
-| L0 字典 | terminology.tsv | - | 术语字典（数据飞轮，仓库内维护） |
+| 公共库 | zh_guard_common.py | - | 三级词典加载、豁免、防循环状态（hook 脚本的同目录依赖） |
+| L0 字典 | terminology.tsv（内置） / mindforge.zh-dict.tsv（项目级） | - | 三级术语字典：内置 → 用户级 → 项目级（数据飞轮） |
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
 | L2 出口检测 | inspect.py | Stop（+ SubagentStop，仅 Claude） | 命中直译词要求重写（按地道措辞重写整句） |
 | L2 文件写入口 | inspect-file.py | PreToolUse（Write\|Edit\|NotebookEdit） | 文档类文件（.md/.markdown/.txt/.rst）写入前检测，deny 并要求改写 |
@@ -135,7 +136,24 @@ token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估
 （另有一个 `eval-tidy-dict.py`，只评测 tidy 整理前后的行为等价性，与上面的方案级
 成本不是一回事。）
 
-## 字典：安装迁移 + 版本同步
+## 字典：三级加载 + 安装迁移 + 版本同步
+
+字典按三级加载，优先级从低到高（后加载覆盖先加载）：
+
+1. **内置**：本目录 `terminology.tsv`，随插件分发，是发布源；
+2. **用户级**：`~/.claude/zh-guard/terminology.tsv`（`ZH_GUARD_HOME` 可改），
+   首次 hook 运行时从内置迁移过去，升级时保留自加词条；
+3. **项目级**：`mindforge.zh-dict.tsv`，放在项目根随仓库提交，团队共享
+   （cspell 项目词典同款机制）。hook 从 stdin 的 `cwd` 逐级向上发现，
+   遇到含 `.git` 的目录即停——项目根之外的词典不生效。
+
+展示顺序（L1 注入）与覆盖顺序相反：项目级 → 用户级 → 内置，
+越具体越靠前，超出注入上限时先牺牲宽泛层。L2 出口检测、文件写检测、
+L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程拿不到
+会话 cwd，只合并前两级。
+
+**部署要求**：`zh_guard_common.py` 必须与 hook 脚本同目录
+（插件市场安装自动满足；手动复制部署时别漏拷这个文件）。
 
 - **发布源**：本目录 `terminology.tsv`（在 MindForge 仓库内维护）。
 - **安装时迁移**：首次 hook 运行时，字典被复制到
@@ -232,7 +250,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（23 项，含 zcode 契约、文件写入口、句式词条、判官配置）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（24 项，含三级词典、zcode 契约、文件写入口、句式词条）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
 python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）

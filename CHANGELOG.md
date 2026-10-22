@@ -9,6 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Three-tier dictionary loading** — project-level terms now work like
+  cspell's project dictionary. A `mindforge.zh-dict.tsv` placed at the
+  project root (checked into the repo, shared with the team) is discovered
+  by walking up from the hook's `cwd`, stopping at the first `.git`
+  directory so files outside the project root never apply. Precedence:
+  bundled → user → project (most specific wins); L1 display order is the
+  reverse, so project terms surface first and broad tiers get cut first
+  when the cap hits. All three hook execution points (L1 / L2 / file
+  guard) merge all three tiers; the long-lived term-dict MCP process has
+  no session cwd and keeps two. `tidy-dict` now covers the project tier
+  when found from the working directory.
+- **`zh_guard_common.py`** — dictionary loading, migration, exemptions and
+  anti-loop state extracted from the three hook scripts (each had its own
+  copy of the loader; a fourth copy for project-level logic was the
+  signal to consolidate). Hooks are now thin fail-open shells; the common
+  module has no import side effects. Deployment note: it must live next
+  to the hook scripts.
 - **File-write guard (new `inspect-file.py`, PreToolUse on Write|Edit|NotebookEdit)** —
   the Stop exit check only sees the assistant message; a model writing stiff
   translationese into README / docs / comments slipped through when the message
@@ -47,9 +64,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cost re-measured (estimate backend): full-dictionary injection is now
   851 chars / 533 tokens per turn, dictionary marginal 279 tokens,
   net hook latency unchanged at ~25–30 ms.
-- Tests 20 → 23: file-guard behaviors (deny/clean/suffix-gate/quote-exemption/
-  anti-loop/Edit coverage), sentence-pattern blocking, and judge-config
-  guards ($ARGUMENTS, stop_hook_active, ok/reason contract, manifest wiring).
+- Tests 20 → 24: three-tier discovery (project override, .git boundary,
+  display order, file-guard pickup), file-guard behaviors (deny/clean/suffix-gate/
+  quote-exemption/anti-loop/Edit coverage), sentence-pattern blocking, and
+  judge-config guards ($ARGUMENTS, stop_hook_active, ok/reason contract,
+  manifest wiring).
 
 ## [0.9.7] - 2026-10-20
 

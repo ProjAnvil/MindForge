@@ -9,16 +9,11 @@
     zcode 的 Stop 契约里 continue:false 语义是「允许结束」，不能输出。
     未命中或任何异常时放行。
 
-字典（install 时迁移模型，与 inject.py 相同）：
-  1. 插件自带 terminology.tsv 是发布源；
-  2. 首次运行时若 ~/.claude/zh-guard/terminology.tsv 不存在，自动复制过去；
-  3. 运行时合并读取插件自带 + 用户目录（用户条目优先）；
-  4. ZH_GUARD_DICT 环境变量可指定单一字典文件（调试用）。
+字典三级（项目级 > 用户级 > 内置），公共逻辑见 zh_guard_common.py；
+项目级词典从 stdin 的 cwd 向上发现（mindforge.zh-dict.tsv）。
 
-防循环：
-  1. 同一内容（hash 相同）只阻断一次；
-  2. 每会话 10 分钟窗口内最多阻断 3 次，超出直接放行。
-停用方式：export ZH_GUARD_OFF=1，或创建 OFF 文件（ZH_GUARD_HOME/ 或插件目录）。
+防循环：同一内容只阻断一次；10 分钟窗口内最多 3 次。
+停用方式：export ZH_GUARD_OFF=1，或创建 OFF 文件。
 
 设计原则（fail-open）：脚本错误、超时、字典缺失，一律放行，
 绝不卡死会话。
@@ -28,248 +23,95 @@ import json
 import os
 import re
 import sys
-import time
+
+from zh_guard_common import (
+    allow_block,
+    ensure_user_dict,
+    is_off,
+    load_pairs,
+    load_state,
+    record_block,
+    save_state,
+    state_path,
+    strip_code,
+)
+
+
+def main():
+    if is_off():
+        sys.exit(0)
+    ensure_user_dict()
+    raw = sys.stdin.read()
+    try:
+        payload = json.loads(raw)
+    except Exception:
+        sys.exit(0)
+    msg = payload.get("last_assistant_message") or ""
+    if not msg.strip():
+        sys.exit(0)
+    session_id = payload.get("session_id") or "default"
+
+    # 平台检测：zcode 只向插件进程注入 ZCODE_PLUGIN_ROOT。
+    # zcode 的 Stop 契约是 decision:block（continue:false 在那里
+    # 语义相反，会把拦截整个废掉），必须分开输出。
+    is_zcode = bool(os.environ.get("ZCODE_PLUGIN_ROOT"))
+
+    cwd = payload.get("cwd") or ""
+    pairs = load_pairs(cwd)
+    if not pairs:
+        sys.exit(0)
+
+    text = strip_code(msg)
+    hits = []
+    for bad, good, is_regex in pairs:
+        if is_regex:
+            try:
+                m = re.search(bad, text)
+            except re.error:
+                continue  # 无效正则：跳过该词条（fail-open）
+            if m:
+                hits.append((m.group(0), good))
+        elif bad in text:
+            hits.append((bad, good))
+    if not hits:
+        sys.exit(0)
+
+    content_hash = hashlib.sha1(msg.encode("utf-8")).hexdigest()
+    spath = state_path("state-", session_id)
+    state = load_state(spath)
+    if not allow_block(state, content_hash):
+        sys.exit(0)
+
+    record_block(state, content_hash)
+    save_state(spath, state)
+
+    fixes = "；".join("%s→%s" % (bad, good) for bad, good in hits[:10])
+    reason = (
+        "你的上一条回复包含字面直译的术语，不是地道中文，需要重写。"
+        "按箭头右侧的写法表达（右侧是自然的中文措辞，要据此重写整句，"
+        "不要做机械的词到词替换）：" + fixes + "。"
+        "其余内容、结论和代码保持不变，"
+        "输出修正后的完整回复。"
+        "再次提醒：有中文社区定译用定译，无定译保留英文原词，"
+        "禁止字面直译英文黑话。"
+    )
+    if is_zcode:
+        body = json.dumps({
+            "decision": "block",
+            "reason": reason,
+        }, ensure_ascii=False)
+    else:
+        body = json.dumps({
+            "continue": False,
+            "reason": reason,
+            "stopReason": reason,
+        }, ensure_ascii=False)
+    sys.stdout.write(body + "\n")
+    sys.stderr.write(reason + "\n")
+    sys.exit(2)
+
 
 try:
-    HERE = os.path.dirname(os.path.abspath(__file__))
-    STATE_DIR = os.environ.get(
-        "ZH_GUARD_STATE_DIR",
-        os.path.join(os.environ.get("TMPDIR", "/tmp"), "zh-guard"),
-    )
-    MAX_BLOCKS_PER_WINDOW = 3
-    WINDOW_SECONDS = 600
-
-    def guard_home():
-        return os.environ.get(
-            "ZH_GUARD_HOME",
-            os.path.join(os.path.expanduser("~"), ".claude", "zh-guard"),
-        )
-
-    def is_off():
-        if os.environ.get("ZH_GUARD_OFF"):
-            return True
-        if os.path.exists(os.path.join(HERE, "OFF")):
-            return True
-        return os.path.exists(os.path.join(guard_home(), "OFF"))
-
-    def ensure_user_dict():
-        """安装迁移 + 版本同步。
-
-        1. 用户字典不存在：复制插件自带字典过去；
-        2. 已存在且 @sync 版本与自带字典一致：不动；
-        3. 版本不一致（插件升级带来了新词条或改了写法）：以新版自带字典为底，
-           再把用户自加的词条（第一列不在自带字典里的行）追加回去。
-
-        用户对自带词条本身的本地改写会被新版覆盖——这是刻意的：字典要能迭代，
-        否则「下一刀 → 下一个削减项」这种机器写法一旦被复制出厂就再也修不掉。
-        想完全自己掌控字典，用 ZH_GUARD_DICT 指向自己的文件。
-        """
-        try:
-            home = guard_home()
-            user = os.path.join(home, "terminology.tsv")
-            bundled = os.path.join(HERE, "terminology.tsv")
-            if not os.path.exists(bundled):
-                return
-            with open(bundled, encoding="utf-8") as f:
-                bundled_text = f.read()
-            if not os.path.exists(user):
-                os.makedirs(home, exist_ok=True)
-                with open(user, "w", encoding="utf-8") as f:
-                    f.write(bundled_text)
-                return
-            marker = ""
-            for line in bundled_text.splitlines():
-                if line.startswith("@sync") or line.startswith("# @sync"):
-                    marker = line.strip()
-                    break
-            with open(user, encoding="utf-8") as f:
-                user_text = f.read()
-            if marker and marker in user_text:
-                return
-            bundled_keys = set()
-            for line in bundled_text.splitlines():
-                line = line.lstrip("\ufeff")
-                if not line or line.startswith("#"):
-                    continue
-                key = line.split("\t")[0].strip()
-                if key:
-                    bundled_keys.add(key)
-            kept = []
-            for line in user_text.splitlines():
-                line = line.lstrip("\ufeff")
-                if not line or line.startswith("#"):
-                    continue
-                key = line.split("\t")[0].strip()
-                if key and key not in bundled_keys:
-                    kept.append(line)
-            text = bundled_text if bundled_text.endswith("\n") else bundled_text + "\n"
-            if kept:
-                text += "\n# 以下为用户自加词条（字典升级时自动保留）\n" + "\n".join(kept) + "\n"
-            with open(user, "w", encoding="utf-8") as f:
-                f.write(text)
-        except Exception:
-            pass
-
-    def dict_paths():
-        """返回字典文件路径列表：插件自带在前，用户覆盖在后。"""
-        override = os.environ.get("ZH_GUARD_DICT")
-        if override:
-            return [override] if os.path.exists(override) else []
-        paths = []
-        default = os.path.join(HERE, "terminology.tsv")
-        if os.path.exists(default):
-            paths.append(default)
-        user = os.path.join(guard_home(), "terminology.tsv")
-        if os.path.exists(user):
-            paths.append(user)
-        return paths
-
-    def load_dict():
-        """合并读取 [(词, 期望写法, 是否正则), ...]。用户条目覆盖插件默认。
-
-        第一列以 re: 开头表示正则词条（匹配可变模式，如 第N刀），
-        其余按字面子串匹配。无效正则在使用处跳过（fail-open）。
-        """
-        merged = {}
-        for path in dict_paths():
-            with open(path, encoding="utf-8-sig") as f:
-                for line in f:
-                    line = line.rstrip("\n").lstrip("\ufeff")
-                    if not line or line.startswith("#"):
-                        continue
-                    parts = [p.strip() for p in line.split("\t")]
-                    if len(parts) >= 2 and parts[0]:
-                        merged[parts[0]] = parts[1]
-        out = []
-        for bad, good in merged.items():
-            if bad.startswith("re:"):
-                out.append((bad[3:], good, True))
-            else:
-                out.append((bad, good, False))
-        return out
-
-    def strip_code(text):
-        """去掉围栏代码块、行内代码与引号内提及，只检查自然语言部分。
-
-        引号豁免：「」与“”内的术语属于提及（讨论这个词），
-        不是使用（拿这个词表达意思），不拦截。
-        """
-        text = re.sub(r"```.*?```", "", text, flags=re.S)
-        text = re.sub(r"`[^`\n]*`", "", text)
-        text = re.sub(r"「[^」\n]*」", "", text)
-        text = re.sub(r"\u201c[^\u201d\n]*\u201d", "", text)
-        return text
-
-    def state_path(session_id):
-        safe = re.sub(r"[^A-Za-z0-9_-]", "_", session_id or "default")
-        return os.path.join(STATE_DIR, "state-" + safe + ".json")
-
-    def load_state(path):
-        try:
-            with open(path, encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return {"blocked_hashes": [], "block_times": []}
-
-    def save_state(path, state):
-        try:
-            os.makedirs(STATE_DIR, exist_ok=True)
-            with open(path, "w", encoding="utf-8") as f:
-                json.dump(state, f)
-        except Exception:
-            pass
-
-    def allow_block(state, content_hash):
-        """防循环判定：同 hash 只断一次；窗口内限次。"""
-        now = time.time()
-        if content_hash in state.get("blocked_hashes", []):
-            return False
-        recent = [t for t in state.get("block_times", []) if now - t < WINDOW_SECONDS]
-        if len(recent) >= MAX_BLOCKS_PER_WINDOW:
-            return False
-        return True
-
-    def record_block(state, content_hash):
-        now = time.time()
-        hashes = state.get("blocked_hashes", [])
-        hashes.append(content_hash)
-        state["blocked_hashes"] = hashes[-20:]
-        times = [t for t in state.get("block_times", []) if now - t < WINDOW_SECONDS]
-        times.append(now)
-        state["block_times"] = times
-
-    def main():
-        if is_off():
-            sys.exit(0)
-        ensure_user_dict()
-        raw = sys.stdin.read()
-        try:
-            payload = json.loads(raw)
-        except Exception:
-            sys.exit(0)
-        msg = payload.get("last_assistant_message") or ""
-        if not msg.strip():
-            sys.exit(0)
-        session_id = payload.get("session_id") or "default"
-
-        # 平台检测：zcode 只向插件进程注入 ZCODE_PLUGIN_ROOT。
-        # zcode 的 Stop 契约是 decision:block（continue:false 在那里
-        # 语义相反，会把拦截整个废掉），必须分开输出。
-        is_zcode = bool(os.environ.get("ZCODE_PLUGIN_ROOT"))
-
-        pairs = load_dict()
-        if not pairs:
-            sys.exit(0)
-
-        text = strip_code(msg)
-        hits = []
-        for bad, good, is_regex in pairs:
-            if is_regex:
-                try:
-                    m = re.search(bad, text)
-                except re.error:
-                    continue  # 无效正则：跳过该词条（fail-open）
-                if m:
-                    hits.append((m.group(0), good))
-            elif bad in text:
-                hits.append((bad, good))
-        if not hits:
-            sys.exit(0)
-
-        content_hash = hashlib.sha1(msg.encode("utf-8")).hexdigest()
-        spath = state_path(session_id)
-        state = load_state(spath)
-        if not allow_block(state, content_hash):
-            sys.exit(0)
-
-        record_block(state, content_hash)
-        save_state(spath, state)
-
-        fixes = "；".join("%s→%s" % (bad, good) for bad, good in hits[:10])
-        reason = (
-            "你的上一条回复包含字面直译的术语，不是地道中文，需要重写。"
-            "按箭头右侧的写法表达（右侧是自然的中文措辞，要据此重写整句，"
-            "不要做机械的词到词替换）：" + fixes + "。"
-            "其余内容、结论和代码保持不变，"
-            "输出修正后的完整回复。"
-            "再次提醒：有中文社区定译用定译，无定译保留英文原词，"
-            "禁止字面直译英文黑话。"
-        )
-        if is_zcode:
-            body = json.dumps({
-                "decision": "block",
-                "reason": reason,
-            }, ensure_ascii=False)
-        else:
-            body = json.dumps({
-                "continue": False,
-                "reason": reason,
-                "stopReason": reason,
-            }, ensure_ascii=False)
-        sys.stdout.write(body + "\n")
-        sys.stderr.write(reason + "\n")
-        sys.exit(2)
-
     main()
 except SystemExit:
     raise
