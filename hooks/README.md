@@ -10,6 +10,8 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | L0 字典 | terminology.tsv | - | 术语字典（数据飞轮，仓库内维护） |
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
 | L2 出口检测 | inspect.py | Stop（+ SubagentStop，仅 Claude） | 命中直译词要求重写（按地道措辞重写整句） |
+| L2 文件写入口 | inspect-file.py | PreToolUse（Write\|Edit\|NotebookEdit） | 文档类文件（.md/.markdown/.txt/.rst）写入前检测，deny 并要求改写 |
+| L2 句式判官 | claude-prompt-hooks.json | Stop（prompt 型，仅 Claude Code） | 字典未命中时小模型判断是否地道中文，覆盖长尾句式 |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
 | 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
 | 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
@@ -40,8 +42,23 @@ zcode 直接装本插件（`.claude-plugin/plugin.json` 在其 manifest 查找�
 - Stop：zcode 的契约是 `decision:"block"` + reason；`continue:false` 在 zcode
   里语义相反（允许结束）。inspect.py 检测 `ZCODE_PLUGIN_ROOT` 自动切换输出。
 - 子代理：zcode 没有子代理事件，规范注入与 L2 覆盖不到子代理。
+- 文件写入口（PreToolUse）：zcode 支持，matcher `Write|Edit` 语义一致。
+- 句式判官（prompt 型 hook）：Claude Code 独有类型，配置在
+  `hooks/claude-prompt-hooks.json`（Claude 专属文件，zcode 不加载，
+  不会产生死配置告警）。判官每轮 Stop 增加一次小模型调用（默认
+  Haiku 级，约 1-3 秒），只在字典出口未命中时才有拦截作用；
+  `stop_hook_active` 为 true 时判官直接放行，防止连环阻断。
 - 用户级 config 里的 hook 需要 `hooks.enabled: true`；插件 hook 跟随插件
   启停，不需要。更新插件后新建 session 才生效（hook 配置有会话快照）。
+
+### 已知边界
+
+- 文件写入口只查 .md/.markdown/.txt/.rst；代码内中文注释需要先隔离
+  字符串与 docstring，暂不检测。编辑本插件自己的 README（内含直译词
+  示例）会被拦一次，重试同内容即放行，或给示例词加「」引号。
+- Kimi 上 Stop payload 不含助手消息（上游 issue #2123），出口层失效；
+  文件写入口是 Kimi 上唯一可用的输出检测口，将来注册时 matcher 需按
+  Kimi 工具名写 `WriteFile|StrReplaceFile`。
 
 ### Kimi Code
 
@@ -215,7 +232,7 @@ rm ~/.claude/zh-guard/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（20 项，含 zcode Stop 契约、文件结构守卫、新词条）
+python3 hooks/test_zh_guard.py         # zh-guard hooks（23 项，含 zcode 契约、文件写入口、句式词条、判官配置）
 python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
 python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
 python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）

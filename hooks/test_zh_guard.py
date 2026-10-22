@@ -384,7 +384,8 @@ def test_plugin_hook_files_structure():
           set(sub) == {"SubagentStart", "SubagentStop"}, "实际：%s" % sorted(sub))
     with open(os.path.join(HERE, ".claude-plugin", "plugin.json"), encoding="utf-8") as f:
         m = json.load(f)
-    check("Claude manifest 声明 subagent-hooks.json", m.get("hooks") == "./hooks/subagent-hooks.json",
+    check("Claude manifest 声明子代理与 prompt 判官文件",
+          set(m.get("hooks", [])) == {"./hooks/subagent-hooks.json", "./hooks/claude-prompt-hooks.json"},
           str(m.get("hooks")))
     zcode_manifest = os.path.join(HERE, ".zcode-plugin", "plugin.json")
     check(".zcode-plugin/plugin.json 存在", os.path.exists(zcode_manifest), zcode_manifest)
@@ -421,6 +422,87 @@ def test_l1_injection_new_rules_and_wider_cap():
     check("L1 注入含规则五新措辞（大致了解了）", "大致了解了" in ctx, ctx[:400])
     check("L1 展示尾部词条（槽位→，验证上限放宽）", "槽位→" in ctx, ctx[-300:])
     check("L1 注入仍保留既有规则（剩下的待办）", "剩下的待办" in ctx, ctx[:400])
+
+
+INSPECT_FILE = os.path.join(HERE, "inspect-file.py")
+
+
+def test_l2_blocks_sentence_patterns():
+    """句式级套话：re: 正则词条拦「值得注意的是」「进行了分析」这类模板腔。"""
+    env, sd = temp_env()
+    cases = [
+        ("值得注意的是，网络吞吐量高。", "直接给结论"),
+        ("综上所述，这个方案可行。", "直接说结论"),
+        ("我们进行了全面的修改。", "直接用动词"),
+        ("由于磁盘损坏的原因，数据丢了。", "因为"),
+    ]
+    for i, (msg, want) in enumerate(cases):
+        proc = run_hook(INSPECT, {"session_id": "t-pat%d" % i, "last_assistant_message": msg}, env)
+        body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+        check("L2 拦截句式套话（%s…）" % msg[:8],
+              proc.returncode == 2 and want in body, body[:200])
+    proc = run_hook(
+        INSPECT,
+        {"session_id": "t-pat-clean", "last_assistant_message": "网络吞吐量高，因为先写磁盘再批量推送。"},
+        env,
+    )
+    check("L2 地道中文不受句式词条误伤", proc.returncode == 0, "rc=%d" % proc.returncode)
+
+
+def test_file_guard_blocks_translationese():
+    """文件写入口：PreToolUse 检查 Write/Edit 即将写入的文档内容。"""
+    env, sd = temp_env()
+    proc = run_hook(INSPECT_FILE, {
+        "session_id": "tf1", "tool_name": "Write",
+        "tool_input": {"file_path": "/x/docs/a.md", "content": "我们对网络做病灶实验，结论如下。"},
+    }, env)
+    body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+    check("文件检测：.md 含直译词被 deny（exit 2）", proc.returncode == 2, "rc=%d" % proc.returncode)
+    check("文件检测：输出 permissionDecision=deny",
+          "permissionDecision" in body and "deny" in body, body[:200])
+    check("文件检测：deny 理由带修正指引（消融实验）", "消融实验" in body, body[:200])
+    proc2 = run_hook(INSPECT_FILE, {
+        "session_id": "tf2", "tool_name": "Write",
+        "tool_input": {"file_path": "/x/docs/b.md", "content": "重试逻辑已修复，重复请求降到 7 次。"},
+    }, env)
+    check("文件检测：干净 .md 放行", proc2.returncode == 0, "rc=%d" % proc2.returncode)
+    proc3 = run_hook(INSPECT_FILE, {
+        "session_id": "tf3", "tool_name": "Write",
+        "tool_input": {"file_path": "/x/src/a.py", "content": "注释：这里做了病灶实验。"},
+    }, env)
+    check("文件检测：非文档后缀（.py）放行（范围收窄）", proc3.returncode == 0, "rc=%d" % proc3.returncode)
+    proc4 = run_hook(INSPECT_FILE, {
+        "session_id": "tf4", "tool_name": "Edit",
+        "tool_input": {"file_path": "/x/docs/c.md", "new_string": "字典里有一条：「幽灵词元」→ghost token。"},
+    }, env)
+    check("文件检测：引号内提及豁免", proc4.returncode == 0, "rc=%d" % proc4.returncode)
+    proc5 = run_hook(INSPECT_FILE, {
+        "session_id": "tf5", "tool_name": "Edit",
+        "tool_input": {"file_path": "/x/docs/d.md", "new_string": "需要补充：我们对模型做了消融实验以外的病灶实验。"},
+    }, env)
+    check("文件检测：Edit 的 new_string 同样被查", proc5.returncode == 2, "rc=%d" % proc5.returncode)
+    proc6 = run_hook(INSPECT_FILE, {
+        "session_id": "tf5", "tool_name": "Edit",
+        "tool_input": {"file_path": "/x/docs/d.md", "new_string": "需要补充：我们对模型做了消融实验以外的病灶实验。"},
+    }, env)
+    check("文件检测：同一内容第二次放行（防循环）", proc6.returncode == 0, "rc=%d" % proc6.returncode)
+
+
+def test_prompt_judge_config():
+    """prompt 型判官（Claude Code 专属）：契约与防连环阻断的关键要素。"""
+    path = os.path.join(HERE, "hooks", "claude-prompt-hooks.json")
+    check("claude-prompt-hooks.json 存在", os.path.exists(path), path)
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        cfg = json.load(f).get("hooks", {})
+    check("prompt 判官只注册 Stop", set(cfg) == {"Stop"}, str(sorted(cfg)))
+    handler = cfg.get("Stop", [{}])[0].get("hooks", [{}])[0]
+    check("判官 handler 类型为 prompt", handler.get("type") == "prompt", str(handler)[:120])
+    p = handler.get("prompt", "")
+    check("判官 prompt 用 $ARGUMENTS 接事件输入", "$ARGUMENTS" in p, p[:120])
+    check("判官 prompt 处理 stop_hook_active（防连环阻断）", "stop_hook_active" in p, p[:120])
+    check("判官 prompt 声明 ok/reason 返回契约", '"ok"' in p and "reason" in p, p[:120])
 
 
 def main():

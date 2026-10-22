@@ -146,7 +146,7 @@ try:
         rest = [(k, v) for k, v in merged.items() if k not in dict(user_only)]
         return user_only + rest
 
-    MAX_SHOWN = 40
+    MAX_SHOWN = 50
 
     def build_context(entries):
         shown = entries[:MAX_SHOWN]

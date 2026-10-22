@@ -9,13 +9,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **File-write guard (new `inspect-file.py`, PreToolUse on Write|Edit|NotebookEdit)** —
+  the Stop exit check only sees the assistant message; a model writing stiff
+  translationese into README / docs / comments slipped through when the message
+  just said "file written". The new hook inspects `tool_input.content` /
+  `new_string` before the write lands, denies with rewrite guidance, and shares
+  the dictionary, exemptions and fail-open design with the message layer.
+  Deliberately narrow scope: .md / .markdown / .txt / .rst only (isolating
+  comments inside code from strings/docstrings is not reliable yet); anti-loop
+  state is independent from the Stop layer.
+- **Sentence-level pattern entries** — dictionary gains a `re:` regex group for
+  template phrasing the substring entries cannot catch: 值得注意的是、综上所述、
+  需要指出的是、由于…的原因、进行了…（分析/修改/部署）. Backed by
+  translationese-detection literature: function-word and syntactic patterns
+  separate translated from original Chinese at 90%+ accuracy with cheap
+  lexical features, no LLM needed.
+- **Prompt-based Stop judge (Claude Code only)** — `hooks/claude-prompt-hooks.json`
+  adds a `type: "prompt"` hook on Stop: when the dictionary misses, a small fast
+  model judges whether `last_assistant_message` reads as natural Chinese and
+  returns `{ok, reason}` (the prompt/agent verdict contract — `decision:"block"`
+  silently fails there). The judge stands down when `stop_hook_active` is true to
+  prevent chained blocks, and errs to `{ok: true}` when unsure. Cost: one small-
+  model call per turn (~1-3 s). Lives in the Claude-only hooks file; zcode and
+  Kimi never load it.
 - Dictionary: four new translationese entries from live bad cases — 槽位→插槽 / slot,
   槽键→slot 的 key, 键-值关系→key-value, 已初步清楚→大致了解了 (`@sync` bumped to
-  0.9.8 so installed dictionaries refresh on the next hook run).
+  0.9.9 so installed dictionaries refresh on the next hook run).
 - L1 injection gains a sixth rule against hard-compounded noun-phrase
   translations (slot key→「槽键」-style compounds) and rule 5 now names the
   公文腔 progress phrase 「大致了解了」 explicitly.
-- The per-turn injection cap is raised from 30 to 40 entries. With 32+ bundled
+- The per-turn injection cap is raised from 30 to 50 entries. With 32+ bundled
   entries the old cap had already cut the 机器腔 group out of the injected
   list; the new entries would never have been visible to the model.
 
@@ -24,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cost re-measured (estimate backend): full-dictionary injection is now
   851 chars / 533 tokens per turn, dictionary marginal 279 tokens,
   net hook latency unchanged at ~25–30 ms.
+- Tests 20 → 23: file-guard behaviors (deny/clean/suffix-gate/quote-exemption/
+  anti-loop/Edit coverage), sentence-pattern blocking, and judge-config
+  guards ($ARGUMENTS, stop_hook_active, ok/reason contract, manifest wiring).
 
 ## [0.9.7] - 2026-10-20
 

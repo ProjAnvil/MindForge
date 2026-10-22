@@ -5,7 +5,7 @@
   "author": {
     "name": "MindForge"
   },
-  "hooks": "./hooks/subagent-hooks.json",
+  "hooks": ["./hooks/subagent-hooks.json", "./hooks/claude-prompt-hooks.json"],
   "mcpServers": {
     "term-dict": {
       "command": "python3",
