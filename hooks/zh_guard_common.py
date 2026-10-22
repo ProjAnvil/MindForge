@@ -7,7 +7,7 @@
 
 三级词典（优先级从低到高，后加载覆盖先加载）：
   1. 内置：插件自带 terminology.tsv，随插件分发；
-  2. 用户级：~/.claude/zh-guard/terminology.tsv（ZH_GUARD_HOME 可改），
+  2. 用户级：~/.claude/MindForge/terminology.tsv（ZH_GUARD_HOME 可改），
      用户自加词条、字典升级时保留；
   3. 项目级：从 hook stdin 的 cwd 向上发现的 mindforge.zh-dict.tsv，
      放项目根，随仓库提交，团队共享（cspell 项目词典同款机制）。
@@ -23,6 +23,7 @@
 """
 import os
 import re
+import shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE_DIR = os.environ.get(
@@ -37,6 +38,18 @@ PROJECT_DICT_NAME = "mindforge.zh-dict.tsv"
 def guard_home():
     return os.environ.get(
         "ZH_GUARD_HOME",
+        os.path.join(os.path.expanduser("~"), ".claude", "MindForge"),
+    )
+
+
+def legacy_home():
+    """产品目录改名前的旧位置（~/.claude/zh-guard）。
+
+    仅用于一次性迁移：发现旧字典/旧 OFF 时搬到 guard_home()。
+    ZH_GUARD_LEGACY_HOME 供测试隔离。
+    """
+    return os.environ.get(
+        "ZH_GUARD_LEGACY_HOME",
         os.path.join(os.path.expanduser("~"), ".claude", "zh-guard"),
     )
 
@@ -46,12 +59,45 @@ def is_off():
         return True
     if os.path.exists(os.path.join(HERE, "OFF")):
         return True
-    return os.path.exists(os.path.join(guard_home(), "OFF"))
+    if os.path.exists(os.path.join(guard_home(), "OFF")):
+        return True
+    # 旧目录的 OFF 在迁移完成前也要认，避免停用状态因目录改名失效。
+    return os.path.exists(os.path.join(legacy_home(), "OFF"))
+
+
+def migrate_legacy_home():
+    """一次性迁移：~/.claude/zh-guard → ~/.claude/MindForge。
+
+    字典与 OFF 各自独立搬迁（新位置已有就不动）；旧目录不删除，
+    迁移完成后可手动清理。搬过来的旧字典随后照常走 @sync 版本同步：
+    自带词条刷新、用户自加词条保留。幂等，可反复调用。
+    在 hook 的停用检查之前执行，保证改名后停用状态也无缝。
+    """
+    try:
+        home = guard_home()
+        legacy = legacy_home()
+        if not os.path.isdir(legacy):
+            return
+        old_off = os.path.join(legacy, "OFF")
+        if os.path.exists(old_off) and not os.path.exists(os.path.join(home, "OFF")):
+            os.makedirs(home, exist_ok=True)
+            # OFF 是状态标记：移动而非复制。留在旧位置会让
+            # 「删新 OFF 恢复」失效（旧副本还压着停用状态）。
+            shutil.move(old_off, os.path.join(home, "OFF"))
+        old_dict = os.path.join(legacy, "terminology.tsv")
+        new_dict = os.path.join(home, "terminology.tsv")
+        if os.path.exists(old_dict) and not os.path.exists(new_dict):
+            os.makedirs(home, exist_ok=True)
+            shutil.copyfile(old_dict, new_dict)
+    except Exception:
+        pass
 
 
 def ensure_user_dict():
     """安装迁移 + 版本同步。
 
+    0. 产品目录改名迁移：~/.claude/zh-guard → ~/.claude/MindForge，
+       旧字典与 OFF 存在则搬过来（见 migrate_legacy_home）；
     1. 用户字典不存在：复制插件自带字典过去；
     2. 已存在且 @sync 版本与自带字典一致：不动；
     3. 版本不一致：以新版自带字典为底，
@@ -61,6 +107,7 @@ def ensure_user_dict():
     字典要能迭代，想完全自控请用 ZH_GUARD_DICT 指向自己的文件。
     """
     try:
+        migrate_legacy_home()
         home = guard_home()
         user = os.path.join(home, "terminology.tsv")
         bundled = os.path.join(HERE, "terminology.tsv")

@@ -141,8 +141,10 @@ token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估
 字典按三级加载，优先级从低到高（后加载覆盖先加载）：
 
 1. **内置**：本目录 `terminology.tsv`，随插件分发，是发布源；
-2. **用户级**：`~/.claude/zh-guard/terminology.tsv`（`ZH_GUARD_HOME` 可改），
+2. **用户级**：`~/.claude/MindForge/terminology.tsv`（`ZH_GUARD_HOME` 可改），
    首次 hook 运行时从内置迁移过去，升级时保留自加词条；
+   旧版安装在 `~/.claude/zh-guard/` 的字典与 OFF 标记会在新版首次运行时
+   自动搬迁过来（旧目录不删除，确认无误后可手动清理）；
 3. **项目级**：`mindforge.zh-dict.tsv`，放在项目根随仓库提交，团队共享
    （cspell 项目词典同款机制）。hook 从 stdin 的 `cwd` 逐级向上发现，
    遇到含 `.git` 的目录即停——项目根之外的词典不生效。
@@ -157,7 +159,7 @@ L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程
 
 - **发布源**：本目录 `terminology.tsv`（在 MindForge 仓库内维护）。
 - **安装时迁移**：首次 hook 运行时，字典被复制到
-  `~/.claude/zh-guard/terminology.tsv`。
+  `~/.claude/MindForge/terminology.tsv`。
 - **版本同步**：自带字典里有一行 `# @sync <版本>`。当本地副本缺这个标记
   （旧版本安装）或版本落后时，hook 会把自带字典刷新到本地，
   **并保留用户自加的词条**（第一列不在自带字典里的行）。
@@ -166,8 +168,8 @@ L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程
   `下一刀 → 下一个削减项`）会永久屏蔽后续修正。用户对自带词条的本地改写
   会在字典升级时被新版覆盖；想完全自控请用自己的 key，或用
   `ZH_GUARD_DICT` 指向自己的字典文件。
-- **运行时合并**：读取插件自带 + `~/.claude/zh-guard/` 两份字典，用户条目优先。
-- **用户词条**：直接编辑 `~/.claude/zh-guard/terminology.tsv`。
+- **运行时合并**：读取插件自带 + `~/.claude/MindForge/` 两份字典，用户条目优先。
+- **用户词条**：直接编辑 `~/.claude/MindForge/terminology.tsv`。
   格式：TSV 三列 `直译词<TAB>期望写法<TAB>说明`，`#` 开头为注释。
   带可变数字等模式用正则词条：第一列以 `re:` 开头
   （如 `re:第\s*\d+\s*刀`），无效正则自动跳过。
@@ -185,7 +187,7 @@ python3 hooks/tidy-dict.py --check              # 有硬错误时退出码 1（�
 python3 hooks/tidy-dict.py --path myspace.tsv   # 只处理指定文件
 ```
 
-默认同时处理自带字典和 `~/.claude/zh-guard/` 下的用户字典。它会：
+默认同时处理自带字典和 `~/.claude/MindForge/` 下的用户字典。它会：
 
 1. **排版**：按最宽词条补空格，三列对齐（中文按两格宽算），注释和分组原样保留；
 2. **归一化**：去 BOM、去多余空白、约定行尾；
@@ -236,8 +238,8 @@ token 计数优先用 `tiktoken`（装了更准），没装就用标注清楚的
 
 ```
 export ZH_GUARD_OFF=1        # 本会话停用（仅 zh-guard 部分）
-touch ~/.claude/zh-guard/OFF # 持久停用
-rm ~/.claude/zh-guard/OFF    # 恢复
+touch ~/.claude/MindForge/OFF # 持久停用
+rm ~/.claude/MindForge/OFF    # 恢复
 ```
 
 ## 检测语义（L2）
@@ -267,7 +269,7 @@ python3 hooks/eval-tidy-dict.py        # 整理前后：行为等价 + 成本对
 
 | 变量 | 作用 |
 |---|---|
-| `ZH_GUARD_HOME` | 用户目录（默认 `~/.claude/zh-guard`），存用户词条与 OFF 文件 |
+| `ZH_GUARD_HOME` | 用户目录（默认 `~/.claude/MindForge`），存用户词条与 OFF 文件 |
 | `ZH_GUARD_DICT` | 指定单一字典文件（调试用，跳过合并与迁移） |
 | `ZH_GUARD_STATE_DIR` | 防循环状态目录（默认 `$TMPDIR/zh-guard`） |
 | `ZH_GUARD_OFF` | 任意非空值停用 zh-guard |

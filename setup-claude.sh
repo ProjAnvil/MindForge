@@ -355,18 +355,19 @@ if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
     create_symlink "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$CLAUDE_HOOKS_DIR/terminology.tsv" "hooks/terminology.tsv"
     create_symlink "$MINDFORGE_HOOKS_DIR/term-dict-server.py" "$CLAUDE_HOOKS_DIR/term-dict-server.py" "hooks/term-dict-server.py"
 
-    echo -e "${BLUE}zh-guard MCP（可选，符号链接部署不自动注册）:${NC}"
+    echo -e "${BLUE}MindForge term-dict MCP（可选，符号链接部署不自动注册）:${NC}"
     echo "  claude mcp add term-dict -- python3 \"\$HOME/.claude/hooks/term-dict-server.py\""
 
     # zh-guard: install-time migration of the terminology dictionary
-    # to ~/.claude/zh-guard/ (user-editable, never overwritten)
-    ZH_GUARD_DIR="$CLAUDE_DIR/zh-guard"
+    # to ~/.claude/MindForge/ (user-editable, never overwritten); the
+    # legacy ~/.claude/zh-guard/ directory is migrated by the hooks on first run
+    ZH_GUARD_DIR="$CLAUDE_DIR/MindForge"
     create_dir "$ZH_GUARD_DIR"
     if [ ! -f "$ZH_GUARD_DIR/terminology.tsv" ] && [ -f "$MINDFORGE_HOOKS_DIR/terminology.tsv" ]; then
         cp "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$ZH_GUARD_DIR/terminology.tsv"
-        echo -e "${GREEN}+${NC} zh-guard terminology.tsv (installed to ~/.claude/zh-guard/)"
+        echo -e "${GREEN}+${NC} MindForge terminology.tsv (installed to ~/.claude/MindForge/)"
     elif [ -f "$ZH_GUARD_DIR/terminology.tsv" ]; then
-        echo -e "${GREEN}✓${NC} zh-guard terminology.tsv (kept existing user dictionary)"
+        echo -e "${GREEN}✓${NC} MindForge terminology.tsv (kept existing user dictionary)"
     fi
 
     # Write language marker: en -> English rules only; zh-cn -> Chinese + English

@@ -150,7 +150,7 @@ TOOLS = [
         "name": "add_term",
         "description": (
             "向术语字典追加新直译 bad case（数据飞轮）。写入用户字典"
-            " ~/.claude/zh-guard/terminology.tsv，下轮注入即生效。"
+            " ~/.claude/MindForge/terminology.tsv，下轮注入即生效。"
             "term 支持 re: 前缀写正则词条（如 re:第\\s*\\d+\\s*刀）。"
         ),
         "inputSchema": {

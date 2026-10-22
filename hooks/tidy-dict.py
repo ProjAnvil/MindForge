@@ -7,7 +7,7 @@
     python3 tidy-dict.py --write              # 体检 + 写回排版后的文件
     python3 tidy-dict.py --write --path FILE  # 指定文件，不用两边的默认路径
 
-默认处理三个文件：自带字典（本目录）、用户字典（~/.claude/zh-guard/）
+默认处理三个文件：自带字典（本目录）、用户字典（~/.claude/MindForge/）
 和项目级词典（cwd 向上发现的 mindforge.zh-dict.tsv，找到才处理）。
 
 做的事：

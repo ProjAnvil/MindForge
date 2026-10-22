@@ -550,6 +550,43 @@ def test_project_level_dict():
         shutil.rmtree(base, ignore_errors=True)
 
 
+def test_legacy_home_migration():
+    """产品目录改名：~/.claude/zh-guard → ~/.claude/MindForge。
+
+    老用户的自加词条和 OFF 停用标记必须无缝跟到新目录；
+    迁移后的旧字典走 @sync 版本同步，自带词条刷新、自加词条保留。
+    """
+    env, sd = temp_env()
+    legacy = tempfile.mkdtemp(prefix="zh-guard-legacy-")
+    new_home = tempfile.mkdtemp(prefix="mindforge-home-")
+    env["ZH_GUARD_LEGACY_HOME"] = legacy
+    env["ZH_GUARD_HOME"] = new_home
+    with open(os.path.join(legacy, "terminology.tsv"), "w", encoding="utf-8") as f:
+        f.write("# 老安装的用户字典（无 @sync 标记）\n"
+                "用户生造词\t正确写法\t老词条\n")
+    open(os.path.join(legacy, "OFF"), "w").close()
+    try:
+        proc = run_hook(INSPECT, {"session_id": "lg0",
+                                  "last_assistant_message": "这里出现了用户生造词。"}, env)
+        check("旧目录 OFF 停用立即生效（迁移前也认）", proc.returncode == 0,
+              "rc=%d" % proc.returncode)
+        check("OFF 标记跟随迁移", os.path.exists(os.path.join(new_home, "OFF")))
+        os.remove(os.path.join(new_home, "OFF"))
+        run_hook(INJECT, {"prompt": "hi", "session_id": "lg1"}, env)
+        new_dict = os.path.join(new_home, "terminology.tsv")
+        check("旧字典迁移到新目录", os.path.exists(new_dict), new_dict)
+        with open(new_dict, encoding="utf-8") as f:
+            content = f.read()
+        check("老用户自加词条在迁移后保留", "用户生造词\t正确写法" in content, content[:300])
+        check("迁移后旧字典走 @sync 版本同步（带新标记）", "# @sync" in content, content[:300])
+        proc2 = run_hook(INSPECT, {"session_id": "lg2",
+                                   "last_assistant_message": "这里出现了用户生造词。"}, env)
+        check("恢复后迁移词条参与 L2", proc2.returncode == 2, "rc=%d" % proc2.returncode)
+    finally:
+        shutil.rmtree(legacy, ignore_errors=True)
+        shutil.rmtree(new_home, ignore_errors=True)
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:

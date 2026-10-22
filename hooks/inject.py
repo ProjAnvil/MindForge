@@ -6,7 +6,7 @@
 
 字典三级（项目级 > 用户级 > 内置），公共逻辑见 zh_guard_common.py：
   1. 内置 terminology.tsv 是发布源；
-  2. 首次运行时迁移到 ~/.claude/zh-guard/（用户可改，升级保留自加词条）；
+  2. 首次运行时迁移到 ~/.claude/MindForge/（用户可改，升级保留自加词条）；
   3. 项目级 mindforge.zh-dict.tsv 从 stdin 的 cwd 向上发现，
      展示顺序最靠前；
   4. ZH_GUARD_DICT 环境变量可指定单一字典文件（调试用）。
@@ -21,6 +21,7 @@ from zh_guard_common import (
     ensure_user_dict,
     is_off,
     load_display_entries,
+    migrate_legacy_home,
 )
 
 MAX_SHOWN = 50
@@ -54,6 +55,7 @@ def build_context(entries):
 
 
 def main():
+    migrate_legacy_home()
     if is_off():
         sys.exit(0)
     ensure_user_dict()

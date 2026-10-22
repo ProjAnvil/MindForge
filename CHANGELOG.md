@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **User directory renamed to `~/.claude/MindForge/`** — MindForge is the
+  product users install, so the user-facing directory no longer carries the
+  internal zh-guard codename. Legacy installs are migrated transparently on
+  the first hook run (before the kill-switch check, so disabled installs
+  migrate too): the dictionary is copied and the OFF marker is *moved* —
+  copying OFF would leave a stale copy that keeps the guard disabled after
+  the user removes the new one. The migrated dictionary then goes through
+  the normal @sync refresh, keeping user-added terms. The old
+  `~/.claude/zh-guard/` directory is never deleted; users can clean it up
+  manually. `ZH_GUARD_LEGACY_HOME` is available for testing/overrides.
 - **Three-tier dictionary loading** — project-level terms now work like
   cspell's project dictionary. A `mindforge.zh-dict.tsv` placed at the
   project root (checked into the repo, shared with the team) is discovered
@@ -64,7 +74,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cost re-measured (estimate backend): full-dictionary injection is now
   851 chars / 533 tokens per turn, dictionary marginal 279 tokens,
   net hook latency unchanged at ~25–30 ms.
-- Tests 20 → 24: three-tier discovery (project override, .git boundary,
+- Tests 20 → 25: legacy-home migration (OFF honored before migration, OFF
+  follows as a move, user terms survive via @sync), three-tier discovery (project override, .git boundary,
   display order, file-guard pickup), file-guard behaviors (deny/clean/suffix-gate/
   quote-exemption/anti-loop/Edit coverage), sentence-pattern blocking, and
   judge-config guards ($ARGUMENTS, stop_hook_active, ok/reason contract,

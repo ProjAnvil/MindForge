@@ -30,6 +30,7 @@ from zh_guard_common import (
     is_off,
     load_pairs,
     load_state,
+    migrate_legacy_home,
     record_block,
     save_state,
     state_path,
@@ -38,6 +39,7 @@ from zh_guard_common import (
 
 
 def main():
+    migrate_legacy_home()
     if is_off():
         sys.exit(0)
     ensure_user_dict()
