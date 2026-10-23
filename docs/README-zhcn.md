@@ -139,6 +139,10 @@ zcode 不会加载自己不支持的事件，没有死配置。
 # CLI 打上版本 tag 后可换成 @latest。
 go install github.com/ProjAnvil/MindForge/cli/mindforge@main
 
+# 刚发布的模块在公共 proxy / sum 库有收录延迟，遇到 404 时
+# 先用直连模式装一次：
+GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+
 # 或者从仓库检出构建
 git clone https://github.com/ProjAnvil/MindForge.git && cd MindForge && make cli
 ```

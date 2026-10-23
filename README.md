@@ -123,6 +123,10 @@ The `mindforge` binary is the installer, generator, and doctor — it embeds the
 # switch to @latest once the CLI gets a versioned tag.
 go install github.com/ProjAnvil/MindForge/cli/mindforge@main
 
+# Fresh modules can lag in the public proxy/sum DB. If you hit a 404
+# right after a release, install once via direct mode:
+GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+
 # Or build from a checkout
 git clone https://github.com/ProjAnvil/MindForge.git && cd MindForge && make cli
 ```
