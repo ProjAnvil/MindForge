@@ -23,7 +23,7 @@ import (
 // plain semver tags (v0.10.0, ...) so that `go install ...@latest`
 // resolves correctly — prefixed tags (style-v*, skills-v*) are invisible
 // to the Go toolchain.
-const Version = "0.10.0"
+const Version = "0.10.1"
 
 func main() {
 	if len(os.Args) < 2 {

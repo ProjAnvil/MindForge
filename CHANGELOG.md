@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.1] - 2026-10-23
+
+CLI patch release (`v0.10.1`, plain semver so `go install ...@latest`
+resolves). The style documents are embedded in the binary through
+`go:embed`, so this is what carries the 0.9.8 writing-rule changes to
+anyone running the CLI instead of the marketplace plugins. Those plugins
+ship separately under `style-v0.9.8`.
 
 ### Added
 
