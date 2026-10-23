@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`mindforge` CLI v0.1.0 (Go, stdlib only)** — the installer/generator/doctor
+  from the approved product vision, shipped as an MVP: `install`
+  (interactive platform + language selection, `--yes` for scripting),
+  `init dict` (generates `mindforge.zh-dict.tsv` from an all-commented
+  template), and `doctor` (runtime, three-tier dictionary, per-platform
+  registration, legacy-directory reminder). The hook payload (scripts,
+  bundled dictionary, style-rule documents) is embedded in the binary via
+  `go:embed`, so one build carries everything. Installs are idempotent —
+  entries are owned via the `mindforge/hooks/` path marker and replaced
+  wholesale, while foreign hook config survives byte-for-byte. Supported
+  platforms: Claude Code (settings.json merge incl. subagent events) and
+  zcode (config.json merge with `hooks.enabled=true`, 7-event set only,
+  Stop via the new `--platform` flag). Kimi Code is detected but not yet
+  installable (upstream Stop payload, issue #2123). The `.sh` setup stays;
+  the CLI is the main direction. See `cli/README.md`.
+- `inspect.py --platform` — explicit platform selection for CLI-installed
+  zcode hooks: user-config hooks do not receive `ZCODE_PLUGIN_ROOT` (that
+  env var is injected for plugin hooks only), so the Stop contract switch
+  needed a flag.
 - **User directory renamed to `~/.claude/MindForge/`** — MindForge is the
   product users install, so the user-facing directory no longer carries the
   internal zh-guard codename. Legacy installs are migrated transparently on

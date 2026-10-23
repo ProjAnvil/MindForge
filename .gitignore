@@ -92,3 +92,7 @@ $RECYCLE.BIN/
 # Smelt eval reports
 evals/.env
 .smelt/
+
+# Go build outputs
+.build/
+bin/

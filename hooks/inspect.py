@@ -53,10 +53,13 @@ def main():
         sys.exit(0)
     session_id = payload.get("session_id") or "default"
 
-    # 平台检测：zcode 只向插件进程注入 ZCODE_PLUGIN_ROOT。
+    # 平台检测：CLI 用户级安装用 --platform 参数显式指定；
+    # 插件安装由 zcode 注入 ZCODE_PLUGIN_ROOT 环境变量。
     # zcode 的 Stop 契约是 decision:block（continue:false 在那里
     # 语义相反，会把拦截整个废掉），必须分开输出。
-    is_zcode = bool(os.environ.get("ZCODE_PLUGIN_ROOT"))
+    is_zcode = ("--platform" in sys.argv[1:]) or bool(
+        os.environ.get("ZCODE_PLUGIN_ROOT")
+    )
 
     cwd = payload.get("cwd") or ""
     pairs = load_pairs(cwd)

@@ -1,7 +1,7 @@
 # MindForge Makefile
 # Manage MCP services, Agents, and Skills
 
-.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm sync-plugins
+.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm sync-plugins cli cli-test
 
 # Default target
 help:
@@ -266,6 +266,16 @@ clean-all:
 		fi; \
 	done
 	@echo "✓ All resources cleaned"
+
+# MindForge CLI (Go, stdlib only): installer + init + doctor
+cli:
+	@echo "Building mindforge CLI..."
+	@go build -o bin/mindforge .
+	@echo "✓ bin/mindforge built (try: ./bin/mindforge doctor)"
+
+cli-test:
+	@go vet ./... && go test ./cli/
+	@echo "✓ CLI tests passed"
 
 # Skill & agent evaluation with smelt (evals/ project, uv-managed)
 # Deterministic: lint all SKILL.md + agent files + harness self-tests — safe for CI.

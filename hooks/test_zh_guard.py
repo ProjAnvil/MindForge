@@ -20,15 +20,16 @@ PY = sys.executable
 FAILURES = []
 
 
-def run_hook(script, payload, env_extra=None):
+def run_hook(script, payload, env_extra=None, args=None):
     env = dict(os.environ)
     env.pop("ZH_GUARD_OFF", None)
     env.pop("ZH_GUARD_DICT", None)
     env.pop("ZH_GUARD_HOME", None)
+    env.pop("ZH_GUARD_LEGACY_HOME", None)
     if env_extra:
         env.update(env_extra)
     proc = subprocess.run(
-        [PY, script],
+        [PY, script] + (args or []),
         input=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
         capture_output=True,
         env=env,
@@ -585,6 +586,19 @@ def test_legacy_home_migration():
     finally:
         shutil.rmtree(legacy, ignore_errors=True)
         shutil.rmtree(new_home, ignore_errors=True)
+
+
+def test_platform_flag_for_cli_installed_hooks():
+    """--platform 参数：CLI 用户级安装的 zcode hook 拿不到 ZCODE_PLUGIN_ROOT，
+    需要显式参数切到 zcode 的 Stop 契约。"""
+    env, sd = temp_env()
+    proc = run_hook(INSPECT, {"session_id": "pf1",
+                              "last_assistant_message": "我们对网络做病灶实验。"},
+                    env, args=["--platform"])
+    out = json.loads(proc.stdout.decode("utf-8"))
+    check("--platform 参数切换到 zcode 契约（decision:block）",
+          proc.returncode == 2 and out.get("decision") == "block",
+          proc.stdout.decode("utf-8")[:200])
 
 
 def main():
