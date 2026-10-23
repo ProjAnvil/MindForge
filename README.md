@@ -12,6 +12,10 @@ MindForge is a comprehensive toolkit for managing MCP (Model Context Protocol) s
 - **Rich Agent Collection**: Specialized agents for Java, Python, Go, Frontend, and System Architecture
 - **Reusable Skills**: Domain-specific skills that can be composed and shared across agents
 - **MCP Services**: Extensible collection of Model Context Protocol services
+- **Multi-harness Support**: Claude Code, zcode, and Codex (OpenAI) install the same hooks, dictionary, and rules from one repository
+- **zh-guard Translationese Defense**: Controlled-writing rules injected every turn, plus exit checks, a file-write guard, sentence patterns, and an LLM judge that catch stiff machine translation in model output
+- **Three-tier Dictionary**: Bundled → user-level (`~/.claude/MindForge/`) → project-level (`mindforge.zh-dict.tsv` in the repo, team-shared)
+- **MindForge CLI**: One Go binary (installer / `init dict` / `doctor`) with the whole hook payload embedded
 - **Easy Setup**: One-command installation script for Claude Code integration
 - **Flexible Tech Stack**: Each component can use its own preferred technology stack
 
@@ -56,9 +60,9 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **en** - English
 - **zh-cn** - Simplified Chinese
 
-### 🧩 Install as a Plugin (Claude Code & Codex)
+### 🧩 Install as a Plugin (Claude Code, zcode & Codex)
 
-Agents, skills, and the controlled-writing style rules hook are all distributed as plugins. Both Claude Code and Codex read the same marketplace manifest (`.claude-plugin/marketplace.json`), so one repository serves both harnesses:
+Agents, skills, and the controlled-writing style rules hook are all distributed as plugins. Claude Code, zcode, and Codex read the same marketplace manifest (`.claude-plugin/marketplace.json`), so one repository serves all harnesses:
 
 ```bash
 # Claude Code (inside a session)
@@ -78,13 +82,59 @@ codex plugin add mindforge-zh-cn@mindforge
 codex plugin add style-rules-zh-cn@mindforge
 ```
 
+zcode reads the same marketplace manifest: add `https://github.com/ProjAnvil/MindForge.git` as a plugin marketplace in your zcode client, then install `mindforge-zh-cn@mindforge` and `style-rules-zh-cn@mindforge`. The plugin ships a zcode-specific manifest (`.zcode-plugin/plugin.json`) so no unsupported hook registrations are ever loaded there.
+
 Notes:
 
-- `style-rules-zh-cn` bundles the zh-guard translationese defense: a TSV terminology dictionary (data flywheel) maintained at `hooks/terminology.tsv`, injected every turn (L1) and enforced on output (L2, Stop/SubagentStop). On install the dictionary migrates to `~/.claude/zh-guard/terminology.tsv` (never overwritten); user entries win and plugin updates still deliver new entries.
+- `style-rules-zh-cn` bundles the zh-guard translationese defense (see the next section). On install the dictionary migrates to `~/.claude/MindForge/terminology.tsv` (never overwritten; legacy `~/.claude/zh-guard/` installs are migrated automatically); user entries win and plugin updates still deliver new entries.
 - Plugin agents and skills are namespaced, e.g. `/mindforge-en:git-guru` and `mindforge-en:code-reviewer`, so they never conflict with personal or project ones.
-- Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback (Codex), so no symlinks or `settings.json` merging are required.
+- Plugin hooks use `${CLAUDE_PLUGIN_ROOT}` (Claude Code) with a `${PLUGIN_ROOT}` fallback, so no symlinks or `settings.json` merging are required.
 - Restart the harness after installing.
 - If you modify `hooks/`, `agents/`, or `skills/`, run `make sync-plugins` to refresh the plugin bundles (the `style-rules-zh-cn` plugin lives in `hooks/` and needs no sync).
+
+### 🧠 zh-guard: Translationese Defense
+
+Chinese technical writing by LLMs is full of stiff, literal translations — 病灶实验 for ablation study, 槽键 for slot key, 值得注意的是 template phrases. zh-guard pushes back at five layers, all fail-open (any error lets the text through, never blocking your session):
+
+| Layer | Hook event | What it does |
+|---|---|---|
+| L1 inject | UserPromptSubmit | Injects controlled-writing rules and a 直译词→expected-writing list every turn |
+| L2 exit | Stop / SubagentStop | Scans `last_assistant_message`; on a hit forces a natural-Chinese rewrite |
+| File-write guard | PreToolUse (Write\|Edit\|apply_patch) | Denies writes that would land stiff terms into docs (`.md`/`.txt`/…) before they happen |
+| Sentence patterns | (dictionary `re:` entries) | Catches template phrasing the word list cannot — 值得注意的是、综上所述、进行了… |
+| LLM judge | Stop (Claude Code prompt-type hook) | A small model judges naturalness when the dictionary misses, covering the long tail |
+
+Plus a pull-mode knowledge layer: the `term-dict` MCP server exposes `lookup_term` / `check_text` / `add_term`, so the model can query the dictionary on demand and new bad cases become entries on the spot (a data flywheel).
+
+**Three-tier dictionary** (most specific wins):
+
+1. Bundled — `hooks/terminology.tsv`, shipped with the plugin/CLI;
+2. User-level — `~/.claude/MindForge/terminology.tsv`, seeded on install, kept across upgrades;
+3. Project-level — `mindforge.zh-dict.tsv` at the project root, committed to the repo and shared with the team. Discovered by walking up from the session's `cwd`, stopping at the first `.git` boundary.
+
+Generate a project dictionary with `mindforge init dict` (or copy the format from `hooks/terminology.tsv`). Entries are `直译词<TAB>期望写法<TAB>说明`; `re:` prefixed entries are regexes. Kill switch: `export ZH_GUARD_OFF=1` or drop an `OFF` file into `~/.claude/MindForge/`. Full details live in [hooks/README.md](hooks/README.md).
+
+### 🔧 MindForge CLI (Go)
+
+The `mindforge` binary is the installer, generator, and doctor — it embeds the whole hook payload (scripts, bundled dictionary, style-rule documents), so a single build carries everything. Install it straight from GitHub:
+
+```bash
+# Requires Go 1.24+. @main tracks the default branch;
+# switch to @latest once the CLI gets a versioned tag.
+go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+
+# Or build from a checkout
+git clone https://github.com/ProjAnvil/MindForge.git && cd MindForge && make cli
+```
+
+```bash
+mindforge install                                        # interactive: pick harnesses + language
+mindforge install --platform=claude,zcode,codex --lang=zh-cn --yes   # scripted
+mindforge init dict                                      # generate mindforge.zh-dict.tsv here
+mindforge doctor                                         # runtimes, registration, dictionary tiers
+```
+
+`install` registers the hooks into each harness's own config format (Claude Code `settings.json`, zcode `config.json` with `hooks.enabled=true`, Codex `hooks.json`), idempotently — foreign hook entries survive byte-for-byte. Kimi Code is detected but not yet installable (blocked on an upstream Stop-payload limitation). Platform details in [cli/README.md](cli/README.md).
 
 ## 🤖 Available Agents
 
@@ -178,6 +228,16 @@ mindforge/
 │   │   └── CLAUDE.md   # English user-level instructions
 │   └── zh-cn/
 │       └── CLAUDE.md   # Chinese user-level instructions
+├── hooks/               # style-rules-zh-cn plugin: controlled-writing rules + zh-guard
+│   ├── hooks/           # hook registrations (shared / Claude-only variants)
+│   ├── inject.py / inspect.py / inspect-file.py   # L1 / L2 / file-write guard
+│   ├── term-dict-server.py    # zh-guard MCP server (lookup_term/check_text/add_term)
+│   ├── zh_guard_common.py    # three-tier dictionary loading (shared library)
+│   ├── terminology.tsv       # bundled dictionary (data flywheel)
+│   └── .claude-plugin/ / .zcode-plugin/   # per-harness plugin manifests
+├── cli/                 # mindforge CLI (Go): install / init dict / doctor
+├── plugins/             # generated plugin bundles (mindforge-en/zh-cn, style-rules)
+├── go.mod + assets.go   # Go module; embeds the hook payload into the CLI binary
 ├── templates/           # Templates for creating new resources
 │   ├── agent-template-en.md      # English agent template
 │   ├── agent-template-zhcn.md    # Chinese agent template
@@ -371,9 +431,15 @@ make test-all
 
 # Clean all MCP service artifacts
 make clean-all
+
+# Build the mindforge CLI (Go)
+make cli
+
+# Vet + test the CLI
+make cli-test
 ```
 
-**Note:** Agents and skills are markdown files and don't require building.
+**Note:** Agents and skills are markdown files and don't require building. The zh-guard hook scripts are tested with `python3 hooks/test_zh_guard.py` (and friends).
 
 ## 📋 Resource Conventions
 

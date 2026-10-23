@@ -44,8 +44,14 @@ mindforge doctor
 
 ```
 make cli        # 构建到 bin/mindforge
-make cli-test   # go vet + go test ./cli/
-go run ./cli doctor   # 不构建直接跑
+make cli-test   # go vet + go test ./cli/mindforge/
+go run ./cli/mindforge doctor   # 不构建直接跑
+```
+
+或者直接从 GitHub 安装二进制（main 分支；CLI 发版后可换 `@latest`）：
+
+```
+go install github.com/ProjAnvil/MindForge/cli/mindforge@main
 ```
 
 嵌入的 hook 载荷来自仓库根 `assets.go`（`//go:embed hooks/...`）；

@@ -270,11 +270,11 @@ clean-all:
 # MindForge CLI (Go, stdlib only): installer + init + doctor
 cli:
 	@echo "Building mindforge CLI..."
-	@go build -o bin/mindforge .
+	@go build -o bin/mindforge ./cli/mindforge
 	@echo "✓ bin/mindforge built (try: ./bin/mindforge doctor)"
 
 cli-test:
-	@go vet ./... && go test ./cli/
+	@go vet ./... && go test ./cli/mindforge/
 	@echo "✓ CLI tests passed"
 
 # Skill & agent evaluation with smelt (evals/ project, uv-managed)
