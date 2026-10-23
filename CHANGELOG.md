@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Writing-rule floor, exceptions, and pre-send check** — the injected
+  style rules gained three sections the ASD-STE100 body rules never
+  covered, taken from the gaps in Caveman's `SKILL.md`: a **floor** that
+  outranks every style rule (code, commands, paths, API names and error
+  text stay character-for-character; comments already in an edited file
+  are never deleted or shortened; negations and limiters — `not`,
+  `never`, `no`, `only`, `except` — plus numbers with units are never
+  dropped); an **exceptions** list of five cases that switch back to full
+  sentences (security warnings, irreversible actions needing
+  confirmation, a confused or repeating user, anything persisted outside
+  chat — code, comments, commit messages, docs, issues, PRs — and
+  questions or options put to the user); and a four-item **pre-send
+  check**. The floor exists because the body rules themselves ("sentence
+  ≤30 characters", "≤2 noun modifiers") push a model toward simplifying
+  payloads it must not touch, and a dropped negation costs more than
+  every token saved. Each language file carries all three sections on
+  its own.
+
+### Changed
+
+- **Each rules file is now self-contained** — `style-rules-en.md` holds
+  the English ASD-STE100 rules and nothing else (its floor, exceptions
+  and check sections had been written in Chinese), and
+  `style-rules-zh.md` holds the Chinese rules **plus** the English ones.
+  `inject-style-rules.sh` therefore reads exactly one file per mode
+  instead of concatenating both, which is what sent the shared sections
+  and the English rules twice per turn under zh-cn. The zh-cn payload
+  drops from 3,010 to 2,171 bytes (28% smaller) while keeping the
+  English rules it always carried; the en payload grows from 1,604 to
+  1,965 bytes now that the three new sections are in English rather than
+  Chinese. The missing-file fail-open moved into each branch, so a zh-cn
+  install no longer needs the English file present at all.
+- **`user_claude_md/*/CLAUDE.md` no longer carries the writing rules** —
+  the Chinese rules existed in two byte-identical copies
+  (`hooks/style-rules-zh.md` and the user-level file), so an install with
+  both sent the same rules twice per turn and every edit had to be made
+  twice. The user-level file now holds only engineering behavior, and
+  restores the five principles the earlier writing-rules rewrite had
+  dropped: built-in capability priority, search first, cite sources,
+  confirm deletions, default language. `hooks/style-rules-{zh,en}.md` is
+  the single source; the CLI inherits it through `go:embed`, and
+  `plugins/style-rules/` keeps its own copy because a plugin install is
+  self-contained. That plugins copy was missing `style-rules-zh.md`
+  entirely, which silently downgraded the plugin's zh-cn mode to
+  English-only. Both READMEs now say where the style rules come from and
+  how to opt in without the hook.
+
 ## [0.10.0] - 2026-10-23
 
 CLI release stream (`v0.10.0`, plain semver so `go install ...@latest`
@@ -130,7 +181,8 @@ tags.
   check**. The floor exists because the body rules themselves ("sentence
   ≤30 characters", "≤2 noun modifiers") push a model toward simplifying
   payloads it must not touch, and a dropped negation costs more than
-  every token saved.
+  every token saved. Each language file carries all three sections on
+  its own.
 
 ### Changed
 
@@ -148,6 +200,18 @@ tags.
   entirely, which silently downgraded the plugin's zh-cn mode to
   English-only. Both READMEs now say where the style rules come from and
   how to opt in without the hook.
+- **Each rules file is now self-contained** — `style-rules-en.md` holds
+  the English ASD-STE100 rules and nothing else (its floor, exceptions
+  and check sections had been written in Chinese), and
+  `style-rules-zh.md` holds the Chinese rules **plus** the English ones.
+  `inject-style-rules.sh` therefore reads exactly one file per mode
+  instead of concatenating both, which is what sent the shared sections
+  and the English rules twice per turn under zh-cn. The zh-cn payload
+  drops from 3,010 to 2,171 bytes (28% smaller) while keeping the
+  English rules it always carried; the en payload grows from 1,604 to
+  1,965 bytes now that the three new sections are in English rather than
+  Chinese. The missing-file fail-open moved into each branch, so a zh-cn
+  install no longer needs the English file present at all.
 
 ## [0.9.7] - 2026-10-20
 

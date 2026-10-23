@@ -10,8 +10,10 @@
 #   2. the marker file style-rules.lang next to this script
 #      (written by setup-claude.sh from its --lang parameter)
 #   3. default: en
-# en    -> inject English rules only
-# zh-cn -> inject Chinese + English rules
+# Each rules file is self-contained and a mode reads exactly one of them,
+# so no rule is ever sent twice:
+# en    -> style-rules-en.md (English rules only)
+# zh-cn -> style-rules-zh.md (Chinese rules plus the English rules)
 #
 # No external dependencies (no jq/python) so it runs on macOS, Linux,
 # and Windows GitBash.
@@ -24,11 +26,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 RULES_ZH="$SCRIPT_DIR/style-rules-zh.md"
 RULES_EN="$SCRIPT_DIR/style-rules-en.md"
 LANG_FILE="$SCRIPT_DIR/style-rules.lang"
-
-if [ ! -f "$RULES_EN" ]; then
-    # Fail open: no English rules file, inject nothing.
-    exit 0
-fi
 
 # Choose language: argument > marker > default en.
 LANG_CODE="en"
@@ -43,8 +40,13 @@ elif [ -f "$LANG_FILE" ]; then
     esac
 fi
 
-# Compose rules per language.
+# Compose rules per language. Each file is self-contained, so a mode reads
+# exactly one file and never concatenates two.
 if [ "$LANG_CODE" = "en" ]; then
+    if [ ! -f "$RULES_EN" ]; then
+        # Fail open: no English rules file, inject nothing.
+        exit 0
+    fi
     RULES="$(cat "$RULES_EN")"
     PREAMBLE="Follow these controlled writing rules (ASD-STE100) for all output:"
 else
@@ -52,9 +54,7 @@ else
         # Fail open if the Chinese rules file is missing.
         exit 0
     fi
-    RULES="$(cat "$RULES_ZH")
-
-$(cat "$RULES_EN")"
+    RULES="$(cat "$RULES_ZH")"
     PREAMBLE="写作时必须遵守以下受控写作规范（中文与英文均适用）："
 fi
 
