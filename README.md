@@ -53,7 +53,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # Chinese
 - **Safety rules**: Confirmation requirements for destructive operations
 - **Built-in capability priority**: Guidance on when to use agents/skills vs external tools
 
-**Note:** User-level configuration is optional. If not configured, Claude Code will use its default behavior.
+**Note:** User-level configuration is optional. If not configured, Claude Code will use its default behavior. Writing-style rules (controlled writing, ASD-STE100) are **not** in this file — the style-rules hook injects them, so keeping them out avoids sending the same rules twice. To use them without the hook, merge `hooks/style-rules-en.md` into the copied file.
 
 ### 🌍 Supported Languages
 
@@ -119,15 +119,17 @@ Generate a project dictionary with `mindforge init dict` (or copy the format fro
 The `mindforge` binary is the installer, generator, and doctor — it embeds the whole hook payload (scripts, bundled dictionary, style-rule documents), so a single build carries everything. Install it straight from GitHub:
 
 ```bash
-# Requires Go 1.24+. @main tracks the default branch;
-# switch to @latest once the CLI gets a versioned tag.
-go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+# Requires Go 1.24+
+go install github.com/ProjAnvil/MindForge/cli/mindforge@latest
+
+# Track the development branch instead:
+# go install github.com/ProjAnvil/MindForge/cli/mindforge@main
 
 # Fresh modules can lag in the public proxy/sum DB. If you hit a 404
 # right after a release, install once via direct mode:
-GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@latest
 
-# Or build from a checkout
+# Or grab a prebuilt binary from the GitHub releases page, or build from a checkout
 git clone https://github.com/ProjAnvil/MindForge.git && cd MindForge && make cli
 ```
 

@@ -53,7 +53,7 @@ cp user_claude_md/zh-cn/CLAUDE.md ~/.claude/CLAUDE.md  # 中文
 - **安全规则**：破坏性操作的确认要求
 - **内置能力优先**：关于何时使用 agents/skills 与外部工具的指导
 
-**注意：** 用户级别配置是可选的。如果未配置，Claude Code 将使用其默认行为。
+**注意：** 用户级别配置是可选的。如果未配置，Claude Code 将使用其默认行为。写作规范（受控写作、ASD-STE100）**不在此文件内**，由 style-rules hook 注入；两处不重复，避免同一份规范每轮发送两次。若不使用 hook，请把 `hooks/style-rules-zh.md` 的内容并入复制后的文件。
 
 ### 🌍 支持的语言
 
@@ -135,15 +135,17 @@ zcode 不会加载自己不支持的事件，没有死配置。
 写作规范）全部内嵌，构建一次随身携带。直接从 GitHub 安装：
 
 ```bash
-# 需要 Go 1.24+。@main 跟踪默认分支；
-# CLI 打上版本 tag 后可换成 @latest。
-go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+# 需要 Go 1.24+
+go install github.com/ProjAnvil/MindForge/cli/mindforge@latest
+
+# 想跟踪开发分支就用 @main：
+# go install github.com/ProjAnvil/MindForge/cli/mindforge@main
 
 # 刚发布的模块在公共 proxy / sum 库有收录延迟，遇到 404 时
 # 先用直连模式装一次：
-GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@main
+GOPROXY=direct GOSUMDB=off go install github.com/ProjAnvil/MindForge/cli/mindforge@latest
 
-# 或者从仓库检出构建
+# 或者从 GitHub releases 下载预编译二进制，或从仓库检出构建
 git clone https://github.com/ProjAnvil/MindForge.git && cd MindForge && make cli
 ```
 

@@ -19,8 +19,11 @@ import (
 )
 
 // Version is the CLI version. Bump per release; the release process also
-// builds platform binaries with this string.
-const Version = "0.1.0"
+// builds platform binaries with this string. The CLI release stream uses
+// plain semver tags (v0.10.0, ...) so that `go install ...@latest`
+// resolves correctly — prefixed tags (style-v*, skills-v*) are invisible
+// to the Go toolchain.
+const Version = "0.10.0"
 
 func main() {
 	if len(os.Args) < 2 {
