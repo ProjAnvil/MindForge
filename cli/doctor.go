@@ -56,6 +56,7 @@ func runDoctor(_ []string) error {
 	// Per-platform registration.
 	doctorClaude(home)
 	doctorZcode(home)
+	doctorCodex(home)
 
 	if _, err := os.Stat(filepath.Join(home, ".kimi-code")); err == nil {
 		fmt.Println("  kimi           检测到 ~/.kimi-code（支持规划中，暂不安装）")
@@ -121,6 +122,31 @@ func doctorZcode(home string) {
 	default:
 		fmt.Println("  zcode          未注册（mindforge install --platform=zcode）")
 	}
+}
+
+func doctorCodex(home string) {
+	hooksPath := filepath.Join(home, ".codex", "hooks.json")
+	if _, err := os.Stat(hooksPath); err != nil {
+		if dirExists(filepath.Join(home, ".codex")) {
+			fmt.Println("  codex          未注册（mindforge install --platform=codex；需 codex 0.145+）")
+		}
+		return
+	}
+	top, err := loadTopLevel(hooksPath)
+	if err != nil {
+		fmt.Printf("  codex          ✗ hooks.json 解析失败: %v\n", err)
+		return
+	}
+	var eventsRaw map[string]json.RawMessage
+	if h, ok := top["hooks"]; ok {
+		_ = json.Unmarshal(h, &eventsRaw)
+	}
+	ours, total := countOurs(eventsRaw)
+	if ours == 0 {
+		fmt.Println("  codex          未注册（mindforge install --platform=codex；需 codex 0.145+）")
+		return
+	}
+	fmt.Printf("  codex          ✓ 已注册 %d/%d 个 hook 事件组（首次使用需在 /hooks 里信任）\n", ours, total)
 }
 
 // countOurs counts hook event groups owned by MindForge and the total

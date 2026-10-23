@@ -41,6 +41,11 @@ func detectPlatforms(home string) []platform {
 			supported: dirExists(filepath.Join(home, ".zcode")),
 		},
 		{
+			name:      "codex",
+			config:    filepath.Join(home, ".codex", "hooks.json"),
+			supported: dirExists(filepath.Join(home, ".codex")),
+		},
+		{
 			name:      "kimi",
 			config:   filepath.Join(home, ".kimi-code", "config.toml"),
 			supported: false, // Kimi adaptation is planned, not shipped (upstream Stop payload issue #2123)
@@ -136,8 +141,12 @@ func runInstall(args []string, stdin io.Reader) error {
 			if err := installZcode(home, opts.lang); err != nil {
 				return fmt.Errorf("zcode: %w", err)
 			}
+		case "codex":
+			if err := installCodex(home, opts.lang); err != nil {
+				return fmt.Errorf("codex: %w", err)
+			}
 		default:
-			return fmt.Errorf("未知平台 %q（可选：claude、zcode）", name)
+			return fmt.Errorf("未知平台 %q（可选：claude、zcode、codex）", name)
 		}
 	}
 	printInstallSummary(home, opts)
@@ -229,9 +238,11 @@ func seedUserDict(home string) error {
 	return os.WriteFile(dict, data, 0o644)
 }
 
-// groupProbe reads just the commands of a hook group to decide ownership.
+// groupProbe reads just the commands (and matcher) of a hook group to
+// decide ownership.
 type groupProbe struct {
-	Hooks []struct {
+	Matcher string `json:"matcher"`
+	Hooks   []struct {
 		Command string `json:"command"`
 	} `json:"hooks"`
 }
@@ -470,6 +481,73 @@ func zcodeGroups(hooksDir string) map[string]any {
 	}
 }
 
+// ---------- codex ----------
+
+// installCodex writes hooks into ~/.codex/hooks.json (single-format
+// config; Codex warns when hooks.json and config.toml inline hooks are
+// both present, so we never touch config.toml). The hooks feature is on
+// by default since codex 0.145.
+func installCodex(home, lang string) error {
+	hooksDir := filepath.Join(home, ".codex", "mindforge", "hooks")
+	if err := writeRuntimeFiles(hooksDir); err != nil {
+		return err
+	}
+	if err := writeLangMarker(hooksDir, lang); err != nil {
+		return err
+	}
+	if err := seedUserDict(home); err != nil {
+		return err
+	}
+
+	hooksPath := filepath.Join(home, ".codex", "hooks.json")
+	if err := os.MkdirAll(filepath.Dir(hooksPath), 0o755); err != nil {
+		return err
+	}
+	top, err := loadTopLevel(hooksPath)
+	if err != nil {
+		return err
+	}
+	var eventsRaw map[string]json.RawMessage
+	if h, ok := top["hooks"]; ok {
+		if err := json.Unmarshal(h, &eventsRaw); err != nil {
+			return fmt.Errorf("hooks.json 的 hooks 字段解析失败: %w", err)
+		}
+	}
+	existing, err := filterGroups(eventsRaw)
+	if err != nil {
+		return err
+	}
+	merged, err := mergeHooks(existing, codexGroups(hooksDir))
+	if err != nil {
+		return err
+	}
+	hooksBytes, err := json.Marshal(merged)
+	if err != nil {
+		return err
+	}
+	top["hooks"] = json.RawMessage(hooksBytes)
+	return writeJSONFile(hooksPath, top)
+}
+
+// codexGroups is the registration template for Codex. Its hook engine
+// mirrors Claude Code's contract (same hooks.json shape, stdin carries
+// cwd, additionalContext honored) with platform differences: no Subagent
+// events, file edits go through apply_patch/Edit/Write, and Stop uses
+// the decision:"block" contract — same as zcode, so the Stop command
+// reuses the --platform flag.
+func codexGroups(hooksDir string) map[string]any {
+	bash := "bash " + filepath.Join(hooksDir, "inject-style-rules.sh")
+	inject := "python3 " + filepath.Join(hooksDir, "inject.py")
+	inspect := "python3 " + filepath.Join(hooksDir, "inspect.py") + " --platform"
+	fileGuard := "python3 " + filepath.Join(hooksDir, "inspect-file.py")
+	return map[string]any{
+		"SessionStart":     []any{group("", bash)},
+		"UserPromptSubmit": []any{group("", bash), group("", inject)},
+		"PreToolUse":       []any{group("apply_patch|Edit|Write", fileGuard)},
+		"Stop":             []any{group("", inspect)},
+	}
+}
+
 // ---------- summary ----------
 
 func printInstallSummary(home string, opts installOptions) {
@@ -480,6 +558,9 @@ func printInstallSummary(home string, opts installOptions) {
 			fmt.Printf("  claude: hook 已注册到 ~/.claude/settings.json，脚本在 ~/.claude/MindForge/hooks/\n")
 		case "zcode":
 			fmt.Printf("  zcode:  hook 已注册到 ~/.zcode/cli/config.json（hooks.enabled=true），脚本在 ~/.zcode/mindforge/hooks/\n")
+		case "codex":
+			fmt.Printf("  codex:  hook 已注册到 ~/.codex/hooks.json，脚本在 ~/.codex/mindforge/hooks/\n")
+			fmt.Println("          首次运行 Codex 会要求信任新 hook（/hooks 命令审核；CI 可用 --dangerously-bypass-hook-trust）")
 		}
 	}
 	fmt.Printf("  语言: %s（style-rules.lang 标记）\n", opts.lang)

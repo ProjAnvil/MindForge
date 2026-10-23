@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Codex platform support in the CLI** — Codex's hook engine (stable since
+  0.145, same hooks.json shape and additionalContext contract as Claude
+  Code, Stop via decision:"block" like zcode) made this a near-zero-cost
+  addition: scripts unchanged, `--platform` reused for the Stop contract.
+  Registers SessionStart / UserPromptSubmit / PreToolUse (matcher
+  `apply_patch|Edit|Write` — Codex edits via apply_patch) / Stop into
+  `~/.codex/hooks.json` (single format; config.toml inline hooks left
+  untouched to avoid the dual-format merge warning). Foreign hook groups
+  survive byte-for-byte; the install summary and doctor surface the
+  hook-trust review step (`/hooks`, `--dangerously-bypass-hook-trust`).
 - **`mindforge` CLI v0.1.0 (Go, stdlib only)** — the installer/generator/doctor
   from the approved product vision, shipped as an MVP: `install`
   (interactive platform + language selection, `--yes` for scripting),

@@ -31,7 +31,11 @@ mindforge doctor
 |---|---|---|---|
 | Claude Code | `~/.claude/settings.json`（保留既有配置与外来 hook） | `~/.claude/MindForge/hooks/` | 支持（含 Subagent 事件） |
 | zcode | `~/.zcode/cli/config.json`（`hooks.enabled=true`，保留 timeoutMs 等字段） | `~/.zcode/mindforge/hooks/` | 支持（仅 zcode 的 7 事件；Stop 走 `--platform` 参数） |
+| Codex | `~/.codex/hooks.json`（单一格式，不碰 config.toml） | `~/.codex/mindforge/hooks/` | 支持（需 codex 0.145+；文件编辑工具名是 apply_patch/Edit/Write；首次使用需在 `/hooks` 里信任；Stop 走 `--platform`） |
 | Kimi Code | `~/.kimi-code/config.toml` | — | 检测可见，暂不安装（上游 Stop payload 缺助手消息，issue #2123） |
+
+用 `--platform` 指定装进哪个 harness（`claude` / `zcode` / `codex`，逗号分隔多个）；
+不带该参数则交互式选择，`--yes` 默认装所有检测到的受支持平台。
 
 安装是幂等的：重复 `mindforge install` 不会重复注册——旧条目按
 `mindforge/hooks/` 路径标记识别并整体替换。外来的 hook 配置逐字节保留。

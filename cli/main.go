@@ -59,7 +59,7 @@ func usage() {
 
 Usage:
   mindforge install   Install writing rules and the zh-guard hooks (user level).
-                      Options: --lang=zh-cn|en  --platform=claude,zcode  --yes
+                      Options: --lang=zh-cn|en  --platform=claude,zcode,codex  --yes
   mindforge init dict Generate a project-level dictionary (mindforge.zh-dict.tsv).
                       Options: --lang=zh-cn  --force
   mindforge doctor    Diagnose runtimes, hook registration and dictionary tiers.
