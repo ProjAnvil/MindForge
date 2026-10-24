@@ -204,7 +204,7 @@ def handle_request(msg):
                         "protocolVersion", PROTOCOL_VERSION
                     ),
                     "capabilities": {"tools": {}},
-                    "serverInfo": {"name": "term-dict", "version": "0.9.6"},
+                    "serverInfo": {"name": "term-dict", "version": "0.9.9"},
                 },
             }
         if method == "ping":

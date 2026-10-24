@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [style-v0.9.9] - 2026-10-24
+
+Patch release for `style-rules-zh-cn` and `style-rules`, both at 0.9.9.
+The agents and skills plugins remain at 0.9.7. The CLI release version
+remains 0.10.1; this style tag does not publish new CLI binaries.
+
+### Added
+
+- **Shared draft checking** across MCP, Stop and document-write hooks,
+  with original character offsets, line and column positions, contextual
+  excerpts, repeated matches and longest non-overlapping matching.
+- **Structured MCP preflight** with `corrected_text`, `findings`,
+  `remaining_findings` and `needs_rewrite`. An optional absolute `cwd`
+  applies project dictionary overrides consistently with hooks.
+- **Opt-in Claude MessageDisplay support** for explicitly marked literal
+  replacements. Cross-batch code fences, quoted mentions, duplicate
+  batches and session/message isolation are protected. The hook is not
+  registered by default and changes display text only, not transcripts
+  or model context.
+- **English doctor output tests** covering missing dependencies, invalid
+  configurations, registration status and disabled zcode hooks.
+
+### Changed
+
+- Dictionary entries accept an optional fourth-column action:
+  `replace` or `rewrite`. Existing three-column entries default to
+  contextual rewriting. Four explicit literal rules opt into direct
+  replacement; ambiguous terms and regular expressions remain advisory.
+- Simplified dictionary comments and explanations while preserving all
+  44 entries. Problem-investigation expressions no longer map to an
+  unrelated experimental method.
+- Draft instructions now request MCP preflight, contextual revision and
+  rechecking before the final answer. Tool invocation remains
+  model-controlled; Stop checking remains a fallback.
+- Doctor diagnostics, warnings, recovery hints and related test failure
+  messages are now English. Invalid-JSON diagnostics shared with the
+  installer are also English.
+
+### Fixed
+
+- Stop output now consistently uses `decision: "block"` and `reason`
+  instead of mixing continuation feedback with `continue: false`.
+- Dictionary formatting preserves and validates the optional action
+  column and targets the current user dictionary directory.
+- Updated the zcode style manifest and MCP server version to match this
+  release. Marketplace style entries are synchronized at 0.9.9.
+
+### Upgrade notes
+
+- Update the installed plugin and start a new session; restart persistent
+  MCP servers. Old plugin caches can otherwise restore an older user
+  dictionary through their own synchronization marker.
+- MessageDisplay requires a compatible Claude Code version and explicit
+  configuration. Other platforms keep the existing hook events.
+- Sentence-level contextual annotations are under investigation and are
+  not part of this release.
+
 ## [0.10.1] - 2026-10-23
 
 CLI patch release (`v0.10.1`, plain semver so `go install ...@latest`
