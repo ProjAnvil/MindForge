@@ -47,7 +47,7 @@ func detectPlatforms(home string) []platform {
 		},
 		{
 			name:      "kimi",
-			config:   filepath.Join(home, ".kimi-code", "config.toml"),
+			config:    filepath.Join(home, ".kimi-code", "config.toml"),
 			supported: false, // Kimi adaptation is planned, not shipped (upstream Stop payload issue #2123)
 		},
 	}
@@ -331,7 +331,7 @@ func loadTopLevel(path string) (map[string]json.RawMessage, error) {
 	}
 	top := map[string]json.RawMessage{}
 	if err := json.Unmarshal(raw, &top); err != nil {
-		return nil, fmt.Errorf("%s 不是合法 JSON（请人工修复后再安装）: %w", path, err)
+		return nil, fmt.Errorf("%s contains invalid JSON; fix the file before continuing: %w", path, err)
 	}
 	return top, nil
 }

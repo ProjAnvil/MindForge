@@ -7,18 +7,19 @@ MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`�
 | 组件 | 文件 | 事件/通道 | 职责 |
 |---|---|---|---|
 | 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit（+ SubagentStart，仅 Claude） | 注入受控写作规范（中文+英文） |
-| 公共库 | zh_guard_common.py | - | 三级词典加载、豁免、防循环状态（hook 脚本的同目录依赖） |
+| 公共库 | zh_guard_common.py | - | 三级词典、保护区、原文位置与上下文、最长非重叠匹配、安全替换和防循环 |
 | L0 字典 | terminology.tsv（内置） / mindforge.zh-dict.tsv（项目级） | - | 三级术语字典：内置 → 用户级 → 项目级（数据飞轮） |
 | L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
 | L2 出口检测 | inspect.py | Stop（+ SubagentStop，仅 Claude） | 命中直译词要求重写（按地道措辞重写整句） |
 | L2 文件写入口 | inspect-file.py | PreToolUse（Write\|Edit\|NotebookEdit） | 文档类文件（.md/.markdown/.txt/.rst）写入前检测，deny 并要求改写 |
 | L2 句式判官 | claude-prompt-hooks.json | Stop（prompt 型，仅 Claude Code） | 字典未命中时小模型判断是否地道中文，覆盖长尾句式 |
 | 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
+| 显示替换（可选） | message-display.py | MessageDisplay，仅支持该事件的 Claude Code | 显示前执行安全替换，保留代码及按语境改写的内容 |
 | 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
 | 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
 | 方案成本评测 | eval-zh-guard.py | 手动运行 | 装 vs 不装（含空字典）：token、耗时、拦截代价 |
 
-所有 hook 全部 fail-open：任何异常静默放行，绝不卡死会话。
+所有 hook 保持 fail-open，不因检测异常卡死会话；检测与显示入口会向 stderr 报告错误。
 
 ## 多平台
 
@@ -40,8 +41,8 @@ zcode 直接装本插件（`.claude-plugin/plugin.json` 在其 manifest 查找�
 - 注入（SessionStart / UserPromptSubmit）：zcode 同样解析
   `hookSpecificOutput.additionalContext`，脚本原样可用。
 - MCP：zcode 自动启动 term-dict。
-- Stop：zcode 的契约是 `decision:"block"` + reason；`continue:false` 在 zcode
-  里语义相反（允许结束）。inspect.py 检测 `ZCODE_PLUGIN_ROOT` 自动切换输出。
+- Stop：统一使用 `decision:"block"` + reason 和 exit 2，让助手继续检查；
+  不输出表示停止处理的 `continue:false`。
 - 子代理：zcode 没有子代理事件，规范注入与 L2 覆盖不到子代理。
 - 文件写入口（PreToolUse）：zcode 支持，matcher `Write|Edit` 语义一致。
 - 句式判官（prompt 型 hook）：Claude Code 独有类型，配置在
@@ -71,23 +72,84 @@ UserPromptSubmit 三个事件可阻断，其余全是观察型（fire-and-forget
 
 插件清单声明了 `mcpServers`（`${CLAUDE_PLUGIN_ROOT}` 定位），装插件即得，
 工具自动命名空间化。纯 Python stdio 实现，零依赖，系统 `python3` 即可运行。
-与 L1/L2 共享同一份合并字典（含 `re:` 正则词条），每次调用现读，`add_term`
-入库后立即可查、下轮注入生效。
+与 L1/L2 共享同一检测引擎（含 `re:` 正则词条），每次调用现读，`add_term`
+入库后立即可查、下轮注入生效。可选 `cwd` 必须是绝对路径；
+提供时与 hook 一样加载项目词表，不提供时只合并内置与用户级。
 
 | 工具 | 用途 |
 |---|---|
-| `lookup_term(query)` | 双向查词：英文/中文子串匹配直译词、期望写法、说明 |
-| `check_text(text)` | 交付前自查：L2 同款检测（代码块与引号提及豁免） |
-| `add_term(term, expected, note)` | 数据飞轮：追加用户词条，term 支持 `re:` 前缀 |
+| `lookup_term(query, cwd?)` | 双向查词：英文/中文子串匹配直译词、期望写法、说明 |
+| `check_text(text, cwd?)` | 草稿预检：安全替换、命中位置与上下文、剩余改写建议 |
+| `add_term(term, expected, note?, action?)` | 追加用户词条，默认按语境改写；安全字面替换才设 `action="replace"` |
+
+### 回答前预检
+
+L1 注入要求助手先提交完整中文草稿，使用安全替换后的结果，再结合原句处理剩余命中；
+修改后再次复查。MCP 返回可读文本以及 `structuredContent`：
+
+- `corrected_text`：只执行安全替换后的完整草稿，不修改代码或引号内提及。
+- `changed`：是否执行了替换。
+- `findings`：原稿的全部非重叠命中，包含 `term`、`text`、`expected`、`action`、
+  `note`、`start`、`end`、`line`、`column`、`context`。
+- `remaining_findings`：对替换后草稿重新检查的结果。
+- `needs_rewrite`：仍有命中，需要助手结合语境复核；不是要求机械替换所有命中。
+
+`start/end` 是原文中从 0 开始的字符偏移，`end` 不包含在匹配内；
+`line/column` 从 1 开始。`findings` 对应原稿，`remaining_findings` 对应替换后的草稿。
+例如 `机械胳膊，做病灶分析并保留台账。` 只会自动把前者改为「机械臂」，
+其余由助手根据原意处理，不能把「清单 / 记录」直接写进回答。
+
+重叠命中采用从左到右、同起点最长优先；同范围规则冲突时优先按语境改写。
+替换基于原文位置执行一遍，不把新生成的词再次级联替换。无效正则会记录错误并跳过；
+不合法的规则动作会明确报错。
 
 定位：拉模式知识层，不替代 L1（推送预防）与 L2（外部检测）——
 模型感知不到自己在说翻译腔（P3），不会总记得主动查询，外部检测仍是兜底。
+提示词不能保证每次调用工具，Stop 仍检查最终原稿；没有新增外部模型调用或分词依赖。
 
 符号链接部署（`setup-claude.sh`）不自动注册 MCP，手动执行：
 
 ```
 claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
 ```
+
+### 可选：MessageDisplay 显示前替换
+
+只在支持 [MessageDisplay](https://code.claude.com/docs/en/hooks#messagedisplay)
+的 Claude Code 版本启用；不默认注册到旧版 Claude、zcode 或其他客户端。
+CLI 安装会携带脚本，但不会自动启用事件。
+
+CLI 安装后可把下面的事件组**合并**到 Claude 用户设置，保留已有 hooks：
+
+```json
+{
+  "hooks": {
+    "MessageDisplay": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/MindForge/hooks/message-display.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+插件目录另有独立的 `hooks/message-display-hooks.json`，需要该功能的插件清单
+可显式引用它；默认清单不加载，避免未知事件破坏旧平台兼容性。
+仅插件安装时，用户设置中的命令路径应指向实际插件目录的 `message-display.py`。
+
+只替换第四列标为 `replace` 的字面词条；`rewrite` 内容原样保留，交给模型和 Stop。
+屏蔽代码与引号提及，围栏状态按 session/message 隔离并跨显示批次保留，
+支持重复批次；乱序、状态损坏或其他异常时记录 stderr，宿主显示原文。
+状态文件只保存批次、围栏及哈希，不保存回答正文。
+
+**仅改变显示，不改变会话记录或模型上下文。** 失败或超时时可能显示原文，
+不提供“用户绝不会看到原文”的保证。停用方式与其他 hook 相同。
 
 ## 安装
 
@@ -97,6 +159,11 @@ claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
 ```
 
 依赖系统 `python3`。
+
+开发工作区的修改不会自动更新已经加载的插件缓存。请使用更新后的插件或部署运行脚本，
+再重启 MCP / 新建会话；旧版本缓存仍可能按旧 `@sync` 标记把用户词表写回旧版。
+不要只修改用户副本而继续运行旧插件。MessageDisplay 需要支持该事件的客户端，
+其余检测与 MCP 功能不依赖该事件。
 
 ## 这套东西到底要花多少：eval-zh-guard.py
 
@@ -152,7 +219,7 @@ token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估
 展示顺序（L1 注入）与覆盖顺序相反：项目级 → 用户级 → 内置，
 越具体越靠前，超出注入上限时先牺牲宽泛层。L2 出口检测、文件写检测、
 L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程拿不到
-会话 cwd，只合并前两级。
+会话 cwd，只有调用时显式提供绝对路径 `cwd` 才合并项目级。
 
 **部署要求**：`zh_guard_common.py` 必须与 hook 脚本同目录
 （插件市场安装自动满足；手动复制部署时别漏拷这个文件）。
@@ -170,7 +237,10 @@ L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程
   `ZH_GUARD_DICT` 指向自己的字典文件。
 - **运行时合并**：读取插件自带 + `~/.claude/MindForge/` 两份字典，用户条目优先。
 - **用户词条**：直接编辑 `~/.claude/MindForge/terminology.tsv`。
-  格式：TSV 三列 `直译词<TAB>期望写法<TAB>说明`，`#` 开头为注释。
+  格式：TSV `直译词<TAB>期望写法<TAB>说明[<TAB>动作]`，`#` 开头为注释。
+  旧三列及省略动作默认 `rewrite`，由助手结合原句改写；第四列 `replace`
+  表示可直接执行的安全字面替换。正则词条和多个候选写法不能标为 `replace`。
+  注释只留格式、简短分组和 `@sync` 标记；第三列只留查询关键词与必要的语境提示。
   带可变数字等模式用正则词条：第一列以 `re:` 开头
   （如 `re:第\s*\d+\s*刀`），无效正则自动跳过。
   词条要写精确（「病灶实验」而非「病灶」），避免误伤医学等合法语境。
@@ -226,9 +296,11 @@ token 计数优先用 `tiktoken`（装了更准），没装就用标注清楚的
 
   1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
      反例 `下一刀 → 下一个削减项`；正例 `下一刀 → 下一处可以精简的部分`。
-  2. 要能直接替换原文里的直译词，所以不带括号注释、不写整句模板。
+  2. 标为 `replace` 的写法必须可直接替换原文，不含多个候选或改写指令；
+     需要判断语境或重写句子的规则保留默认 `rewrite`，由助手处理。
   3. 拿不准译法的名词保留英文原词：token、agent、hook、ghost token 不译。
-  4. 有社区定译的用定译：ablation study=消融实验，ground truth=真值。
+  4. 优先保留原意，不要为了套专业术语而改成别的意思。
+     例如「病灶分析」在排查问题时说「分析问题原因」，不能直接认作 ablation。
 
   英文原词和括号里的一句解释请放第三列（说明），不要塞进第二列。
 - **回馈上游**：通用性强的词条欢迎提交回 MindForge 仓库的

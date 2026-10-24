@@ -6,52 +6,35 @@
 
 工具面（拉模式知识层，不替代 L1 注入与 L2 检测）：
   lookup_term(query)   双向查词：直译词/期望写法/说明 子串匹配
-  check_text(text)     交付前自查：L2 同款检测（豁免区 + 正则）
+  check_text(text)     草稿预检：共享检测、安全替换及结构化改写建议
   add_term(...)        数据飞轮：追加用户词条，下轮注入生效
 
 设计原则（fail-open）：单个请求出错返回 isError，服务器不崩溃。
+check_text / lookup_term 可显式传 cwd 加载项目词表。
 """
 import json
 import os
-import re
 import sys
 
 from zh_guard_common import (
+    Rule,
+    apply_replacements,
     ensure_user_dict,
+    format_findings,
     guard_home,
-    load_note_entries,
-    strip_code,
+    lint_text,
+    load_rules,
 )
 
 PROTOCOL_VERSION = "2024-11-05"
 MAX_LOOKUP_RESULTS = 20
 
 
-def load_entries():
-    """合并读取 [(直译词, 期望写法, 说明), ...]。更具体层优先。
-
-    MCP 服务器是常驻进程，拿不到会话 cwd，项目级词典不参与
-    （hook 层的 L1/L2/文件检测仍三级生效）。
-    """
-    return load_note_entries(None)
-
-
-def detect(text):
-    """返回 [(命中词, 期望写法), ...]。正则词条引用实际命中串。"""
-    entries = load_entries()
-    stripped = strip_code(text)
-    hits = []
-    for term, good, _note in entries:
-        if term.startswith("re:"):
-            try:
-                m = re.search(term[3:], stripped)
-            except re.error:
-                continue
-            if m:
-                hits.append((m.group(0), good))
-        elif term in stripped:
-            hits.append((term, good))
-    return hits
+def requested_cwd(args):
+    cwd = args.get("cwd")
+    if cwd is not None and (not isinstance(cwd, str) or not os.path.isabs(cwd)):
+        raise ValueError("cwd 必须是项目目录的绝对路径")
+    return cwd
 
 
 # ---------- 工具实现 ----------
@@ -60,9 +43,10 @@ def tool_lookup_term(args):
     query = str(args.get("query", "")).strip().lower()
     if not query:
         return "query 为空。传入要查询的英文或中文术语。"
-    entries = load_entries()
+    entries = load_rules(requested_cwd(args))
     matched = []
-    for term, good, note in entries:
+    for rule in entries:
+        term, good, note = rule.term, rule.expected, rule.note
         hay = " / ".join([term, good, note]).lower()
         if query in hay:
             display = term if not term.startswith("re:") else "re:" + term[3:]
@@ -81,16 +65,37 @@ def tool_lookup_term(args):
 
 
 def tool_check_text(args):
-    text = str(args.get("text", ""))
-    if not text.strip():
-        return "text 为空。"
-    hits = detect(text)
+    text = args.get("text", "")
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError("text 必须是非空中文草稿")
+    rules = load_rules(requested_cwd(args))
+    hits = lint_text(text, rules)
+    corrected = apply_replacements(text, hits)
+    remaining = lint_text(corrected, rules)
+    report = {
+        "corrected_text": corrected,
+        "changed": corrected != text,
+        "findings": [hit._asdict() for hit in hits],
+        "remaining_findings": [hit._asdict() for hit in remaining],
+        "needs_rewrite": bool(remaining),
+    }
     if not hits:
-        return "未命中直译词。"
-    lines = ["命中 %d 处直译词，修正后再交付：" % len(hits)]
-    for bad, good in hits[:20]:
-        lines.append("  %s → %s" % (bad, good))
-    return "\n".join(lines)
+        summary = "未命中直译词。"
+    else:
+        summary = "命中 %d 处，已执行标为 replace 的安全替换：\n%s" % (
+            len(hits), format_findings(hits, 20),
+        )
+        summary += "\n安全替换后的草稿：\n" + corrected
+        if remaining:
+            summary += (
+                "\n剩余命中请结合原句判断，合法用法保留；"
+                "不要照抄候选列表或改写指令。修改后再次调用 check_text 复查。"
+            )
+    return {
+        "content": [{"type": "text", "text": summary}],
+        "structuredContent": report,
+        "isError": False,
+    }
 
 
 def tool_add_term(args):
@@ -98,17 +103,19 @@ def tool_add_term(args):
     expected = str(args.get("expected", "")).strip()
     note = str(args.get("note", "")).strip()
     if not term or not expected:
-        return "term 与 expected 必填。term 支持 re: 前缀（正则词条）。"
+        raise ValueError("term 与 expected 必填。term 支持 re: 前缀（正则词条）。")
     # 清洗输入，保证 TSV 结构不被破坏。
     clean = lambda s: s.replace("\t", " ").replace("\n", " ").replace("\r", " ")
     term, expected, note = clean(term), clean(expected), clean(note)
+    action = args.get("action", "rewrite")
+    Rule(term, expected, note, action)
     ensure_user_dict()
     path = os.path.join(guard_home(), "terminology.tsv")
-    try:
-        with open(path, "a", encoding="utf-8") as f:
-            f.write("%s\t%s\t%s\n" % (term, expected, note))
-    except Exception as exc:
-        return "写入失败：%r" % exc
+    row = "%s\t%s\t%s" % (term, expected, note)
+    if "action" in args:
+        row += "\t" + action
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(row + "\n")
     return "已添加：%s → %s（写入 %s，下轮注入生效）" % (term, expected, path)
 
 
@@ -117,16 +124,18 @@ TOOLS = [
         "name": "lookup_term",
         "description": (
             "查询术语的中文地道写法（zh-guard 术语字典）。写中文技术内容前，"
-            "用英文原词或中文词查询：有社区定译返回定译（ablation study=消融实验），"
-            "无定译的返回「保留英文」。双向子串匹配直译词/期望写法/说明。"
+            "用英文原词或中文词查询：按上下文给出自然、易懂的说法，"
+            "不硬套其他专业概念；无合适中文时返回「保留英文」。"
+            "双向子串匹配直译词/期望写法/说明。"
         ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "英文或中文术语，如 ablation、病灶、ground truth",
-                }
+                    "description": "英文或中文术语，如 slot key、病灶分析、ground truth",
+                },
+                "cwd": {"type": "string", "description": "项目目录绝对路径；可选，用于加载项目词表"},
             },
             "required": ["query"],
         },
@@ -136,12 +145,15 @@ TOOLS = [
         "description": (
             "交付前自查中文草稿中的直译词（zh-guard L2 同款检测，"
             "代码块与引号内提及豁免）。输出中文技术内容前调用，"
-            "命中会列出 直译词→期望写法。"
+            "自动执行显式安全替换，返回 corrected_text、命中位置、原句上下文、"
+            "规则动作及 remaining_findings。后者由助手结合语境改写，合法用法保留；"
+            "修改后再次调用复查，不机械执行候选列表或改写指令。"
         ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "text": {"type": "string", "description": "待自查的中文草稿"}
+                "text": {"type": "string", "description": "正式回答前的完整中文草稿"},
+                "cwd": {"type": "string", "description": "项目目录绝对路径；可选，用于加载项目词表"},
             },
             "required": ["text"],
         },
@@ -159,6 +171,10 @@ TOOLS = [
                 "term": {"type": "string", "description": "直译词；re: 前缀表示正则"},
                 "expected": {"type": "string", "description": "期望写法"},
                 "note": {"type": "string", "description": "简短说明（可选）"},
+                "action": {
+                    "type": "string", "enum": ["replace", "rewrite"],
+                    "description": "默认 rewrite（结合原句改写）；明确无歧义的字面替换才标 replace",
+                },
             },
             "required": ["term", "expected"],
         },
@@ -208,14 +224,16 @@ def handle_request(msg):
                         "isError": True,
                     },
                 }
-            text = func(params.get("arguments", {}) or {})
+            result = func(params.get("arguments", {}) or {})
+            if isinstance(result, str):
+                result = {
+                    "content": [{"type": "text", "text": result}],
+                    "isError": False,
+                }
             return {
                 "jsonrpc": "2.0",
                 "id": msg_id,
-                "result": {
-                    "content": [{"type": "text", "text": text}],
-                    "isError": False,
-                },
+                "result": result,
             }
         # 未知请求（有 id）→ 标准错误；通知（无 id）→ 忽略。
         if msg_id is not None:

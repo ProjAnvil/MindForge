@@ -73,8 +73,12 @@ def test_l1_injection_format():
     ctx = out.get("hookSpecificOutput", {}).get("additionalContext", "")
     check("L1 输出合法 JSON 且 continue=true", ok and out.get("continue") is True, proc.stdout[:200])
     check("L1 注入包含混排规范", "禁止字面直译" in ctx, ctx[:200])
-    check("L1 注入包含字典定译（消融实验）", "消融实验" in ctx)
+    check("L1 注入包含通俗的实验说法",
+          "病灶实验→排查原因的实验" in ctx, ctx[:500])
+    check("L1 注入不再推荐旧说法", "消融" not in ctx, ctx[:500])
     check("L1 注入包含新增词条（地面真实）", "地面真实" in ctx)
+    check("L1 要求回答前调用 MCP 预检并复查",
+          "check_text" in ctx and "草稿" in ctx and "复查" in ctx, ctx[-600:])
 
 
 def test_l2_blocks_translationese():
@@ -83,7 +87,11 @@ def test_l2_blocks_translationese():
     proc = run_hook(INSPECT, {"session_id": "t2", "last_assistant_message": msg}, env)
     body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
     check("L2 命中直译词时退出码为 2", proc.returncode == 2, "rc=%d" % proc.returncode)
-    check("L2 反馈包含修正指引（消融实验）", "消融实验" in body, body[:300])
+    check("L2 反馈包含通俗的实验说法",
+          "排查原因的实验" in body and "消融" not in body, body[:300])
+    out = json.loads(proc.stdout)
+    check("Claude Stop 使用 block 续跑而非 continue:false 停止",
+          out.get("decision") == "block" and out.get("continue") is not False, str(out)[:200])
 
 
 def test_l2_blocks_new_entries():
@@ -225,6 +233,7 @@ def test_dict_version_sync():
         f.write(
             "# 用户旧字典（无 @sync 标记，模拟旧版本安装）\n"
             "下一刀\t下一个削减项\t旧写法\n"
+            "病灶实验\t消融实验\t旧写法\n"
             "用户自加词\t用户自己的写法\t用户补充\n"
         )
     try:
@@ -233,6 +242,9 @@ def test_dict_version_sync():
             content = f.read()
         check("版本落后时把新版自带词条同步到用户字典",
               "下一处可以精简的部分" in content, content[:300])
+        check("升级后替换旧实验说法",
+              "排查原因的实验" in content and "消融" not in content,
+              content[:300])
         check("用户自加词条在同步后保留", "用户自加词\t用户自己的写法" in content, content[:300])
         check("同步后用户字典带上 @sync 标记", "# @sync" in content, content[:300])
         proc = run_hook(
@@ -355,9 +367,9 @@ def test_l2_zcode_stop_contract():
           proc.stdout.decode("utf-8")[:200])
     check("zcode 下不输出 continue:false", out.get("continue") is not False,
           proc.stdout.decode("utf-8")[:200])
-    check("zcode 下 reason 带修正指引（消融实验）",
-          "消融实验" in out.get("reason", ""), str(out.get("reason", ""))[:200])
-    check("zcode 下 stderr 仍写阻断理由", "消融实验" in proc.stderr.decode("utf-8"),
+    check("zcode 下 reason 带通俗的修正指引",
+          "排查原因的实验" in out.get("reason", ""), str(out.get("reason", ""))[:200])
+    check("zcode 下 stderr 仍写阻断理由", "排查原因的实验" in proc.stderr.decode("utf-8"),
           proc.stderr.decode("utf-8")[:200])
     proc2 = run_hook(
         INSPECT,
@@ -428,6 +440,23 @@ def test_l1_injection_new_rules_and_wider_cap():
 INSPECT_FILE = os.path.join(HERE, "inspect-file.py")
 
 
+def test_shared_matching_positions_and_longest_rule():
+    env, sd = temp_env()
+    path = os.path.join(sd, "custom.tsv")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("缺口\t剩下的待办\t短词\n遗留缺口\t还没做完的部分\t长词\n")
+    env["ZH_GUARD_DICT"] = path
+    text = "第一行。\n遗留缺口。"
+    for index, script in enumerate([INSPECT, INSPECT_FILE]):
+        payload = {"session_id": "shared-%d" % index, "last_assistant_message": text,
+                   "tool_input": {"file_path": "/x/a.md", "content": text}}
+        proc = run_hook(script, payload, env)
+        body = proc.stdout.decode("utf-8") + proc.stderr.decode("utf-8")
+        check("共享引擎提供位置且抑制重叠短词（%s）" % os.path.basename(script),
+              proc.returncode == 2 and "第2行" in body and "第1列" in body
+              and "还没做完的部分" in body and "剩下的待办" not in body, body[:400])
+
+
 def test_l2_blocks_sentence_patterns():
     """句式级套话：re: 正则词条拦「值得注意的是」「进行了分析」这类模板腔。"""
     env, sd = temp_env()
@@ -461,7 +490,8 @@ def test_file_guard_blocks_translationese():
     check("文件检测：.md 含直译词被 deny（exit 2）", proc.returncode == 2, "rc=%d" % proc.returncode)
     check("文件检测：输出 permissionDecision=deny",
           "permissionDecision" in body and "deny" in body, body[:200])
-    check("文件检测：deny 理由带修正指引（消融实验）", "消融实验" in body, body[:200])
+    check("文件检测：deny 理由带通俗的修正指引",
+          "排查原因的实验" in body and "消融" not in body, body[:200])
     proc2 = run_hook(INSPECT_FILE, {
         "session_id": "tf2", "tool_name": "Write",
         "tool_input": {"file_path": "/x/docs/b.md", "content": "重试逻辑已修复，重复请求降到 7 次。"},
@@ -533,7 +563,7 @@ def test_project_level_dict():
         body = proc2.stdout.decode("utf-8") + proc2.stderr.decode("utf-8")
         check("项目级覆盖内置词条（用项目覆盖写法）",
               proc2.returncode == 2 and "项目覆盖写法" in body
-              and "消融实验" not in body, body[:200])
+              and "排查原因的实验" not in body, body[:200])
         proc3 = run_hook(INSPECT, {"session_id": "pj3", "cwd": sub,
                                    "last_assistant_message": "这里出现了外部黑词。"}, env)
         check("项目根之外不查（.git 边界）", proc3.returncode == 0, "rc=%d" % proc3.returncode)

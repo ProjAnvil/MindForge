@@ -83,12 +83,15 @@ func TestInstallClaudeRegistersAllEvents(t *testing.T) {
 	hooksDir := filepath.Join(home, ".claude", "MindForge", "hooks")
 	for _, name := range []string{
 		"inject-style-rules.sh", "inject.py", "inspect.py",
-		"inspect-file.py", "zh_guard_common.py", "term-dict-server.py",
+		"inspect-file.py", "zh_guard_common.py", "term-dict-server.py", "message-display.py",
 		"terminology.tsv", "style-rules-zh.md", "style-rules-en.md",
 	} {
 		if _, err := os.Stat(filepath.Join(hooksDir, name)); err != nil {
 			t.Errorf("脚本缺失: %s (%v)", name, err)
 		}
+	}
+	if _, registered := events["MessageDisplay"]; registered {
+		t.Error("旧版兼容安装不应默认注册可选 MessageDisplay")
 	}
 	// Language marker.
 	marker, err := os.ReadFile(filepath.Join(hooksDir, "style-rules.lang"))
@@ -245,7 +248,7 @@ func TestInstallZcodeCreatesMissingConfigDir(t *testing.T) {
 
 func TestCountOursCountsOursAndTotal(t *testing.T) {
 	events := map[string]json.RawMessage{
-		"Stop": json.RawMessage(`[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inspect.py"}]},{"hooks":[{"command":"mine.sh"}]}]`),
+		"Stop":       json.RawMessage(`[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inspect.py"}]},{"hooks":[{"command":"mine.sh"}]}]`),
 		"PreToolUse": json.RawMessage(`[{"hooks":[{"command":"my-guard.sh"}]}]`),
 	}
 	ours, total := countOurs(events)

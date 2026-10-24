@@ -8,7 +8,7 @@ package mindforge
 
 import "embed"
 
-//go:embed hooks/inject-style-rules.sh hooks/inject.py hooks/inspect.py hooks/inspect-file.py hooks/zh_guard_common.py hooks/term-dict-server.py hooks/style-rules-zh.md hooks/style-rules-en.md hooks/terminology.tsv
+//go:embed hooks/inject-style-rules.sh hooks/inject.py hooks/inspect.py hooks/inspect-file.py hooks/message-display.py hooks/zh_guard_common.py hooks/term-dict-server.py hooks/style-rules-zh.md hooks/style-rules-en.md hooks/terminology.tsv
 var Assets embed.FS
 
 // RuntimeFiles lists the embedded files that an install writes into a
@@ -19,6 +19,7 @@ var RuntimeFiles = []string{
 	"hooks/inject.py",
 	"hooks/inspect.py",
 	"hooks/inspect-file.py",
+	"hooks/message-display.py",
 	"hooks/zh_guard_common.py",
 	"hooks/term-dict-server.py",
 	"hooks/style-rules-zh.md",

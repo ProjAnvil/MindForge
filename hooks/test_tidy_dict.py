@@ -120,6 +120,25 @@ def test_real_dict_is_clean():
               f.read() == rendered)
 
 
+def test_optional_action_column():
+    source = "旧词\t候选写法\t说明\n机械胳膊\t机械臂\t说明\treplace\n"
+    items = tidy_dict.parse(source.splitlines())
+    rendered = tidy_dict.render(items)
+    rows = [line.split("\t") for line in rendered.splitlines()]
+    check("旧三列保持兼容，新第四列不丢失",
+          len(rows[0]) == 3 and len(rows[1]) == 4
+          and rows[1][-1].strip() == "replace", rendered)
+    check("四列排版幂等", tidy_dict.render(tidy_dict.parse(rendered.splitlines())) == rendered)
+    for row in [
+        "旧词\t新词\t说明\tunknown",
+        "re:旧词\t新词\t说明\treplace",
+        "旧词\t候选一 / 候选二\t说明\treplace",
+        "旧词\t新词\t说明\trewrite\t多余列",
+    ]:
+        errors, _ = tidy_dict.check(tidy_dict.parse([row]))
+        check("不合法的替换规则明确报错（%s）" % row, bool(errors), str(errors))
+
+
 def main():
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for t in tests:

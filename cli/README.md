@@ -23,6 +23,7 @@ mindforge init dict [--lang=zh-cn] [--force]
 mindforge doctor
     体检：python3 运行时、三级词典层级与条数、各平台 hook 注册状态、
     旧目录（~/.claude/zh-guard）残留提醒、Kimi 支持状态。
+    诊断结果、错误、警告与修复提示统一使用英文，不随主写作语言切换。
 ```
 
 ## 平台支持

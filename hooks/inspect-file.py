@@ -32,20 +32,19 @@
 """
 import hashlib
 import json
-import re
 import sys
 
 from zh_guard_common import (
     allow_block,
     ensure_user_dict,
+    format_findings,
     is_off,
-    load_pairs,
+    lint_text,
     load_state,
     migrate_legacy_home,
     record_block,
     save_state,
     state_path,
-    strip_code,
 )
 
 TEXT_SUFFIXES = (".md", ".markdown", ".txt", ".rst")
@@ -71,22 +70,7 @@ def main():
     session_id = payload.get("session_id") or "default"
     cwd = payload.get("cwd") or ""
 
-    pairs = load_pairs(cwd)
-    if not pairs:
-        sys.exit(0)
-
-    text = strip_code(content)
-    hits = []
-    for bad, good, is_regex in pairs:
-        if is_regex:
-            try:
-                m = re.search(bad, text)
-            except re.error:
-                continue  # 无效正则：跳过该词条（fail-open）
-            if m:
-                hits.append((m.group(0), good))
-        elif bad in text:
-            hits.append((bad, good))
+    hits = lint_text(content, cwd=cwd)
     if not hits:
         sys.exit(0)
 
@@ -101,10 +85,11 @@ def main():
     record_block(state, content_hash)
     save_state(spath, state)
 
-    fixes = "；".join("%s→%s" % (bad, good) for bad, good in hits[:10])
+    fixes = format_findings(hits)
     reason = (
-        "你即将写入 %s 的内容包含字面直译的术语或套话，不是地道中文，"
-        "先改写再写入。按箭头右侧的写法重写整句（不要机械替换）：%s。"
+        "你即将写入 %s 的内容命中措辞检查规则，"
+        "先检查原句再写入：%s。可直接替换的按建议修正；"
+        "按语境改写的先判断原意，合法用法保留，不要机械替换候选写法或改写指令。"
         "其余内容与结构保持不变。"
         "再次提醒：有中文社区定译用定译，无定译保留英文原词，"
         "禁止字面直译英文黑话。" % (path, fixes)
@@ -125,6 +110,6 @@ try:
     main()
 except SystemExit:
     raise
-except Exception:
-    # fail-open：任何未预期错误都放行。
+except Exception as exc:
+    print("zh-guard 文件检测失败：%s" % exc, file=sys.stderr)
     sys.exit(0)

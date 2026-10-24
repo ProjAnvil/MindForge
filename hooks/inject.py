@@ -11,7 +11,7 @@
      展示顺序最靠前；
   4. ZH_GUARD_DICT 环境变量可指定单一字典文件（调试用）。
 
-设计原则（fail-open）：任何异常一律静默退出 0，绝不阻断用户输入。
+设计原则（fail-open）：异常报告到 stderr 后退出 0，不阻断用户输入。
 停用方式：export ZH_GUARD_OFF=1，或创建 OFF 文件（ZH_GUARD_HOME/ 或插件目录）。
 """
 import json
@@ -37,13 +37,13 @@ def build_context(entries):
     )
     return (
         "【中文术语规范（自动注入）】\n"
-        "1. 术语有中文社区定译就用定译：ablation study=消融实验，"
-        "hallucination=幻觉，prompt=提示词。\n"
+        "1. 优先用自然、易懂的中文，保留原意，不要硬套专业术语。"
+        "通用术语如 hallucination=幻觉，prompt=提示词。\n"
         "2. 术语没有通用定译就保留英文原词：token、agent、hook、embedding、"
         "ghost token。中英混排是中文技术写作的惯例。\n"
         "3. 禁止字面直译英文黑话。\n"
-        "4. 以下直译词禁用，按箭头右侧的写法表达；右侧是高亮条款所指的中文措辞，"
-        "拿不准就保留英文原词："
+        "4. 以下是措辞检查规则，箭头右侧是建议写法；"
+        "先判断原句语境，保留原意和合法用法，不要机械替换："
         + (pairs + more if pairs else "暂无") +
         "\n5. 措辞要像人在说话：说「剩下的待办」「发现的问题」「这儿有个 bug」，"
         "别端着写成「遗留缺口」「结构性缺陷」这类从英文句型硬搬过来的词。"
@@ -51,6 +51,11 @@ def build_context(entries):
         "\n6. 英文名词短语别硬拼成中文合成词：slot key 说「slot 的 key」，"
         "key-value 就写 key-value，不写「槽键」「键-值关系」。"
         "名词叠着名词时，拆成短句直说。"
+        "\n7. 正式回答前，先把完整中文草稿交给 term-dict MCP 的 check_text 预检；"
+        "有项目目录时传入绝对路径 cwd。使用 corrected_text 中的安全替换结果，"
+        "remaining_findings 则结合原句改写，合法用法保留。修改后再次调用复查，"
+        "不要把候选列表、占位符或「直接给结论」之类指令照抄到回答里。"
+        "工具不可用时自行检查，不要声称已经调用；Stop 仍会补查。"
     )
 
 
@@ -82,6 +87,6 @@ try:
     main()
 except SystemExit:
     raise
-except Exception:
-    # fail-open：任何未预期错误都放行。
+except Exception as exc:
+    print("zh-guard 术语注入失败：%s" % exc, file=sys.stderr)
     sys.exit(0)

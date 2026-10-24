@@ -25,7 +25,7 @@ func runDoctor(_ []string) error {
 	// Runtime.
 	py, pyErr := exec.LookPath("python3")
 	if pyErr != nil {
-		fmt.Println("  python3        ✗ 未找到（hook 脚本需要它）")
+		fmt.Println("  python3        ✗ not found (required by hook scripts)")
 	} else {
 		version := ""
 		if out, err := exec.Command(py, "--version").Output(); err == nil {
@@ -36,21 +36,21 @@ func runDoctor(_ []string) error {
 
 	// Dictionary tiers.
 	bundled := countEmbeddedEntries()
-	fmt.Printf("  词典 内置       %d 条（随 CLI 分发）\n", bundled)
+	fmt.Printf("  dictionary bundled  %d entries (included with the CLI)\n", bundled)
 	userDict := filepath.Join(home, ".claude", "MindForge", "terminology.tsv")
 	if n, ok := countFileEntries(userDict); ok {
-		fmt.Printf("  词典 用户级     %d 条（%s）\n", n, userDict)
+		fmt.Printf("  dictionary user     %d entries (%s)\n", n, userDict)
 	} else {
-		fmt.Printf("  词典 用户级     未生成（mindforge install 或首次 hook 运行时创建）\n")
+		fmt.Println("  dictionary user     not created (run mindforge install or a hook to create it)")
 	}
 	if path, ok := findProjectDict(cwd); ok {
 		n, _ := countFileEntries(path)
-		fmt.Printf("  词典 项目级     %d 条（%s）\n", n, path)
+		fmt.Printf("  dictionary project  %d entries (%s)\n", n, path)
 	} else {
-		fmt.Println("  词典 项目级     未找到（mindforge init dict 生成）")
+		fmt.Println("  dictionary project  not found (run mindforge init dict)")
 	}
 	if legacy := filepath.Join(home, ".claude", "zh-guard"); dirExists(legacy) {
-		fmt.Println("  旧目录提醒     ~/.claude/zh-guard 仍存在；新版已迁移，确认后可手动删除")
+		fmt.Println("  legacy directory    ~/.claude/zh-guard still exists; verify migration before removing it manually")
 	}
 
 	// Per-platform registration.
@@ -59,21 +59,21 @@ func runDoctor(_ []string) error {
 	doctorCodex(home)
 
 	if _, err := os.Stat(filepath.Join(home, ".kimi-code")); err == nil {
-		fmt.Println("  kimi           检测到 ~/.kimi-code（支持规划中，暂不安装）")
+		fmt.Println("  kimi           ~/.kimi-code detected (support is planned; not installed)")
 	}
-	fmt.Println("\n提示: hook 配置有会话快照——安装或更新后新建会话才生效。")
+	fmt.Println("\nNote: Hook configuration is snapshotted per session. Start a new session after installing or updating hooks.")
 	return nil
 }
 
 func doctorClaude(home string) {
 	settingsPath := filepath.Join(home, ".claude", "settings.json")
 	if _, err := os.Stat(settingsPath); err != nil {
-		fmt.Println("  claude         未检测到 settings.json")
+		fmt.Println("  claude         settings.json not found")
 		return
 	}
 	top, err := loadTopLevel(settingsPath)
 	if err != nil {
-		fmt.Printf("  claude         ✗ settings.json 解析失败: %v\n", err)
+		fmt.Printf("  claude         ✗ failed to parse settings.json: %v\n", err)
 		return
 	}
 	var eventsRaw map[string]json.RawMessage
@@ -87,21 +87,21 @@ func doctorClaude(home string) {
 		files = len(entries)
 	}
 	if ours == 0 {
-		fmt.Println("  claude         未注册（mindforge install --platform=claude）")
+		fmt.Println("  claude         not registered (run mindforge install --platform=claude)")
 		return
 	}
-	fmt.Printf("  claude         ✓ 已注册 %d/%d 个 hook 事件组，脚本目录 %d 个文件\n", ours, total, files)
+	fmt.Printf("  claude         ✓ registered %d/%d hook event groups; %d files in the hooks directory\n", ours, total, files)
 }
 
 func doctorZcode(home string) {
 	configPath := filepath.Join(home, ".zcode", "cli", "config.json")
 	if _, err := os.Stat(configPath); err != nil {
-		fmt.Println("  zcode          未检测到 config.json")
+		fmt.Println("  zcode          config.json not found")
 		return
 	}
 	top, err := loadTopLevel(configPath)
 	if err != nil {
-		fmt.Printf("  zcode          ✗ config.json 解析失败: %v\n", err)
+		fmt.Printf("  zcode          ✗ failed to parse config.json: %v\n", err)
 		return
 	}
 	var hooksObj map[string]json.RawMessage
@@ -116,11 +116,11 @@ func doctorZcode(home string) {
 	ours, total := countOurs(eventsRaw)
 	switch {
 	case ours > 0 && enabled:
-		fmt.Printf("  zcode          ✓ 已注册 %d/%d 个 hook 事件组（hooks.enabled=true）\n", ours, total)
+		fmt.Printf("  zcode          ✓ registered %d/%d hook event groups (hooks.enabled=true)\n", ours, total)
 	case ours > 0 && !enabled:
-		fmt.Println("  zcode          ⚠ 已注册但 hooks.enabled 不是 true（不生效）")
+		fmt.Println("  zcode          ⚠ registered but hooks.enabled is not true (inactive)")
 	default:
-		fmt.Println("  zcode          未注册（mindforge install --platform=zcode）")
+		fmt.Println("  zcode          not registered (run mindforge install --platform=zcode)")
 	}
 }
 
@@ -128,13 +128,13 @@ func doctorCodex(home string) {
 	hooksPath := filepath.Join(home, ".codex", "hooks.json")
 	if _, err := os.Stat(hooksPath); err != nil {
 		if dirExists(filepath.Join(home, ".codex")) {
-			fmt.Println("  codex          未注册（mindforge install --platform=codex；需 codex 0.145+）")
+			fmt.Println("  codex          not registered (run mindforge install --platform=codex; requires codex 0.145+)")
 		}
 		return
 	}
 	top, err := loadTopLevel(hooksPath)
 	if err != nil {
-		fmt.Printf("  codex          ✗ hooks.json 解析失败: %v\n", err)
+		fmt.Printf("  codex          ✗ failed to parse hooks.json: %v\n", err)
 		return
 	}
 	var eventsRaw map[string]json.RawMessage
@@ -143,10 +143,10 @@ func doctorCodex(home string) {
 	}
 	ours, total := countOurs(eventsRaw)
 	if ours == 0 {
-		fmt.Println("  codex          未注册（mindforge install --platform=codex；需 codex 0.145+）")
+		fmt.Println("  codex          not registered (run mindforge install --platform=codex; requires codex 0.145+)")
 		return
 	}
-	fmt.Printf("  codex          ✓ 已注册 %d/%d 个 hook 事件组（首次使用需在 /hooks 里信任）\n", ours, total)
+	fmt.Printf("  codex          ✓ registered %d/%d hook event groups (trust them in /hooks before first use)\n", ours, total)
 }
 
 // countOurs counts hook event groups owned by MindForge and the total
@@ -208,7 +208,7 @@ func countEmbeddedEntries() int {
 
 func countTSVEntries(text string) int {
 	n := 0
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "@sync") {
 			continue

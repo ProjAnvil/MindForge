@@ -11,7 +11,7 @@
 和项目级词典（cwd 向上发现的 mindforge.zh-dict.tsv，找到才处理）。
 
 做的事：
-  1. 排版：三列按宽度对齐（补空格到 Tab 前），注释行原样保留；
+  1. 排版：按宽度对齐（补空格到 Tab 前），保留可选第四列和注释；
   2. 归一化：去掉行首尾空白、清掉 BOM、统一行尾换行；
   3. 去重：同一第一列保留最后一次出现（与运行时「用户条目优先」一致），并报告；
   4. 体检：第一列以 re: 开头的词条尝试编译，坏正则报错但不改文件；
@@ -29,13 +29,9 @@ MAX_COL = 28  # 对齐时列宽上限，避免长词条把表格撑爆
 
 
 def default_paths():
-    from zh_guard_common import find_project_dict
+    from zh_guard_common import find_project_dict, guard_home
     paths = [os.path.join(HERE, "terminology.tsv")]
-    home = os.environ.get(
-        "ZH_GUARD_HOME",
-        os.path.join(os.path.expanduser("~"), ".claude", "zh-guard"),
-    )
-    user = os.path.join(home, "terminology.tsv")
+    user = os.path.join(guard_home(), "terminology.tsv")
     if os.path.exists(user):
         paths.append(user)
     project = find_project_dict(os.getcwd())
@@ -52,7 +48,7 @@ def read_lines(path):
 def parse(lines):
     """把文件拆成 [(kind, payload)]，kind ∈ {comment, blank, row}。
 
-    row 的 payload 是 [直译词, 期望写法, 说明]，缺的列补空串。
+    row 的前三列是 [直译词, 期望写法, 说明]，可选第四列为动作。
     """
     out = []
     for raw in lines:
@@ -78,18 +74,27 @@ def parse(lines):
             continue
         while len(cells) < 3:
             cells.append("")
-        out.append(("row", cells[:3]))
+        out.append(("row", cells))
     return out
 
 
 def check(items):
     """返回 (errors, warnings) 列表。"""
+    from zh_guard_common import Rule
+
     errors, warnings = [], []
     seen = {}
     for i, (kind, payload) in enumerate(items, start=1):
         if kind != "row":
             continue
-        term, target, note = payload
+        term, target, note = payload[:3]
+        if len(payload) > 4:
+            errors.append("第 %d 行：词条最多四列" % i)
+        action = (payload[3] or "rewrite") if len(payload) >= 4 else "rewrite"
+        try:
+            Rule(term, target, note, action)
+        except ValueError as exc:
+            errors.append("第 %d 行：%s" % (i, exc))
         if not term:
             errors.append("第 %d 行：第一列为空" % i)
             continue
@@ -127,7 +132,7 @@ def render(items):
         # 中文按两个字符宽算，视觉才对得齐
         return min(MAX_COL, max(display_width(c) for c in cols) + 2)
 
-    w = [width(0), width(1)]
+    w = [width(0), width(1), width(2)]
     lines = []
     for kind, payload in items:
         if kind == "comment":
@@ -135,11 +140,14 @@ def render(items):
         elif kind == "blank":
             lines.append("")
         else:
-            term, target, note = payload
+            term, target, note = payload[:3]
             pad0 = " " * max(0, w[0] - display_width(term))
             pad1 = " " * max(0, w[1] - display_width(target))
-            # 三个分隔符始终保留：缺列的词条也要保持 TSV 结构，方便下次解析和手改
-            lines.append(term + pad0 + "\t" + target + pad1 + "\t" + note)
+            line = term + pad0 + "\t" + target + pad1 + "\t" + note
+            if len(payload) > 3:
+                line += " " * max(0, w[2] - display_width(note))
+                line += "\t" + "\t".join(payload[3:])
+            lines.append(line)
     return "\n".join(lines) + "\n"
 
 

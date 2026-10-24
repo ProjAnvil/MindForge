@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """zh-guard 公共库：三级词典加载与共享工具（MindForge style-rules-zh-cn 插件内）。
 
-被 inject.py / inspect.py / inspect-file.py / term-dict-server.py 引用。
+被注入、MCP、出口检测、文件检测与显示替换入口共同引用。
 本模块 import 时无任何副作用；各 hook 脚本保持 fail-open 薄壳，
 错误处理（SystemExit 之外的异常一律 exit 0）留在各自脚本里。
 
@@ -21,9 +21,13 @@
 
 调试：ZH_GUARD_DICT 指定单一字典文件时，跳过三级合并。
 """
+from __future__ import annotations
+
 import os
 import re
 import shutil
+import sys
+from typing import Iterable, Literal, NamedTuple
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE_DIR = os.environ.get(
@@ -33,6 +37,38 @@ STATE_DIR = os.environ.get(
 MAX_BLOCKS_PER_WINDOW = 3
 WINDOW_SECONDS = 600
 PROJECT_DICT_NAME = "mindforge.zh-dict.tsv"
+RuleAction = Literal["replace", "rewrite"]
+REWRITE_HINTS = {"直接给结论", "直接说结论", "直接说要点", "直接用动词"}
+
+
+# dataclasses imports inspect, which would load the sibling hook script.
+class Rule:
+    def __init__(self, term: str, expected: str, note: str = "",
+                 action: str = "rewrite"):
+        if action not in ("replace", "rewrite"):
+            raise ValueError("未知词条动作：%s" % action)
+        if action == "replace" and (
+            not expected or term.startswith("re:") or " / " in expected
+            or expected in REWRITE_HINTS
+        ):
+            raise ValueError("直接替换只支持明确的字面词条：%s" % term)
+        self.term = term
+        self.expected = expected
+        self.note = note
+        self.action: RuleAction = "replace" if action == "replace" else "rewrite"
+
+
+class Finding(NamedTuple):
+    term: str
+    text: str
+    expected: str
+    action: RuleAction
+    note: str
+    start: int
+    end: int
+    line: int
+    column: int
+    context: str
 
 
 def guard_home():
@@ -198,7 +234,7 @@ def dict_paths(cwd=None):
 
 
 def _iter_raw_entries(path):
-    """逐行产出 (term, expected, note)；跳过注释与缺列行。"""
+    """第四列为可选动作；旧三列词条默认交给模型按语境改写。"""
     with open(path, encoding="utf-8-sig") as f:
         for line in f:
             line = line.rstrip("\n").lstrip("\ufeff")
@@ -209,7 +245,24 @@ def _iter_raw_entries(path):
                 continue
             good = parts[1] if len(parts) >= 2 else ""
             note = parts[2] if len(parts) >= 3 else ""
-            yield parts[0], good, note
+            if len(parts) > 4:
+                raise ValueError("%s：词条最多四列：%s" % (path, parts[0]))
+            action = parts[3] if len(parts) == 4 and parts[3] else "rewrite"
+            yield parts[0], good, note, action
+
+
+def _merged_rules(cwd=None):
+    merged, origin = {}, {}
+    for level, path in enumerate(dict_paths(cwd)):
+        for term, expected, note, action in _iter_raw_entries(path):
+            merged[term] = Rule(term, expected, note, action)
+            origin[term] = level
+    return merged, origin
+
+
+def load_rules(cwd: str | None = None) -> list[Rule]:
+    merged, _origin = _merged_rules(cwd)
+    return list(merged.values())
 
 
 def load_pairs(cwd=None):
@@ -218,12 +271,9 @@ def load_pairs(cwd=None):
     后加载（更具体层）覆盖先加载；re: 前缀按正则词条处理。
     供 L2 出口检测与文件写检测使用。
     """
-    merged = {}
-    for path in dict_paths(cwd):
-        for term, good, _ in _iter_raw_entries(path):
-            merged[term] = good
     out = []
-    for bad, good in merged.items():
+    for rule in load_rules(cwd):
+        bad, good = rule.term, rule.expected
         if bad.startswith("re:"):
             out.append((bad[3:], good, True))
         else:
@@ -238,20 +288,12 @@ def load_display_entries(cwd=None):
     同层保持文件内顺序。正则词条以 humanize 后的模式串展示。
     供 L1 注入使用。
     """
-    merged = {}
-    origin = {}
-    for idx, path in enumerate(dict_paths(cwd)):
-        for term, good, _ in _iter_raw_entries(path):
-            merged[term] = good
-            origin[term] = idx
-    by_level = {}
-    for term, target in merged.items():
-        by_level.setdefault(origin.get(term, 0), []).append((term, target))
+    merged, origin = _merged_rules(cwd)
     out = []
-    for idx in sorted(by_level, reverse=True):  # 层级深的在前
-        for term, target in by_level[idx]:
-            shown = humanize_regex(term[3:]) if term.startswith("re:") else term
-            out.append((shown, target))
+    for rule in sorted(merged.values(), key=lambda rule: -origin[rule.term]):
+        term = rule.term
+        shown = humanize_regex(term[3:]) if term.startswith("re:") else term
+        out.append((shown, rule.expected))
     return out
 
 
@@ -261,11 +303,7 @@ def load_note_entries(cwd=None):
     保留原始 term（含 re: 前缀）与说明列，供 term-dict MCP 查询使用；
     后加载（更具体层）覆盖先加载。
     """
-    merged = {}
-    for path in dict_paths(cwd):
-        for term, good, note in _iter_raw_entries(path):
-            merged[term] = (good, note)
-    return [(term, good, note) for term, (good, note) in merged.items()]
+    return [(rule.term, rule.expected, rule.note) for rule in load_rules(cwd)]
 
 
 def humanize_regex(pattern):
@@ -278,13 +316,104 @@ def humanize_regex(pattern):
         return pattern
 
 
+def mask_protected(text: str, fence: str = "") -> tuple[str, str]:
+    """屏蔽代码与引号提及，保留原文位置；围栏状态可跨显示批次传递。"""
+    def mask(value):
+        return "".join(char if char in "\r\n" else "\0" for char in value)
+
+    lines = []
+    inline = re.compile(
+        r"(?<!`)(`+)(?!`)[^\n]*?(?<!`)\1(?!`)|「[^」\n]*」|“[^”\n]*”"
+    )
+    for line in text.splitlines(keepends=True):
+        if fence:
+            active = re.fullmatch(r"(>*)(`{3,}|~{3,})", fence)
+            if active is None:
+                raise ValueError("无效的围栏状态")
+            marker = active[2]
+            closing = (
+                r"[ \t]*(?:>[ \t]*){%d}" % len(active[1])
+                + re.escape(marker[0])
+                + r"{%d,}[ \t]*(?:\r?\n)?" % len(marker)
+            )
+            if re.fullmatch(closing, line):
+                fence = ""
+            lines.append(mask(line))
+            continue
+        opening = re.match(
+            r"[ \t]*(?P<quotes>(?:>[ \t]*)*)"
+            r"(?:(?:[-+*]|\d+[.)])[ \t]+)?"
+            r"(?P<marker>`{3,}|~{3,})(?P<info>[^\r\n]*)", line,
+        )
+        if opening and not (
+            opening["marker"].startswith("`") and "`" in opening["info"]
+        ):
+            fence = ">" * opening["quotes"].count(">") + opening["marker"]
+            lines.append(mask(line))
+        else:
+            lines.append(inline.sub(lambda match: mask(match[0]), line))
+    return "".join(lines), fence
+
+
 def strip_code(text):
-    """豁免围栏代码块、行内代码与引号内提及，只检查自然语言部分。"""
-    text = re.sub(r"```.*?```", "", text, flags=re.S)
-    text = re.sub(r"`[^`\n]*`", "", text)
-    text = re.sub(r"「[^」\n]*」", "", text)
-    text = re.sub(r"\u201c[^\u201d\n]*\u201d", "", text)
+    """兼容旧入口：屏蔽保护区但不拼接它们两侧的词语。"""
+    return mask_protected(text)[0]
+
+
+def lint_text(text: str, rules: Iterable[Rule] | None = None,
+              cwd: str | None = None, *, masked_text: str | None = None
+              ) -> list[Finding]:
+    masked = mask_protected(text)[0] if masked_text is None else masked_text
+    if len(masked) != len(text):
+        raise ValueError("保护区屏蔽结果必须保留原文长度")
+    candidates = []
+    for rule in load_rules(cwd) if rules is None else rules:
+        pattern = rule.term[3:] if rule.term.startswith("re:") else re.escape(rule.term)
+        try:
+            matches = re.finditer(pattern, masked)
+        except re.error as exc:
+            print("zh-guard: 无效正则 %s：%s" % (rule.term, exc), file=sys.stderr)
+            continue
+        for match in matches:
+            start, end = match.span()
+            if start == end or "\0" in masked[start:end]:
+                continue
+            candidates.append(Finding(
+                rule.term, text[start:end], rule.expected, rule.action, rule.note,
+                start, end, text.count("\n", 0, start) + 1,
+                start - text.rfind("\n", 0, start),
+                text[max(0, start - 40):min(len(text), end + 40)],
+            ))
+    candidates.sort(key=lambda hit: (
+        hit.start, -(hit.end - hit.start), hit.action == "replace"
+    ))
+    hits, end = [], 0
+    for hit in candidates:
+        if hit.start >= end:
+            hits.append(hit)
+            end = hit.end
+    return hits
+
+
+def apply_replacements(text: str, findings: Iterable[Finding]) -> str:
+    """仅替换显式安全词条，基于原文偏移执行一遍，不级联替换。"""
+    for hit in sorted(findings, key=lambda hit: hit.start, reverse=True):
+        if hit.action == "replace":
+            text = text[:hit.start] + hit.expected + text[hit.end:]
     return text
+
+
+def format_findings(findings: Iterable[Finding], limit: int = 10) -> str:
+    parts = []
+    for index, hit in enumerate(findings):
+        if index >= limit:
+            break
+        action = "可直接替换" if hit.action == "replace" else "按语境改写"
+        context = hit.context.replace("\n", "\\n")
+        parts.append("%s→%s（%s，第%d行第%d列；原句：%s）" % (
+            hit.text, hit.expected, action, hit.line, hit.column, context,
+        ))
+    return "；".join(parts)
 
 
 def state_path(prefix, session_id):
