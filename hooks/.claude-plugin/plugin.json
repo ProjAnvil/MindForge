@@ -1,17 +1,9 @@
 {
   "name": "style-rules-zh-cn",
-  "description": "中文写作规范 + 翻译腔防御：受控写作规范注入主会话与 subagent；zh-guard 术语字典（TSV 数据飞轮，支持正则词条）+ 出口检测 + term-dict MCP 查询服务（lookup_term / check_text / add_term）。安装时字典迁移到 ~/.claude/MindForge/（旧目录自动搬迁）。fail-open。",
-  "version": "0.9.9",
+  "description": "中文简要写作指导：仅在会话开始、用户提问和子代理启动时注入表达规则。不自动查词典、不调用工具、不拦截回复，也不启动额外模型审稿。",
+  "version": "0.9.10",
   "author": {
     "name": "MindForge"
   },
-  "hooks": ["./hooks/subagent-hooks.json", "./hooks/claude-prompt-hooks.json"],
-  "mcpServers": {
-    "term-dict": {
-      "command": "python3",
-      "args": [
-        "${CLAUDE_PLUGIN_ROOT}/term-dict-server.py"
-      ]
-    }
-  }
+  "hooks": ["./hooks/subagent-hooks.json"]
 }

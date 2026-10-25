@@ -20,13 +20,13 @@
       "name": "style-rules",
       "source": "./plugins/style-rules",
       "description": "Controlled-writing style rules (English ASD-STE100 only) injected into the main session and all subagents via SessionStart / UserPromptSubmit / SubagentStart hooks. Default English variant.",
-      "version": "0.9.9"
+      "version": "0.9.10"
     },
     {
       "name": "style-rules-zh-cn",
       "source": "./hooks",
-      "description": "中文写作规范 + 翻译腔防御（zh-guard）：受控写作规范注入；术语字典（TSV 数据飞轮，支持正则，采集地道中文写法）+ 出口检测 + term-dict MCP 查询服务。字典带版本同步，升级时保留用户自加词条。fail-open。",
-      "version": "0.9.9"
+      "description": "中文简要写作指导：只注入自然、准确、保留原意的表达规则，不自动查词典、调用工具、拦截回复或增加模型审稿轮次。",
+      "version": "0.9.10"
     }
   ]
 }

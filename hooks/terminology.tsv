@@ -1,6 +1,6 @@
-# 中文术语：直译词<TAB>期望写法<TAB>简短说明[<TAB>动作]
-# 动作默认 rewrite，明确同义词才标 replace；re: 为正则，保留原意。
-# @sync 0.9.9.3
+# 中文术语：词语<TAB>建议写法（可空）<TAB>含义或语境说明（可空）
+# re: 为正则；建议仅供参考，只有词语时仅作登记。
+# @sync 0.9.10
 
 # 问题排查与评测
 病灶实验                    	排查原因的实验         	定位问题原因，不预设实验方法
@@ -21,26 +21,27 @@
 # 机器人
 腿式机器人                  	足式机器人             	legged robot
 腿式运动                    	足式运动               	legged locomotion
-机械胳膊                    	机械臂                 	robot arm                   	replace
-机器人胳膊                  	机械臂                 	robot arm                   	replace
+机械胳膊                    	机械臂                 	robot arm；工业设备语境，人物或文学语境保留原意
+机器人胳膊                  	机械臂                 	robot arm；根据设备或人物语境判断
 
 # 大模型与 token
 令牌数                      	token 数               	AI 语境不译「令牌」
 令牌限制                    	token 上限             	AI 语境不译「令牌」
 令牌化                      	token 化               	也可按上下文说「分词」
-大的语言模型                	大语言模型             	large language model        	replace
+大的语言模型                	大语言模型             	large language model
 
 # 工程术语与比喻
 引擎盖下                    	底层实现               	under the hood
 健全性检查                  	合理性检查             	sanity check；也可保留英文
 死因                        	崩溃原因               	进程或服务语境
 病症                        	症状                   	symptom；技术语境
+睡                          	                       	人的睡眠、睡觉是正常说法，可保留；软件工程语境可能指进程、线程的休眠机制（sleep），按上下文说明执行单元、时长及后续动作，不要把任务等待执行一律当成休眠
 钉死                        	敲定                   	nail down；固定版本或参数时说「锁定」
 钉住                        	敲定                   	nail down；固定版本或参数时说「锁定」
 范围守卫                    	作用域守卫             	scope guard
 锚定                        	锁定 / 以 X 为基准     	anchor；版本用「锁定」，参照值用「以 X 为基准」
 槽位                        	插槽 / slot            	slot；硬件语境的「槽位」不必改
-槽键                        	slot 的 key            	slot key                    	replace
+槽键                        	slot 的 key            	slot key
 键-值关系                   	key-value              	「键值对」不受影响
 re:第\s*\d+\s*刀            	第 N 处可以精简的部分  	精简或削减语境
 下一刀                      	下一处可以精简的部分   	cut；精简或削减语境
@@ -52,6 +53,8 @@ re:第\s*\d+\s*刀            	第 N 处可以精简的部分  	精简或削减�
 结构性缺陷                  	设计上的问题           	structural defect
 已初步清楚                  	大致了解了             	have a preliminary understanding
 台账                        	清单 / 记录            	ledger；任务用「清单」，过程用「记录」
+纯尾即就绪                  	                       	任务衔接语境：等这个任务完成之后，就继续下一项；直接说明先后关系，不引入额外状态或机制
+已挂起等门控                	                       	任务安排语境：已经安排下一个任务，等待执行；不要据此推断进程被挂起或存在特定门控机制
 
 # 句式套话
 re:值得注意的是             	直接给结论             	删掉套话，直接说事

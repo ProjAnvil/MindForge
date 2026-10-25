@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [style-v0.9.10] - 2026-10-25
+
+Patch release for `style-rules-zh-cn` and `style-rules`, both at 0.9.10.
+The agents and skills plugins remain at 0.9.7. The CLI release version
+remains 0.10.1; this style tag does not publish new CLI binaries.
+
+### Changed
+
+- **The default profile injects writing guidance only.** SessionStart,
+  UserPromptSubmit and SubagentStart load one self-contained rules file.
+  No dictionary lookup, no tool call, no reply interception and no
+  additional model review round.
+- **The Chinese rules file is now short.** `style-rules-zh.md` states
+  the expression principles directly instead of embedding the full
+  controlled-writing specification.
+- **Dictionary entries have at most three columns**: term, optional
+  suggestion, optional meaning. The fourth action column is gone, so
+  entries no longer declare a `replace` or `rewrite` behavior.
+- **The bundled dictionary has 47 entries.** Three new terms cover
+  sleeping and task-sequencing phrasing, and the four entries that
+  carried an explicit action now carry context in their meaning column.
+- **The MCP tools use a prefixed namespace**: `mindforge_lookup_term`,
+  `mindforge_check_text`, `mindforge_add_term` and
+  `mindforge_init_dict`. `mindforge_add_term` writes to the workspace
+  dictionary by default and needs an absolute `cwd`.
+- **The setup script links one language file.** It creates the language
+  marker, and the settings merge removes stale MindForge hook groups
+  while keeping foreign hooks untouched.
+
+### Removed
+
+- The Stop and SubagentStop exit checks, the PreToolUse document-write
+  guard, the prompt-type reviewer and the terminology MCP server are no
+  longer registered by default. The scripts stay in the repository for
+  manual experiments.
+- `message-display.py` and its hook registration are gone.
+
+### Fixed
+
+- **Legacy four-column user entries no longer break the dictionary.**
+  A dictionary refresh keeps user-added rows, and the old action column
+  is dropped during that refresh. Before this fix one stale row made
+  every lookup fail.
+- **Hook scripts no longer run on import.** `inject.py`, `inspect.py`
+  and `inspect-file.py` guard their entry point, so a test runner can
+  import them. `inspect.py` shadowed the standard library module of the
+  same name, which silently skipped the whole test suite.
+- The zcode manifest, the Claude manifests, the marketplace entries and
+  the MCP server report 0.9.10.
+
+### Upgrade notes
+
+- Update the installed plugin and start a new session. A session that
+  started earlier keeps the previous hook snapshot.
+- Users who registered the terminology MCP server by hand keep it.
+  Disable it separately to return to the tool-free default profile.
+- Existing user dictionaries refresh to the new bundled version on the
+  next run. User-added rows survive; the old action column is dropped.
+
+### Validation
+
+- All Go tests and `go vet ./...` passed.
+- Nine Python suites in `hooks/` passed, covering 38 unittest cases
+  and the injection, dictionary, MCP and evaluation checks.
+- Sixteen evaluation tests passed in `evals/`.
+- A trial CLI install wrote only the injector, the selected rules file
+  and the language marker.
+
 ## [style-v0.9.9] - 2026-10-24
 
 Patch release for `style-rules-zh-cn` and `style-rules`, both at 0.9.9.
@@ -61,6 +129,51 @@ remains 0.10.1; this style tag does not publish new CLI binaries.
   configuration. Other platforms keep the existing hook events.
 - Sentence-level contextual annotations are under investigation and are
   not part of this release.
+
+## [0.10.2] - 2026-10-25
+
+CLI patch release (`v0.10.2`, plain semver so `go install ...@latest`
+resolves). The CLI installs the same prompt-only profile as the
+marketplace plugins, which ship separately under `style-v0.9.10`.
+
+### Changed
+
+- **Install writes the prompt-only profile.** The hooks directory holds
+  the injector, the selected rules file and the language marker. The
+  Python checkers, the terminology MCP server and the bundled
+  dictionary are no longer copied.
+- **Only injection events are registered.** Claude Code registers
+  SessionStart, UserPromptSubmit and SubagentStart; zcode and Codex
+  register SessionStart and UserPromptSubmit. Stop, SubagentStop and
+  PreToolUse are not registered on any platform.
+- **Install no longer creates dictionaries.** The user-level dictionary
+  is not seeded. `mindforge init dict` still writes a project
+  dictionary from the shared embedded template.
+- **The embedded payload shrank to the rules.** The binary embeds the
+  injector, both rules files, the bundled dictionary reference and the
+  project dictionary template.
+- Diagnostics, prompts and validation errors use English in both
+  languages.
+
+### Removed
+
+- The user dictionary seeding on install, and the MCP server hint from
+  the install summary.
+
+### Fixed
+
+- The install summary reports the actual profile instead of promising a
+  dictionary and an MCP server it no longer sets up.
+- A dictionary refresh drops the legacy action column from user-added
+  rows, so one stale row no longer fails every lookup.
+
+### Upgrade notes
+
+- Run `mindforge install` again to replace an earlier installation. The
+  installer removes its own previous hook groups and keeps foreign
+  hooks. Existing dictionaries and files stay on disk.
+- A terminology MCP server registered by hand keeps running. Disable it
+  separately to return to the tool-free default profile.
 
 ## [0.10.1] - 2026-10-23
 

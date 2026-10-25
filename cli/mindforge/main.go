@@ -1,16 +1,15 @@
 // Command mindforge is the MindForge installer and toolbox.
 //
-// MindForge ships controlled-writing rules and a translationese defense
-// (zh-guard) as hook scripts. This CLI installs them into local coding
-// agents, generates project dictionaries, and diagnoses the setup:
+// MindForge installs prompt-only writing guidance into local coding
+// agents, optionally generates project dictionaries, and diagnoses setup:
 //
 //	mindforge install              interactive user-level install
 //	mindforge init dict            generate a project dictionary
 //	mindforge doctor               check the local setup
 //
-// The hook executables themselves stay Python (fail-open scripts shared
-// with the plugin distribution); this CLI is the installer, generator and
-// doctor, not the runtime. See the repo README for the roadmap.
+// The default hook is a shell injector, not a model reviewer. Python
+// terminology tools remain optional source utilities rather than an
+// installed part of the automatic reply path.
 package main
 
 import (
@@ -23,7 +22,7 @@ import (
 // plain semver tags (v0.10.0, ...) so that `go install ...@latest`
 // resolves correctly — prefixed tags (style-v*, skills-v*) are invisible
 // to the Go toolchain.
-const Version = "0.10.1"
+const Version = "0.10.2"
 
 func main() {
 	if len(os.Args) < 2 {
@@ -61,7 +60,7 @@ func usage() {
 	fmt.Print(`mindforge - MindForge installer and toolbox
 
 Usage:
-  mindforge install   Install writing rules and the zh-guard hooks (user level).
+  mindforge install   Install prompt-only writing guidance (user level).
                       Options: --lang=zh-cn|en  --platform=claude,zcode,codex  --yes
   mindforge init dict Generate a project-level dictionary (mindforge.zh-dict.tsv).
                       Options: --lang=zh-cn  --force
