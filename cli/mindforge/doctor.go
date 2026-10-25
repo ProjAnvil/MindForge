@@ -25,7 +25,7 @@ func runDoctor(_ []string) error {
 	// Runtime.
 	py, pyErr := exec.LookPath("python3")
 	if pyErr != nil {
-		fmt.Println("  python3        ✗ not found (required by hook scripts)")
+		fmt.Println("  python3        not found (optional; default writing guidance does not require Python)")
 	} else {
 		version := ""
 		if out, err := exec.Command(py, "--version").Output(); err == nil {
@@ -41,13 +41,13 @@ func runDoctor(_ []string) error {
 	if n, ok := countFileEntries(userDict); ok {
 		fmt.Printf("  dictionary user     %d entries (%s)\n", n, userDict)
 	} else {
-		fmt.Println("  dictionary user     not created (run mindforge install or a hook to create it)")
+		fmt.Println("  dictionary user     not created (optional; install does not create dictionaries)")
 	}
 	if path, ok := findProjectDict(cwd); ok {
 		n, _ := countFileEntries(path)
 		fmt.Printf("  dictionary project  %d entries (%s)\n", n, path)
 	} else {
-		fmt.Println("  dictionary project  not found (run mindforge init dict)")
+		fmt.Println("  dictionary project  not found (optional; run mindforge init dict if needed)")
 	}
 	if legacy := filepath.Join(home, ".claude", "zh-guard"); dirExists(legacy) {
 		fmt.Println("  legacy directory    ~/.claude/zh-guard still exists; verify migration before removing it manually")
@@ -171,7 +171,7 @@ func countOurs(events map[string]json.RawMessage) (ours, total int) {
 }
 
 // findProjectDict walks up from dir looking for the project dictionary,
-// stopping at the first .git directory (project root boundary).
+// stopping at the first .git directory or file (project root boundary).
 func findProjectDict(dir string) (string, bool) {
 	d := dir
 	for {
@@ -179,7 +179,7 @@ func findProjectDict(dir string) (string, bool) {
 		if info, err := os.Stat(candidate); err == nil && !info.IsDir() {
 			return candidate, true
 		}
-		if info, err := os.Stat(filepath.Join(d, ".git")); err == nil && info.IsDir() {
+		if _, err := os.Stat(filepath.Join(d, ".git")); err == nil {
 			return "", false
 		}
 		parent := filepath.Dir(d)
@@ -213,7 +213,7 @@ func countTSVEntries(text string) int {
 		if line == "" || strings.HasPrefix(line, "#") || strings.HasPrefix(line, "@sync") {
 			continue
 		}
-		if strings.Contains(line, "\t") {
+		if cells := strings.Split(line, "\t"); len(cells) <= 3 {
 			n++
 		}
 	}

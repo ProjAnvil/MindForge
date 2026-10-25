@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,11 +20,21 @@ func TestInitDictGeneratesTemplate(t *testing.T) {
 		t.Fatalf("dictionary was not generated: %v", err)
 	}
 	text := string(data)
-	if !strings.Contains(text, "re:") || !strings.Contains(text, "直译词") {
+	if !strings.Contains(text, "re:") || !strings.Contains(text, "词语") {
 		t.Error("template is missing format instructions")
 	}
-	if !strings.Contains(text, "replace") || !strings.Contains(text, "rewrite") {
-		t.Error("template is missing optional rule action instructions")
+	for _, example := range []string{
+		"# 病灶分析\t\t本项目指排查问题根因，不指定具体实验方法",
+		"# 机械胳膊\t\t本项目指科幻角色的身体部件，不是工业设备",
+		"# 槽键\tslot 的 key\t指 slot 对象的 key",
+		"# 星环",
+	} {
+		if !strings.Contains(text, example) {
+			t.Errorf("template is missing a glossary or meaning-only example: %q", example)
+		}
+	}
+	if strings.Contains(text, "replace") || strings.Contains(text, "第四列") {
+		t.Error("the project template must not request automatic replacement actions")
 	}
 	// All example lines stay commented so an empty dict blocks nothing.
 	for line := range strings.SplitSeq(text, "\n") {
@@ -81,9 +92,37 @@ func TestFindProjectDictRespectsGitBoundary(t *testing.T) {
 }
 
 func TestCountTSVEntries(t *testing.T) {
-	text := "# 注释\n\n病灶实验\t消融实验\t说明\n@sync 0.9.9\nre:第\\d 刀\t第 N 刀\t正则\n坏行缺列\n"
-	if n := countTSVEntries(text); n != 2 {
-		t.Errorf("expected 2 entries, excluding comments, @sync and incomplete rows; got %d", n)
+	text := "# comment\n\n星环\n病灶分析\t\t排查根因\n旧词\t建议\n@sync 0.9.9\n"
+	text += "re:第\\d 刀\t第 N 处\t正则\n多余列\t建议\t说明\tunexpected\n"
+	if n := countTSVEntries(text); n != 4 {
+		t.Errorf("expected 4 entries, including terms and meanings but excluding comments and extra columns; got %d", n)
+	}
+}
+
+func TestFindProjectDictRespectsGitFileBoundary(t *testing.T) {
+	base := t.TempDir()
+	project := filepath.Join(base, "project")
+	child := filepath.Join(project, "src")
+	if err := os.MkdirAll(child, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for path, text := range map[string]string{
+		filepath.Join(project, ".git"):       "gitdir: /unused/worktree\n",
+		filepath.Join(base, projectDictName): "# outside project\n",
+	} {
+		if err := os.WriteFile(path, []byte(text), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if path, found := findProjectDict(child); found {
+		t.Errorf("dictionary discovery must not cross a worktree .git file: %s", path)
+	}
+	path := filepath.Join(project, projectDictName)
+	if err := os.WriteFile(path, []byte("# workspace\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if got, found := findProjectDict(child); !found || got != path {
+		t.Errorf("expected the workspace dictionary, got found=%v path=%s", found, got)
 	}
 }
 
@@ -136,9 +175,9 @@ func TestDoctorOutputEnglish(t *testing.T) {
 				t.Fatalf("create project boundary: %v", err)
 			}
 			expected := []string{
-				"python3", "not found (required by hook scripts)",
+				"python3", "not found (optional; default writing guidance does not require Python)",
 				"dictionary bundled", "dictionary user", "not created",
-				"dictionary project", "not found (run mindforge init dict)",
+				"dictionary project", "not found (optional; run mindforge init dict if needed)",
 				"settings.json not found", "config.json not found",
 				"Start a new session after installing or updating hooks",
 			}
@@ -240,4 +279,37 @@ func TestDoctorZcodeDisabledWarningEnglish(t *testing.T) {
 	}
 	output := captureDoctorOutput(t, func() { doctorZcode(home) })
 	assertDoctorEnglish(t, output, "registered but hooks.enabled is not true", "inactive")
+}
+
+func TestCLIValidationErrorsEnglish(t *testing.T) {
+	t.Chdir(t.TempDir())
+	if err := os.WriteFile(projectDictName, []byte("# fixture\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	for _, scenario := range []struct {
+		name string
+		run  func() error
+	}{
+		{"init_usage", func() error { return runInit(nil) }},
+		{"init_language", func() error { return runInit([]string{"dict", "--lang=invalid"}) }},
+		{"init_existing_dictionary", func() error { return runInit([]string{"dict"}) }},
+		{"install_language", func() error {
+			return runInstall([]string{"--platform=claude", "--lang=invalid"}, strings.NewReader(""))
+		}},
+		{"install_platform", func() error {
+			return runInstall([]string{"--platform=invalid", "--lang=en"}, strings.NewReader(""))
+		}},
+		{"invalid_selection", func() error {
+			_, err := promptSelect("Language", []string{"en"}, "1", bufio.NewReader(strings.NewReader("invalid\n")))
+			return err
+		}},
+	} {
+		t.Run(scenario.name, func(t *testing.T) {
+			err := scenario.run()
+			if err == nil {
+				t.Fatal("expected a validation error")
+			}
+			assertDoctorEnglish(t, err.Error())
+		})
+	}
 }

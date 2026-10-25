@@ -18,7 +18,7 @@ func promptMultiSelect(label string, items []string, defaults string, r *bufio.R
 	fmt.Printf("选择（编号，逗号或空格分隔；回车=%s）: ", defaults)
 	line, err := r.ReadString('\n')
 	if err != nil && line == "" {
-		return nil, fmt.Errorf("读取输入失败: %w", err)
+		return nil, fmt.Errorf("failed to read input: %w", err)
 	}
 	line = strings.TrimSpace(line)
 	if line == "" {
@@ -29,7 +29,7 @@ func promptMultiSelect(label string, items []string, defaults string, r *bufio.R
 	for _, tok := range splitList(line) {
 		n, err := strconv.Atoi(tok)
 		if err != nil || n < 1 || n > len(items) || seen[n] {
-			return nil, fmt.Errorf("无效选择 %q（输入 1-%d 的编号）", tok, len(items))
+			return nil, fmt.Errorf("invalid selection %q (enter a number from 1 to %d)", tok, len(items))
 		}
 		seen[n] = true
 		picked = append(picked, n)
@@ -52,7 +52,7 @@ func promptSelect(label string, items []string, defaults string, r *bufio.Reader
 	fmt.Printf("选择（回车=%s）: ", defaults)
 	line, err := r.ReadString('\n')
 	if err != nil && line == "" {
-		return "", fmt.Errorf("读取输入失败: %w", err)
+		return "", fmt.Errorf("failed to read input: %w", err)
 	}
 	line = strings.TrimSpace(line)
 	if line == "" {
@@ -60,7 +60,7 @@ func promptSelect(label string, items []string, defaults string, r *bufio.Reader
 	}
 	n, err := strconv.Atoi(line)
 	if err != nil || n < 1 || n > len(items) {
-		return "", fmt.Errorf("无效选择 %q（输入 1-%d 的编号）", line, len(items))
+		return "", fmt.Errorf("invalid selection %q (enter a number from 1 to %d)", line, len(items))
 	}
 	return items[n-1], nil
 }

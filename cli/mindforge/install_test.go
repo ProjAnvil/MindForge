@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -42,7 +43,7 @@ func loadEvents(t *testing.T, path string) map[string][]groupProbe {
 	return events
 }
 
-func TestInstallClaudeRegistersAllEvents(t *testing.T) {
+func TestInstallClaudeRegistersOnlyInjection(t *testing.T) {
 	home := t.TempDir()
 	if err := installClaude(home, "zh-cn"); err != nil {
 		t.Fatalf("installClaude: %v", err)
@@ -53,59 +54,49 @@ func TestInstallClaudeRegistersAllEvents(t *testing.T) {
 
 	wantEvents := []string{
 		"SessionStart", "UserPromptSubmit", "SubagentStart",
-		"PreToolUse", "Stop", "SubagentStop",
 	}
 	for _, ev := range wantEvents {
 		if len(events[ev]) == 0 {
-			t.Errorf("event %s 未注册", ev)
+			t.Errorf("event %s is not registered", ev)
 		}
 	}
-	if n := len(events["UserPromptSubmit"]); n != 2 {
-		t.Errorf("UserPromptSubmit 应注册 2 组，实际 %d", n)
+	if n := len(events["UserPromptSubmit"]); n != 1 {
+		t.Errorf("expected one UserPromptSubmit group, got %d", n)
 	}
 
-	// PreToolUse carries the file-guard matcher.
-	for _, g := range events["PreToolUse"] {
-		if g.Hooks == nil {
-			t.Errorf("PreToolUse 组缺 hooks")
-		}
-	}
-	// Commands point into the MindForge hooks directory.
-	for _, g := range events["Stop"] {
-		for _, h := range g.Hooks {
-			if !strings.Contains(h.Command, "MindForge/hooks/inspect.py") {
-				t.Errorf("Stop 命令路径不对: %s", h.Command)
-			}
+	for _, event := range []string{"PreToolUse", "Stop", "SubagentStop"} {
+		if len(events[event]) != 0 {
+			t.Errorf("scheme A must not register %s", event)
 		}
 	}
 
 	// Runtime files extracted.
 	hooksDir := filepath.Join(home, ".claude", "MindForge", "hooks")
 	for _, name := range []string{
-		"inject-style-rules.sh", "inject.py", "inspect.py",
-		"inspect-file.py", "zh_guard_common.py", "term-dict-server.py", "message-display.py",
-		"terminology.tsv", "style-rules-zh.md", "style-rules-en.md",
+		"inject-style-rules.sh", "style-rules-zh.md",
 	} {
 		if _, err := os.Stat(filepath.Join(hooksDir, name)); err != nil {
-			t.Errorf("脚本缺失: %s (%v)", name, err)
+			t.Errorf("missing runtime file: %s (%v)", name, err)
 		}
 	}
 	if _, registered := events["MessageDisplay"]; registered {
-		t.Error("旧版兼容安装不应默认注册可选 MessageDisplay")
+		t.Error("sentence annotations must not register display replacement hooks")
+	}
+	if _, err := os.Stat(filepath.Join(hooksDir, "message-display.py")); !os.IsNotExist(err) {
+		t.Errorf("display replacement script must not be installed: %v", err)
 	}
 	// Language marker.
 	marker, err := os.ReadFile(filepath.Join(hooksDir, "style-rules.lang"))
 	if err != nil || strings.TrimSpace(string(marker)) != "zh-cn" {
-		t.Errorf("style-rules.lang 应为 zh-cn, got %q err=%v", string(marker), err)
+		t.Errorf("expected style-rules.lang to be zh-cn, got %q err=%v", string(marker), err)
 	}
 	// Shell script executable.
 	info, err := os.Stat(filepath.Join(hooksDir, "inject-style-rules.sh"))
 	if err != nil || info.Mode()&0o111 == 0 {
-		t.Errorf("inject-style-rules.sh 应可执行, mode=%v err=%v", info.Mode(), err)
+		t.Errorf("inject-style-rules.sh must be executable, mode=%v err=%v", info.Mode(), err)
 	}
-	// User dict seeded.
-	if _, err := os.Stat(filepath.Join(home, ".claude", "MindForge", "terminology.tsv")); err != nil {
-		t.Errorf("用户词典未生成: %v", err)
+	if _, err := os.Stat(filepath.Join(home, ".claude", "MindForge", "terminology.tsv")); !os.IsNotExist(err) {
+		t.Errorf("scheme A must not create a user dictionary: %v", err)
 	}
 }
 
@@ -117,11 +108,11 @@ func TestInstallClaudeIdempotent(t *testing.T) {
 		}
 	}
 	events := loadEvents(t, filepath.Join(home, ".claude", "settings.json"))
-	if n := len(events["UserPromptSubmit"]); n != 2 {
-		t.Errorf("重复安装后 UserPromptSubmit 应仍为 2 组，实际 %d（过滤失效）", n)
+	if n := len(events["UserPromptSubmit"]); n != 1 {
+		t.Errorf("expected one UserPromptSubmit group after repeated installation, got %d", n)
 	}
-	if n := len(events["Stop"]); n != 1 {
-		t.Errorf("重复安装后 Stop 应仍为 1 组，实际 %d", n)
+	if n := len(events["Stop"]); n != 0 {
+		t.Errorf("scheme A must not register Stop, got %d groups", n)
 	}
 }
 
@@ -153,18 +144,158 @@ func TestInstallClaudePreservesExistingConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(top["model"]) != `"sonnet"` {
-		t.Errorf("顶层字段 model 被破坏: %s", string(top["model"]))
+		t.Errorf("top-level model field was modified: %s", string(top["model"]))
 	}
 	events := loadEvents(t, filepath.Join(settingsDir, "settings.json"))
 	if n := len(events["PostToolUse"]); n != 1 {
-		t.Errorf("外来 PostToolUse 组应保留 1 组，实际 %d", n)
+		t.Errorf("expected one preserved foreign PostToolUse group, got %d", n)
 	}
-	if n := len(events["Stop"]); n != 2 {
-		t.Errorf("Stop 应为 外来1组 + mindforge1组 = 2，实际 %d", n)
+	if n := len(events["Stop"]); n != 1 {
+		t.Errorf("expected only the preserved foreign Stop group in English mode, got %d", n)
 	}
 	// Foreign handler fields (timeout) survive byte-for-byte.
 	if !strings.Contains(string(top["hooks"]), "prettier --write") {
-		t.Error("外来命令内容丢失")
+		t.Error("foreign command contents were lost")
+	}
+}
+
+func TestAllInstallProfilesArePromptOnly(t *testing.T) {
+	for _, platform := range []struct {
+		name     string
+		hooksDir string
+		config   string
+		install  func(string, string) error
+	}{
+		{"claude", ".claude/MindForge/hooks", ".claude/settings.json", installClaude},
+		{"zcode", ".zcode/mindforge/hooks", ".zcode/cli/config.json", installZcode},
+		{"codex", ".codex/mindforge/hooks", ".codex/hooks.json", installCodex},
+	} {
+		for _, language := range []string{"en", "zh-cn"} {
+			t.Run(platform.name+"/"+language, func(t *testing.T) {
+				home := t.TempDir()
+				if err := platform.install(home, language); err != nil {
+					t.Fatal(err)
+				}
+				events := loadEvents(t, filepath.Join(home, platform.config))
+				for event, groups := range events {
+					if event != "SessionStart" && event != "UserPromptSubmit" && event != "SubagentStart" {
+						t.Errorf("prompt-only mode registered a non-injection event: %s", event)
+					}
+					if len(groups) != 1 {
+						t.Errorf("expected one injection group for %s, got %d", event, len(groups))
+					}
+					for _, group := range groups {
+						for _, hook := range group.Hooks {
+							if !strings.Contains(hook.Command, "inject-style-rules.sh") {
+								t.Errorf("prompt-only mode registered a terminology hook: %s", hook.Command)
+							}
+						}
+					}
+				}
+				if len(events["SessionStart"]) != 1 || len(events["UserPromptSubmit"]) != 1 {
+					t.Error("scheme A must inject writing rules at session start and each prompt")
+				}
+				hooksDir := filepath.Join(home, platform.hooksDir)
+				files, err := os.ReadDir(hooksDir)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(files) != 3 {
+					t.Errorf("expected only the injection script, selected rules and language marker, got %d files", len(files))
+				}
+				if _, err := os.Stat(filepath.Join(home, ".claude", "MindForge", "terminology.tsv")); !os.IsNotExist(err) {
+					t.Errorf("prompt-only install must not create a user dictionary: %v", err)
+				}
+				command := exec.CommandContext(t.Context(), "bash", filepath.Join(hooksDir, "inject-style-rules.sh"))
+				command.Stdin = strings.NewReader(`{"hook_event_name":"UserPromptSubmit"}`)
+				output, err := command.Output()
+				if err != nil {
+					t.Fatal(err)
+				}
+				var payload struct {
+					HookSpecificOutput struct {
+						Context string `json:"additionalContext"`
+					} `json:"hookSpecificOutput"`
+				}
+				if err := json.Unmarshal(output, &payload); err != nil {
+					t.Fatal(err)
+				}
+				context := payload.HookSpecificOutput.Context
+				if strings.Contains(context, "mindforge_") {
+					t.Error("scheme A must not request dictionary tools")
+				}
+				if language == "en" && !strings.Contains(context, "ASD-STE100") {
+					t.Error("English injection must retain ASD-STE100")
+				}
+			})
+		}
+	}
+}
+
+func TestSwitchToEnglishDisablesOwnedChecksAndPreservesDictionary(t *testing.T) {
+	home := t.TempDir()
+	if err := installClaude(home, "zh-cn"); err != nil {
+		t.Fatal(err)
+	}
+	dictionary := filepath.Join(home, ".claude", "MindForge", "terminology.tsv")
+	content := []byte("existing-term\t\tpreserve this meaning\n")
+	if err := os.WriteFile(dictionary, content, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := installClaude(home, "en"); err != nil {
+		t.Fatal(err)
+	}
+	events := loadEvents(t, filepath.Join(home, ".claude", "settings.json"))
+	if len(events["Stop"]) != 0 || len(events["SubagentStop"]) != 0 || len(events["PreToolUse"]) != 0 {
+		t.Error("switching to English must unregister owned terminology checks")
+	}
+	after, err := os.ReadFile(dictionary)
+	if err != nil || string(after) != string(content) {
+		t.Errorf("switching language must preserve existing dictionary contents: %v", err)
+	}
+	if err := installClaude(home, "zh-cn"); err != nil {
+		t.Fatal(err)
+	}
+	events = loadEvents(t, filepath.Join(home, ".claude", "settings.json"))
+	if len(events["Stop"]) != 0 || len(events["UserPromptSubmit"]) != 1 {
+		t.Error("Chinese mode must remain prompt-only after a language switch")
+	}
+}
+
+func TestSchemeAUpgradeRemovesLegacyOwnedChecks(t *testing.T) {
+	home := t.TempDir()
+	configDir := filepath.Join(home, ".claude")
+	if err := os.MkdirAll(filepath.Join(configDir, "MindForge"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	legacy := `{"hooks":{
+		"UserPromptSubmit":[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inject.py"}]}],
+		"PreToolUse":[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inspect-file.py"}]}],
+		"Stop":[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inspect.py"}]},
+		        {"hooks":[{"command":"foreign-audit.sh"}]}],
+		"SubagentStop":[{"hooks":[{"command":"python3 ~/.claude/MindForge/hooks/inspect.py"}]}]
+	}}`
+	if err := os.WriteFile(filepath.Join(configDir, "settings.json"), []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	dictionary := filepath.Join(configDir, "MindForge", "terminology.tsv")
+	saved := []byte("custom-term\t\tretained data\n")
+	if err := os.WriteFile(dictionary, saved, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := installClaude(home, "zh-cn"); err != nil {
+		t.Fatal(err)
+	}
+	events := loadEvents(t, filepath.Join(configDir, "settings.json"))
+	if len(events["PreToolUse"]) != 0 || len(events["SubagentStop"]) != 0 || len(events["UserPromptSubmit"]) != 1 {
+		t.Error("scheme A upgrade must remove the legacy owned terminology registrations")
+	}
+	if len(events["Stop"]) != 1 || events["Stop"][0].Hooks[0].Command != "foreign-audit.sh" {
+		t.Error("scheme A upgrade must preserve the foreign Stop hook")
+	}
+	current, err := os.ReadFile(dictionary)
+	if err != nil || string(current) != string(saved) {
+		t.Errorf("scheme A upgrade must preserve existing dictionary data: %v", err)
 	}
 }
 
@@ -197,38 +328,29 @@ func TestInstallZcodeMergesConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(top["skills"]) == "" {
-		t.Error("skills 字段丢失")
+		t.Error("skills field was lost")
 	}
 	var hooksObj map[string]json.RawMessage
 	if err := json.Unmarshal(top["hooks"], &hooksObj); err != nil {
 		t.Fatal(err)
 	}
 	if string(hooksObj["timeoutMs"]) != "60000" {
-		t.Errorf("hooks.timeoutMs 应保留 60000，实际 %s", string(hooksObj["timeoutMs"]))
+		t.Errorf("expected hooks.timeoutMs to remain 60000, got %s", string(hooksObj["timeoutMs"]))
 	}
 	if string(hooksObj["enabled"]) != "true" {
-		t.Errorf("hooks.enabled 应为 true，实际 %s", string(hooksObj["enabled"]))
+		t.Errorf("expected hooks.enabled to be true, got %s", string(hooksObj["enabled"]))
 	}
 
 	events := loadEvents(t, filepath.Join(configDir, "config.json"))
 	// zcode has no Subagent events — ours must not add them.
 	if _, ok := events["SubagentStart"]; ok {
-		t.Error("zcode 不支持 SubagentStart，不应注册（死配置）")
+		t.Error("SubagentStart must not be registered for zcode")
 	}
-	if n := len(events["PreToolUse"]); n != 2 {
-		t.Errorf("PreToolUse 应为 外来1组 + mindforge1组 = 2，实际 %d", n)
+	if n := len(events["PreToolUse"]); n != 1 {
+		t.Errorf("expected only the preserved foreign PreToolUse group, got %d", n)
 	}
-	// Stop hook carries --platform (user-config hooks get no ZCODE_PLUGIN_ROOT).
-	var sawPlatform bool
-	for _, g := range events["Stop"] {
-		for _, h := range g.Hooks {
-			if strings.Contains(h.Command, "--platform") {
-				sawPlatform = true
-			}
-		}
-	}
-	if !sawPlatform {
-		t.Error("zcode 的 Stop 命令应带 --platform")
+	if len(events["Stop"]) != 0 {
+		t.Error("zcode must not register Stop under scheme A")
 	}
 }
 
@@ -242,7 +364,7 @@ func TestInstallZcodeCreatesMissingConfigDir(t *testing.T) {
 		t.Fatalf("installZcode: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(home, ".zcode", "cli", "config.json")); err != nil {
-		t.Errorf("config.json 未生成: %v", err)
+		t.Errorf("config.json was not generated: %v", err)
 	}
 }
 
@@ -253,7 +375,7 @@ func TestCountOursCountsOursAndTotal(t *testing.T) {
 	}
 	ours, total := countOurs(events)
 	if ours != 1 || total != 3 {
-		t.Errorf("应为 ours=1 total=3（含 1 外来组），实际 ours=%d total=%d", ours, total)
+		t.Errorf("expected ours=1 total=3 including a foreign group, got ours=%d total=%d", ours, total)
 	}
 }
 
@@ -272,6 +394,6 @@ func TestDetectPlatforms(t *testing.T) {
 		}
 	}
 	if len(found) != 2 || found[0] != "claude" || found[1] != "zcode" {
-		t.Errorf("受支持平台应为 claude+zcode，实际 %v", found)
+		t.Errorf("expected supported platforms claude and zcode, got %v", found)
 	}
 }

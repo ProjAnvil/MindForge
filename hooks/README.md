@@ -1,155 +1,129 @@
-# style-rules-zh-cn 插件（中文写作规范 + 翻译腔防御）
+# style-rules-zh-cn：方案 A，只注入写作指导
 
-MindForge 中文 hook 插件。设计文档：WorkBuddy `zh-guard-spec-v2.0.md`（zh-guard 部分）。
+默认回答流程只给已有模型请求添加简短写作规则，不调用词典工具、
+不检查或退回已生成回复，不启动额外模型审稿。中文使用简要表达原则，
+英文插件保留 ASD-STE100。词典与研究脚本保留，但不会默认加载。
 
 ## 结构
 
 | 组件 | 文件 | 事件/通道 | 职责 |
 |---|---|---|---|
-| 写作规范 | inject-style-rules.sh | SessionStart / UserPromptSubmit（+ SubagentStart，仅 Claude） | 注入受控写作规范（中文+英文） |
-| 公共库 | zh_guard_common.py | - | 三级词典、保护区、原文位置与上下文、最长非重叠匹配、安全替换和防循环 |
-| L0 字典 | terminology.tsv（内置） / mindforge.zh-dict.tsv（项目级） | - | 三级术语字典：内置 → 用户级 → 项目级（数据飞轮） |
-| L1 术语注入 | inject.py | UserPromptSubmit | 每轮注入术语规范 + 「直译词→期望写法」对照 |
-| L2 出口检测 | inspect.py | Stop（+ SubagentStop，仅 Claude） | 命中直译词要求重写（按地道措辞重写整句） |
-| L2 文件写入口 | inspect-file.py | PreToolUse（Write\|Edit\|NotebookEdit） | 文档类文件（.md/.markdown/.txt/.rst）写入前检测，deny 并要求改写 |
-| L2 句式判官 | claude-prompt-hooks.json | Stop（prompt 型，仅 Claude Code） | 字典未命中时小模型判断是否地道中文，覆盖长尾句式 |
-| 知识层（拉模式） | term-dict-server.py | MCP（term-dict） | 按需查词 / 交付前自查 / 飞轮入库 |
-| 显示替换（可选） | message-display.py | MessageDisplay，仅支持该事件的 Claude Code | 显示前执行安全替换，保留代码及按语境改写的内容 |
-| 字典整理 | tidy-dict.py | 手动运行 | 排版对齐 + 体检（去重、坏正则、缺列） |
-| 整理效果评测 | eval-tidy-dict.py | 手动运行 | 前后对比：行为等价 + token/字符 + 耗时 |
-| 方案成本评测 | eval-zh-guard.py | 手动运行 | 装 vs 不装（含空字典）：token、耗时、拦截代价 |
+| 默认注入器 | inject-style-rules.sh | SessionStart / UserPromptSubmit（+ SubagentStart，仅 Claude） | 读取选定语言的一份规则，不调用模型 |
+| 中文规则 | style-rules-zh.md | prompt 内容 | 简短、自然、保留语境和事实 |
+| 英文规则 | style-rules-en.md | prompt 内容 | ASD-STE100 风格指导 |
+| 词典与维护 | terminology.tsv / term-dict-server.py / tidy-dict.py | 仅显式手动使用 | 不注册到默认回复流程 |
+| 历史检查器 | inject.py / inspect.py / inspect-file.py | 仅手动实验 | 不随 CLI 默认安装，不注册成自动 hook |
+| 成本实验 | evals/scripts/zh_pregen_cost.py / zh_dict_cost.py | 手动运行 | 比较规则、工具查询和 Stop 返修的代价 |
 
-所有 hook 保持 fail-open，不因检测异常卡死会话；检测与显示入口会向 stderr 报告错误。
+默认注入器在规则文件缺失时放行，不阻断回复。模型是否遵守规则仍不是程序保证，
+但默认方案不会因查词或审批新增一个模型往返。
+工程检查信息（测试描述、断言失败、参数校验、异常诊断、词典体检和成本评测报告）
+统一使用英文。中文词条、含义、测试语料及给 agent 的中文写作反馈保持原语言；
+诊断中引用的原始数据也不翻译。
 
 ## 多平台
 
-hook 配置按平台拆分：
+中文和英文默认都只注入 prompt。`hooks/hooks.json` 仅含 SessionStart /
+UserPromptSubmit；Claude 通过 `hooks/subagent-hooks.json` 额外注入 SubagentStart。
+CLI 在 Claude Code、zcode、Codex 上注册同样的开始／提问事件；
+zcode / Codex 不额外注册子代理事件。Kimi 的安装适配仍未提供。
 
-- `hooks/hooks.json`（标准位置，Claude Code 与 zcode 都自动加载）只含三平台
-  都支持的事件：SessionStart、UserPromptSubmit、Stop。
-- `hooks/subagent-hooks.json` 只含 Claude Code 支持的 SubagentStart /
-  SubagentStop，由 `.claude-plugin/plugin.json` 的 `hooks` 字段声明
-  （与自动发现的 hooks.json 合并加载，Claude Code 行为不变）。
+默认配置没有 Stop、SubagentStop、PreToolUse、prompt 型审稿或 `mcpServers`。
+升级安装只替换 MindForge 自己注册的配置，保留外来 hooks 和已有词典数据。
+旧会话有配置快照，更新插件后必须新建会话；如之前独立注册过词典 MCP，
+需要另行禁用，不能指望插件升级撤回已有会话中的工具或提示。
 
-### zcode
+## term-dict MCP 服务（仅手动启用）
 
-zcode 直接装本插件（`.claude-plugin/plugin.json` 在其 manifest 查找列表内）。
-`.zcode-plugin/plugin.json` 专为 zcode 准备：不带 `hooks` 字段，zcode 优先读它，
-只会自动加载 `hooks/hooks.json`，不会再看到自己没有的事件
-（SubagentStart / SubagentStop 在 zcode 属于永不触发的死配置）。
-
-- 注入（SessionStart / UserPromptSubmit）：zcode 同样解析
-  `hookSpecificOutput.additionalContext`，脚本原样可用。
-- MCP：zcode 自动启动 term-dict。
-- Stop：统一使用 `decision:"block"` + reason 和 exit 2，让助手继续检查；
-  不输出表示停止处理的 `continue:false`。
-- 子代理：zcode 没有子代理事件，规范注入与 L2 覆盖不到子代理。
-- 文件写入口（PreToolUse）：zcode 支持，matcher `Write|Edit` 语义一致。
-- 句式判官（prompt 型 hook）：Claude Code 独有类型，配置在
-  `hooks/claude-prompt-hooks.json`（Claude 专属文件，zcode 不加载，
-  不会产生死配置告警）。判官每轮 Stop 增加一次小模型调用（默认
-  Haiku 级，约 1-3 秒），只在字典出口未命中时才有拦截作用；
-  `stop_hook_active` 为 true 时判官直接放行，防止连环阻断。
-- 用户级 config 里的 hook 需要 `hooks.enabled: true`；插件 hook 跟随插件
-  启停，不需要。更新插件后新建 session 才生效（hook 配置有会话快照）。
-
-### 已知边界
-
-- 文件写入口只查 .md/.markdown/.txt/.rst；代码内中文注释需要先隔离
-  字符串与 docstring，暂不检测。编辑本插件自己的 README（内含直译词
-  示例）会被拦一次，重试同内容即放行，或给示例词加「」引号。
-- Kimi 上 Stop payload 不含助手消息（上游 issue #2123），出口层失效；
-  文件写入口是 Kimi 上唯一可用的输出检测口，将来注册时 matcher 需按
-  Kimi 工具名写 `WriteFile|StrReplaceFile`。
-
-### Kimi Code
-
-尚未适配。配置在 `~/.kimi-code/config.toml` 的 `[[hooks]]`（仅 4 个字段），
-注入机制是 stdout 纯文本附加到上下文，只有 PreToolUse / Stop /
-UserPromptSubmit 三个事件可阻断，其余全是观察型（fire-and-forget）。
-
-## term-dict MCP 服务
-
-插件清单声明了 `mcpServers`（`${CLAUDE_PLUGIN_ROOT}` 定位），装插件即得，
-工具自动命名空间化。纯 Python stdio 实现，零依赖，系统 `python3` 即可运行。
-与 L1/L2 共享同一检测引擎（含 `re:` 正则词条），每次调用现读，`add_term`
-入库后立即可查、下轮注入生效。可选 `cwd` 必须是绝对路径；
+该服务保留在源代码中，但默认插件不注册、CLI 不安装，也不要求生成前调用。
+用户明确需要词典资料或手动实验时，可自行注册源代码中的
+`term-dict-server.py`。它是零依赖 Python stdio 实现，
+与手动检查器共享检测引擎，每次调用现读；`mindforge_add_term`
+写入 workspace 后，显式查询和预检传同一 `cwd` 即可读取。
+可选 `cwd` 必须是绝对路径；
 提供时与 hook 一样加载项目词表，不提供时只合并内置与用户级。
 
 | 工具 | 用途 |
 |---|---|
-| `lookup_term(query, cwd?)` | 双向查词：英文/中文子串匹配直译词、期望写法、说明 |
-| `check_text(text, cwd?)` | 草稿预检：安全替换、命中位置与上下文、剩余改写建议 |
-| `add_term(term, expected, note?, action?)` | 追加用户词条，默认按语境改写；安全字面替换才设 `action="replace"` |
+| `mindforge_lookup_term(query, cwd?)` | 双向查词：英文/中文子串匹配词语、建议写法、含义 |
+| `mindforge_check_text(text, cwd?)` | 草稿保持不变，返回句子标注、段落及相关建议和含义 |
+| `mindforge_add_term(term, cwd?, suggestion?, meaning?, scope?)` | 默认写 workspace；必须传其绝对路径 `cwd`。显式 `scope=user` 才写用户级 |
+| `mindforge_init_dict(cwd)` | 初始化全注释三列词典；已有词典不覆盖，返回路径与创建状态 |
 
-### 回答前预检
+### workspace 词典维护
 
-L1 注入要求助手先提交完整中文草稿，使用安全替换后的结果，再结合原句处理剩余命中；
-修改后再次复查。MCP 返回可读文本以及 `structuredContent`：
+`mindforge_add_term` 默认 `scope` 为 `workspace`，不再默认追加到
+`~/.claude/MindForge/terminology.tsv`。MCP 是常驻服务，不能把启动目录
+猜成当前 workspace，因此 workspace 写入必须传有效目录的绝对路径 `cwd`；
+缺失、相对路径、目录不存在都报错，不静默回退到用户级。
 
-- `corrected_text`：只执行安全替换后的完整草稿，不修改代码或引号内提及。
-- `changed`：是否执行了替换。
-- `findings`：原稿的全部非重叠命中，包含 `term`、`text`、`expected`、`action`、
-  `note`、`start`、`end`、`line`、`column`、`context`。
-- `remaining_findings`：对替换后草稿重新检查的结果。
-- `needs_rewrite`：仍有命中，需要助手结合语境复核；不是要求机械替换所有命中。
+初始化和追加会复用从 `cwd` 向上找到的最近词典，遇到 `.git` 目录或文件即停。
+没有词典时在该 Git 根创建；没有 Git 边界时在传入的目录创建。
+`mindforge_add_term` 会在需要时自动初始化，单独初始化则调用
+`mindforge_init_dict`：
+
+```json
+{"cwd": "/absolute/path/to/workspace"}
+```
+
+返回的 `structuredContent` 为
+`{"path": "/absolute/path/to/workspace/mindforge.zh-dict.tsv", "created": true}`。
+重复调用返回 `created: false`，不改已有文件。
+
+追加含义示例，工具名为 `mindforge_add_term`：
+
+```json
+{
+  "cwd": "/absolute/path/to/workspace",
+  "term": "病灶分析",
+  "meaning": "本项目指排查问题根因，不指定具体实验方法"
+}
+```
+
+只有用户明确要求全局共享时，才指定 `scope: "user"`；此时无需 `cwd`。
+返回文本显示实际写入路径，多个 workspace 不共享隐式目录状态。
+初始化模板来自 `project-dict-template.tsv`，CLI 和 MCP 使用同一份内容。
+
+### 手动草稿检查
+
+只有用户明确需要时才提交中文草稿，结合用户问题、对话背景和项目含义复核标注，
+只在必要时局部润色，或判断原文合理并保留。MCP 不改写草稿，返回：
+
+- `draft`：未经修改的完整草稿，批注不会混入正文。
+- `draft_id`：完整草稿的 SHA-256，用于区分不同草稿。
+- `annotations`：所有非重叠命中，包含 `term`、`text`、可空的 `suggestion`
+  和 `meaning`，以及 `start`、`end`、`line`、`column`。
+  每条还有完整 `sentence`、其 `sentence_start` / `sentence_end`、段落 `context`、
+  `rule_id`、`annotation_id` 和 `draft_id`。用户无需填写这些字段。
+- `needs_review`：是否有需要按语境复核的批注，不表示原文一定有错。
 
 `start/end` 是原文中从 0 开始的字符偏移，`end` 不包含在匹配内；
-`line/column` 从 1 开始。`findings` 对应原稿，`remaining_findings` 对应替换后的草稿。
-例如 `机械胳膊，做病灶分析并保留台账。` 只会自动把前者改为「机械臂」，
-其余由助手根据原意处理，不能把「清单 / 记录」直接写进回答。
+`line/column` 从 1 开始，句子范围同样使用字符偏移；所有位置对应 `draft`。
+句子按中文句末标点、空白前的英文句点和换行定位，保留行内代码及引号提及，
+不是句法分析；段落按空行分隔。Markdown 标题和列表项以行作为边界。
+相同草稿和词典得到确定的标注 ID；草稿、词条含义或建议变化后重新检查，
+不能拿旧标注的位置继续修改。标注 ID 不会写回词典，也不是全局忽略规则。
 
-重叠命中采用从左到右、同起点最长优先；同范围规则冲突时优先按语境改写。
-替换基于原文位置执行一遍，不把新生成的词再次级联替换。无效正则会记录错误并跳过；
-不合法的规则动作会明确报错。
+例如项目说明「机械胳膊指科幻人物的身体部件」时，
+`小说里，他举起机械胳膊挡住攻击。` 原稿不变，批注给出该句和项目含义，
+由 agent 判断是否需要润色，而不是强行改成工业术语。
+仅登记词语时可查询、可注入，但不会产生需要改写的批注或 Stop 拦截。
+只改标注所在的必要句子，其他句子、数字、代码和结论保持不变；
+允许保留合法用法，不能编造用户未提供的含义。
+
+重叠命中采用从左到右、同起点最长优先，不对同一处重复批注。
+无效正则会记录错误并跳过，词典最多三列；空建议与空含义不是错误。
+所有建议都只是参考，不提供自动替换动作或显示前换词。
 
 定位：拉模式知识层，不替代 L1（推送预防）与 L2（外部检测）——
 模型感知不到自己在说翻译腔（P3），不会总记得主动查询，外部检测仍是兜底。
 提示词不能保证每次调用工具，Stop 仍检查最终原稿；没有新增外部模型调用或分词依赖。
 
-符号链接部署（`setup-claude.sh`）不自动注册 MCP，手动执行：
+默认安装不提供 MCP。如确实需要，手动指向仓库源代码：
 
 ```
-claude mcp add term-dict -- python3 "$HOME/.claude/hooks/term-dict-server.py"
+claude mcp add term-dict -- python3 /absolute/path/to/MindForge/hooks/term-dict-server.py
 ```
-
-### 可选：MessageDisplay 显示前替换
-
-只在支持 [MessageDisplay](https://code.claude.com/docs/en/hooks#messagedisplay)
-的 Claude Code 版本启用；不默认注册到旧版 Claude、zcode 或其他客户端。
-CLI 安装会携带脚本，但不会自动启用事件。
-
-CLI 安装后可把下面的事件组**合并**到 Claude 用户设置，保留已有 hooks：
-
-```json
-{
-  "hooks": {
-    "MessageDisplay": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$HOME/.claude/MindForge/hooks/message-display.py\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-插件目录另有独立的 `hooks/message-display-hooks.json`，需要该功能的插件清单
-可显式引用它；默认清单不加载，避免未知事件破坏旧平台兼容性。
-仅插件安装时，用户设置中的命令路径应指向实际插件目录的 `message-display.py`。
-
-只替换第四列标为 `replace` 的字面词条；`rewrite` 内容原样保留，交给模型和 Stop。
-屏蔽代码与引号提及，围栏状态按 session/message 隔离并跨显示批次保留，
-支持重复批次；乱序、状态损坏或其他异常时记录 stderr，宿主显示原文。
-状态文件只保存批次、围栏及哈希，不保存回答正文。
-
-**仅改变显示，不改变会话记录或模型上下文。** 失败或超时时可能显示原文，
-不提供“用户绝不会看到原文”的保证。停用方式与其他 hook 相同。
 
 ## 安装
 
@@ -160,12 +134,69 @@ CLI 安装后可把下面的事件组**合并**到 Claude 用户设置，保留�
 
 依赖系统 `python3`。
 
-开发工作区的修改不会自动更新已经加载的插件缓存。请使用更新后的插件或部署运行脚本，
-再重启 MCP / 新建会话；旧版本缓存仍可能按旧 `@sync` 标记把用户词表写回旧版。
-不要只修改用户副本而继续运行旧插件。MessageDisplay 需要支持该事件的客户端，
-其余检测与 MCP 功能不依赖该事件。
+开发工作区的修改不会自动更新已加载的插件缓存。升级方案 A 后新建会话；
+不要把仍在运行的旧检查器、独立 MCP 或外来 hook 的行为误认为默认方案 A。
+本次三列设计不读取旧第四列动作；如有旧词典，删除第四列，把必要说明写进第三列。
+若曾手动启用显示替换 hook，需要移除该手动配置；本版本不再分发相关脚本。
 
-## 这套东西到底要花多少：eval-zh-guard.py
+## 成本实验与历史方案对比
+
+生产默认选择 A，以下工具查询、完整词典注入和 Stop 返修仅供手动对照研究。
+保存的报告记录当时的 prompt 和模型 usage；规则变更后应重新运行，
+不能把旧快照中的 token 数直接当成当前版本的注入开销。
+
+### 短／中／长上下文与真实改写对照
+
+若只比较两个**生成前**方案，使用独立实验：
+
+```sh
+evals/.venv/bin/python evals/scripts/zh_pregen_cost.py --live --rounds 3 \
+  --output evals/reports/zh-pregen-cost.json
+evals/.venv/bin/python -m pytest evals/tests/test_zh_pregen_cost.py -q
+```
+
+A 组只给简短写作指导，一次请求直接回答；B 组用相同指导和问题，
+先通过原生 function calling 调用真实 `mindforge_lookup_term`，获取含义后再回答。
+两组背景、问题和回答长度预算一致，均无 Stop、草稿预检或生成后返修。
+B 组计入工具定义、选择工具的输出、实际返回内容和两次模型请求的全部 usage。
+原生 `tool_choice` 约束用于确保实验中确实拿到语境，不用于证明单靠提示词就能必然触发工具。
+只开放这一个只读工具；不会调用词典写入工具。
+JSON 保留各请求 usage、缓存计数、工具参数和返回内容；本地工具耗时包含 MCP 子进程启动。
+
+使用 `evals/scripts/zh_dict_cost.py` 评测当前的「句子标注 → Stop 续写润色」，
+不是字符串替换。短、中、长合成背景默认分别为 2,000 / 16,000 / 64,000 个字符；
+回复草稿长度保持不变，分别测试命中词典和已经自然的未命中文本。
+不把长回复与长上下文混为一谈。
+
+本地模式调用真实注入／Stop／MCP 脚本，token 文本计数明确标记估算，
+没有真实模型时不报告模型耗时。真实模式复用 `evals/.env` 中的
+`SMELT_API_KEY`、`SMELT_BASE_URL`、`SMELT_AGENT_MODEL`，仅提交合成测试语料：
+
+```sh
+# Local hook measurements and explicitly estimated content tokens, no model calls
+evals/.venv/bin/python evals/scripts/zh_dict_cost.py --hook-rounds 20
+
+# Actual provider usage and paired baseline vs dictionary + polishing requests
+evals/.venv/bin/python evals/scripts/zh_dict_cost.py --live \
+  --hook-rounds 20 --model-rounds 3 \
+  --output evals/reports/zh-dict-context-cost.json
+
+# Deterministic benchmark regression tests
+evals/.venv/bin/python -m pytest evals/tests/test_zh_dict_cost.py -q
+```
+
+真实模式平衡两组请求的先后顺序，记录每组生成及续写请求汇总的输入／输出 token、
+缓存命中、实际请求耗时和 hook 耗时。命中时包括新增续写请求再次读取上下文的成本，
+而不是只数返回批注或改写后的回答。模型未逐字生成同一草稿时明确报错，
+不能把不一致的样本当成有效对照。
+
+报告保存 JSON 原始指标与同名 Markdown 汇总，检查数字／单位是否保留，
+并展示真实改写结果。剩余标注不等于错误；不额外调用 judge 模型评判语义。
+处理 token 数不等于收费 token，缓存命中需单独考虑；网络、缓存和样本量会影响耗时。
+该研究衡量受控样本的成本，不代表真实会话的命中率，也不是完整 coding agent 的性能评测。
+
+下面的单次 hook 统计是早期参考，不包括长上下文在模型续写请求中的完整重读成本；
+当前端到端数据应以新的上下文对照报告为准。
 
 装了它，每轮多付多少 token、多等多少毫秒。三个对照组，把账算到能归因为止：
 
@@ -203,7 +234,9 @@ token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估
 （另有一个 `eval-tidy-dict.py`，只评测 tidy 整理前后的行为等价性，与上面的方案级
 成本不是一回事。）
 
-## 字典：三级加载 + 安装迁移 + 版本同步
+## 手动词典工具：三级加载 + 首次运行迁移 + 版本同步
+
+本节仅描述显式启用的词典工具；默认写作 hook 不读取、迁移或同步词典。
 
 字典按三级加载，优先级从低到高（后加载覆盖先加载）：
 
@@ -221,11 +254,11 @@ token 计数优先 `tiktoken`（真值），装不上就退到写明公式的估
 L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程拿不到
 会话 cwd，只有调用时显式提供绝对路径 `cwd` 才合并项目级。
 
-**部署要求**：`zh_guard_common.py` 必须与 hook 脚本同目录
-（插件市场安装自动满足；手动复制部署时别漏拷这个文件）。
+**手动工具要求**：`zh_guard_common.py` 和 `project-dict-template.tsv` 必须与 Python
+工具脚本同目录，不能只复制 `term-dict-server.py`。默认安装没有这套 Python 载荷。
 
 - **发布源**：本目录 `terminology.tsv`（在 MindForge 仓库内维护）。
-- **安装时迁移**：首次 hook 运行时，字典被复制到
+- **手动工具首次运行迁移**：字典被复制到
   `~/.claude/MindForge/terminology.tsv`。
 - **版本同步**：自带字典里有一行 `# @sync <版本>`。当本地副本缺这个标记
   （旧版本安装）或版本落后时，hook 会把自带字典刷新到本地，
@@ -237,10 +270,10 @@ L1 注入三个执行点都吃三级合并结果；term-dict MCP 是常驻进程
   `ZH_GUARD_DICT` 指向自己的字典文件。
 - **运行时合并**：读取插件自带 + `~/.claude/MindForge/` 两份字典，用户条目优先。
 - **用户词条**：直接编辑 `~/.claude/MindForge/terminology.tsv`。
-  格式：TSV `直译词<TAB>期望写法<TAB>说明[<TAB>动作]`，`#` 开头为注释。
-  旧三列及省略动作默认 `rewrite`，由助手结合原句改写；第四列 `replace`
-  表示可直接执行的安全字面替换。正则词条和多个候选写法不能标为 `replace`。
-  注释只留格式、简短分组和 `@sync` 标记；第三列只留查询关键词与必要的语境提示。
+  格式：TSV `词语<TAB>建议写法（可空）<TAB>含义或语境说明（可空）`，
+  `#` 开头为注释。两列表示词语和建议写法，不把第二列当作含义。
+  仅登记一个词语也可以；有含义而没有建议时保留空的第二个单元格。
+  注释只留格式、简短分组和 `@sync` 标记；不要为了填满三列而猜测译法。
   带可变数字等模式用正则词条：第一列以 `re:` 开头
   （如 `re:第\s*\d+\s*刀`），无效正则自动跳过。
   词条要写精确（「病灶实验」而非「病灶」），避免误伤医学等合法语境。
@@ -262,7 +295,7 @@ python3 hooks/tidy-dict.py --path myspace.tsv   # 只处理指定文件
 1. **排版**：按最宽词条补空格，三列对齐（中文按两格宽算），注释和分组原样保留；
 2. **归一化**：去 BOM、去多余空白、约定行尾；
 3. **去重**：同一词条保留最后一次出现（与运行时「用户条目优先」一致）；
-4. **体检**：坏正则、缺第二列、重复词条，逐条报告；`--check` 时非零退出。
+4. **体检**：坏正则、多余列、重复词条，逐条报告；`--check` 时有硬错误则非零退出。
 
 只读体检不会动文件，可以随便跑。排版是幂等的：再跑一次不会有新变化。
 
@@ -292,21 +325,22 @@ token 计数优先用 `tiktoken`（装了更准），没装就用标注清楚的
 一个值得记的**负结果**：想靠去重省 token 是省不出来的——加载层本来就按唯一键
 合并。整理改的是文件卫生和可读性，不是运行开销；真正的 token 杠杆在「注入上限
 40 条 + term-dict MCP 拉模式」这一层。
-- **期望写法怎么写**（第二列，最容易写坏的一列）：
+- **建议与含义怎么写**：
 
   1. 写中文作者真会说的话，不要「为翻译而翻译」的机器名词。
      反例 `下一刀 → 下一个削减项`；正例 `下一刀 → 下一处可以精简的部分`。
-  2. 标为 `replace` 的写法必须可直接替换原文，不含多个候选或改写指令；
-     需要判断语境或重写句子的规则保留默认 `rewrite`，由助手处理。
+  2. 第二列只作参考，不是标准答案；只知道意思时留空，把含义写在第三列。
   3. 拿不准译法的名词保留英文原词：token、agent、hook、ghost token 不译。
   4. 优先保留原意，不要为了套专业术语而改成别的意思。
      例如「病灶分析」在排查问题时说「分析问题原因」，不能直接认作 ablation。
 
-  英文原词和括号里的一句解释请放第三列（说明），不要塞进第二列。
+  英文原词和语境说明放第三列，不用用户编写复杂的规则或句子标注。
 - **回馈上游**：通用性强的词条欢迎提交回 MindForge 仓库的
   `hooks/terminology.tsv`。
 
-## 停用与恢复
+## 手动检查器停用与恢复
+
+下面的开关只用于可选的历史检查器。默认写作注入请通过客户端的插件／hook 开关管理。
 
 ```
 export ZH_GUARD_OFF=1        # 本会话停用（仅 zh-guard 部分）
@@ -317,6 +351,7 @@ rm ~/.claude/MindForge/OFF    # 恢复
 ## 检测语义（L2）
 
 - 第一列按字面子串匹配 assistant 消息正文。
+- 只有建议或含义非空的条目参与复核；仅登记词语不阻断。
 - 豁免区：围栏代码块、行内代码、「」与""引号内提及。
 - 防循环：同一消息每会话只阻断一次；10 分钟窗口内最多阻断 3 次。
 - 状态存 `$TMPDIR/zh-guard/`。
@@ -324,9 +359,13 @@ rm ~/.claude/MindForge/OFF    # 恢复
 ## 测试
 
 ```
-python3 hooks/test_zh_guard.py         # zh-guard hooks（24 项，含三级词典、zcode 契约、文件写入口、句式词条）
-python3 hooks/test_term_dict_mcp.py    # term-dict MCP（5 项）
-python3 hooks/test_tidy_dict.py        # 字典整理/体检（5 项）
+python3 hooks/test_zh_guard_common.py  # 三列词典、完整句子/段落、标注标识与保护区
+python3 hooks/test_scheme_a.py        # 默认入口只注入规则、不挂载工具或模型审稿
+python3 hooks/test_english_diagnostics.py # 工程检查使用英文，中文产品资料保持原文
+python3 hooks/test_english_installation.py # 英文只注入规范，切换语言保留数据和外来 hook
+python3 hooks/test_zh_guard.py         # 注入、项目含义、Stop 与文件写入口
+python3 hooks/test_term_dict_mcp.py    # 原稿不变的句子标注、词语/含义入库与查询
+python3 hooks/test_tidy_dict.py        # 空单元格保留、三列体检与排版幂等
 python3 hooks/test_eval_tidy_dict.py   # tidy 评测工具自身（5 项）
 python3 hooks/test_eval_zh_guard.py    # 方案成本评测工具自身（6 项）
 bash hooks/test-inject-style-rules.sh  # 写作规范（14 项）

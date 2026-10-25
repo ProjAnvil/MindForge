@@ -11,11 +11,11 @@
 和项目级词典（cwd 向上发现的 mindforge.zh-dict.tsv，找到才处理）。
 
 做的事：
-  1. 排版：按宽度对齐（补空格到 Tab 前），保留可选第四列和注释；
+  1. 排版：三列按宽度对齐（补空格到 Tab 前），保留空单元格和注释；
   2. 归一化：去掉行首尾空白、清掉 BOM、统一行尾换行；
   3. 去重：同一第一列保留最后一次出现（与运行时「用户条目优先」一致），并报告；
   4. 体检：第一列以 re: 开头的词条尝试编译，坏正则报错但不改文件；
-  5. 报错：缺第二列（只有直译词没写期望写法）的行。
+  5. 报错：多于三列的行；建议写法与含义均可留空。
 
 fail-open 风格：单个文件读不动就跳过它，继续下一个。
 """
@@ -48,7 +48,7 @@ def read_lines(path):
 def parse(lines):
     """把文件拆成 [(kind, payload)]，kind ∈ {comment, blank, row}。
 
-    row 的前三列是 [直译词, 期望写法, 说明]，可选第四列为动作。
+    row 的三列是 [词语, 可空的建议写法, 可空的含义或语境说明]。
     """
     out = []
     for raw in lines:
@@ -88,25 +88,22 @@ def check(items):
         if kind != "row":
             continue
         term, target, note = payload[:3]
-        if len(payload) > 4:
-            errors.append("第 %d 行：词条最多四列" % i)
-        action = (payload[3] or "rewrite") if len(payload) >= 4 else "rewrite"
+        if len(payload) > 3:
+            errors.append("Line %d: entries have at most three columns" % i)
         try:
-            Rule(term, target, note, action)
+            Rule(term, target, note)
         except ValueError as exc:
-            errors.append("第 %d 行：%s" % (i, exc))
+            errors.append("Line %d: %s" % (i, exc))
         if not term:
-            errors.append("第 %d 行：第一列为空" % i)
+            errors.append("Line %d: the first column is empty" % i)
             continue
-        if not target:
-            errors.append("第 %d 行：%s 缺第二列（期望写法）" % (i, term))
         if term.startswith("re:"):
             try:
                 re.compile(term[3:])
             except re.error as exc:
-                errors.append("第 %d 行：正则写坏了 %s（%s）" % (i, term, exc))
+                errors.append("Line %d: invalid regex %s (%s)" % (i, term, exc))
         if term in seen:
-            warnings.append("第 %d 行：%s 重复（保留最后一次）→ 已在第 %d 行出现过"
+            warnings.append("Line %d: duplicate %s (keeping the last entry); first seen on line %d"
                             % (i, term, seen[term]))
         seen[term] = i
     return errors, warnings
@@ -159,7 +156,7 @@ def tidy(path, write=False):
     try:
         lines = read_lines(path)
     except Exception as exc:
-        print("跳过（读不到）：%s | %s" % (path, exc))
+        print("Skipped (unreadable): %s | %s" % (path, exc))
         return True
     items = parse(lines)
     items = dedupe(items)
@@ -168,11 +165,11 @@ def tidy(path, write=False):
 
     print("── %s" % path)
     for w in warnings:
-        print("   提示 %s" % w)
+        print("   Warning: %s" % w)
     for e in errors:
-        print("   问题 %s" % e)
-    status = "干净" if not errors and not warnings else ("%d 个问题" % len(errors))
-    print("   %s，共 %d 条词条" % (
+        print("   Error: %s" % e)
+    status = "Clean" if not errors and not warnings else ("%d error(s)" % len(errors))
+    print("   %s; %d entries" % (
         status, len([1 for k, _ in items if k == "row"])))
 
     if clean != "\n".join(lines) + "\n":
@@ -180,35 +177,35 @@ def tidy(path, write=False):
             try:
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(clean)
-                print("   已排版写回")
+                print("   Formatting written")
             except Exception as exc:
-                print("   写回失败：%s" % exc)
+                print("   Failed to write formatting: %s" % exc)
                 return False
         else:
-            print("   排版有变化，加 --write 写回")
+            print("   Formatting changes available; use --write to save")
     return not errors
 
 
 def main():
-    ap = argparse.ArgumentParser(description="zh-guard 词典整理 / 体检")
-    ap.add_argument("--write", action="store_true", help="写回排版后的文件")
-    ap.add_argument("--check", action="store_true", help="有问题时退出码为 1")
-    ap.add_argument("--path", help="只处理指定文件")
+    ap = argparse.ArgumentParser(description="Format and validate zh-guard dictionaries")
+    ap.add_argument("--write", action="store_true", help="Write formatted output")
+    ap.add_argument("--check", action="store_true", help="Exit with status 1 on validation errors")
+    ap.add_argument("--path", help="Process only the specified file")
     args = ap.parse_args()
 
     paths = [args.path] if args.path else default_paths()
     ok = True
     for p in paths:
         if not os.path.exists(p):
-            print("跳过（不存在）：%s" % p)
+            print("Skipped (not found): %s" % p)
             continue
         ok = tidy(p, write=args.write) and ok
     if args.check and not ok:
         print("")
-        print("存在必须修的错误")
+        print("Errors require correction")
         sys.exit(1)
     print("")
-    print("体检通过" if ok else "体检发现问题")
+    print("Dictionary checks passed" if ok else "Dictionary checks found errors")
 
 
 if __name__ == "__main__":

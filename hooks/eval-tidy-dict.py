@@ -308,13 +308,13 @@ def delta(before, after):
 
 def row(label, before, after, unit="", better="lower"):
     if before == after:
-        mark = "一致" if better == "same" else "持平"
+        mark = "identical" if better == "same" else "unchanged"
     elif better == "same":
-        mark = "应为一致（实际不一致）"
+        mark = "expected identical values"
     elif (better == "lower") == (after < before):
         mark = "OK"
     else:
-        mark = "变差"
+        mark = "regressed"
     judge = "" if after == before else ("↓" if after < before else "↑")
     return "%-22s %12s %12s %10s  %s" % (
         label, "%s%s" % (before, unit), "%s%s" % (after, unit), "%+d%s %s" % (
@@ -322,11 +322,11 @@ def row(label, before, after, unit="", better="lower"):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="tidy-dict 前后对比评测")
-    ap.add_argument("--json", action="store_true", help="输出 JSON 指标而不是表格")
-    ap.add_argument("--rounds", type=int, default=10, help="计时轮数（默认 10）")
-    ap.add_argument("--corpus", help="外部语料文件：句子<TAB>block|pass")
-    ap.add_argument("--source", default=BUNDLED, help="基准字典（默认自带字典）")
+    ap = argparse.ArgumentParser(description="Compare dictionaries before and after formatting")
+    ap.add_argument("--json", action="store_true", help="Output JSON metrics instead of a table")
+    ap.add_argument("--rounds", type=int, default=10, help="Number of timing rounds (default: 10)")
+    ap.add_argument("--corpus", help="External corpus: sentence<TAB>block|pass")
+    ap.add_argument("--source", default=BUNDLED, help="Source dictionary (default: bundled)")
     args = ap.parse_args()
 
     corpus = load_corpus(args.corpus)
@@ -360,54 +360,54 @@ def main():
             }, ensure_ascii=False, indent=2))
             return
 
-        print("tidy-dict 评测：整理前 vs 整理后")
-        print("语料 %d 条（%d 该拦 / %d 该放行），计时 %d 轮，token 后端：%s"
+        print("tidy-dict evaluation: before vs after formatting")
+        print("Corpus: %d cases (%d block / %d allow), %d timing rounds, token backend: %s"
               % (len(corpus),
                  len([c for c in corpus if c[1] == "block"]),
                  len([c for c in corpus if c[1] == "pass"]),
                  args.rounds, co_after["token_backend"]))
         print("")
-        print("%-22s %12s %12s %s" % ("指标", "整理前", "整理后", "变化"))
+        print("%-22s %12s %12s %s" % ("Metric", "Before", "After", "Change"))
         print("-" * 68)
-        print(row("字典行数", fs_before["lines"], fs_after["lines"], better="lower"))
-        print(row("唯一词条", fs_before["unique_keys"], fs_after["unique_keys"], better="same"))
-        print(row("重复词条", fs_before["duplicates"], fs_after["duplicates"], better="lower"))
-        print(row("体检错/警告", fs_before["lint_errors"] + fs_before["lint_warnings"],
+        print(row("Dictionary lines", fs_before["lines"], fs_after["lines"], better="lower"))
+        print(row("Unique entries", fs_before["unique_keys"], fs_after["unique_keys"], better="same"))
+        print(row("Duplicate entries", fs_before["duplicates"], fs_after["duplicates"], better="lower"))
+        print(row("Errors / warnings", fs_before["lint_errors"] + fs_before["lint_warnings"],
                   fs_after["lint_errors"] + fs_after["lint_warnings"], better="lower"))
-        print(row("文件字节", fs_before["bytes"], fs_after["bytes"]))
+        print(row("File bytes", fs_before["bytes"], fs_after["bytes"]))
         print("-" * 68)
-        print(row("注入字符", co_before["chars"], co_after["chars"], better="lower"))
-        print(row("注入 token", co_before["tokens"], co_after["tokens"], better="lower"))
-        print(row("注入词条", co_before["entries"], co_after["entries"], better="lower"))
+        print(row("Injected characters", co_before["chars"], co_after["chars"], better="lower"))
+        print(row("Injected tokens", co_before["tokens"], co_after["tokens"], better="lower"))
+        print(row("Injected entries", co_before["entries"], co_after["entries"], better="lower"))
         print("-" * 68)
-        print(row("L1 耗时均值 ms", round(rt_before["inject_mean_ms"], 1),
+        print(row("L1 mean ms", round(rt_before["inject_mean_ms"], 1),
                   round(rt_after["inject_mean_ms"], 1), better="lower"))
-        print(row("L1 耗时最快 ms", round(rt_before["inject_min_ms"], 1),
+        print(row("L1 minimum ms", round(rt_before["inject_min_ms"], 1),
                   round(rt_after["inject_min_ms"], 1), better="lower"))
-        print(row("L2 耗时均值 ms", round(rt_before["inspect_mean_ms"], 1),
+        print(row("L2 mean ms", round(rt_before["inspect_mean_ms"], 1),
                   round(rt_after["inspect_mean_ms"], 1), better="lower"))
-        print(row("L2 耗时最快 ms", round(rt_before["inspect_min_ms"], 1),
+        print(row("L2 minimum ms", round(rt_before["inspect_min_ms"], 1),
                   round(rt_after["inspect_min_ms"], 1), better="lower"))
-        print(row("字典解析均值 ms", round(pc_before["parse_mean_ms"], 3),
+        print(row("Dictionary parse ms", round(pc_before["parse_mean_ms"], 3),
                   round(pc_after["parse_mean_ms"], 3), better="lower"))
-        print("（端到端含 python 解释器启动，噪声 ±%.0f ms，看成组对比；"
-              "字典解析才是整理真正影响的那部分）"
+        print("(End-to-end timings include Python startup; noise +/-%.0f ms. "
+              "Compare groups; dictionary parsing is the directly affected component.)"
               % max(rt_before["inject_stdev_ms"], rt_after["inject_stdev_ms"]))
         print("-" * 68)
-        print("%-22s %12s %12s" % ("准确率 precision", sc_before["precision"], sc_after["precision"]))
-        print("%-22s %12s %12s" % ("召回 recall", sc_before["recall"], sc_after["recall"]))
+        print("%-22s %12s %12s" % ("Precision", sc_before["precision"], sc_after["precision"]))
+        print("%-22s %12s %12s" % ("Recall", sc_before["recall"], sc_after["recall"]))
         print("%-22s %12s %12s" % ("F1", sc_before["f1"], sc_after["f1"]))
-        print("%-22s %12s" % ("逐条判定完全一致", "—"), end=" ")
-        print("是" if identical else "否")
+        print("%-22s %12s" % ("Identical verdicts", "—"), end=" ")
+        print("yes" if identical else "no")
         print("")
         ok = identical and co_after["tokens"] <= co_before["tokens"]
-        print("结论：整理 %s。行为%s等价，注入成本%s，字典解析 %.3f→%.3f ms。"
-              % ("通过" if ok else "需要修",
-                 "完全" if identical else "不",
-                 "不反弹" if co_after["tokens"] <= co_before["tokens"] else "反而变大",
+        print("Conclusion: formatting %s; behavior %s equivalent; injection cost %s; parse %.3f -> %.3f ms."
+              % ("passed" if ok else "requires fixes",
+                 "is" if identical else "is not",
+                 "did not increase" if co_after["tokens"] <= co_before["tokens"] else "increased",
                  pc_before["parse_mean_ms"], pc_after["parse_mean_ms"]))
-        print("负结果也记一下：想靠去重省 token 是省不出来的——加载层本来就按唯一键合并，"
-              "整理改的是文件卫生和可读性，不是运行开销。")
+        print("Negative result: deduplication does not save injected tokens because the loader already "
+              "merges unique keys. Formatting improves dictionary hygiene and readability, not runtime cost.")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

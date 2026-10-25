@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	mf "github.com/ProjAnvil/MindForge"
 )
 
 const projectDictName = "mindforge.zh-dict.tsv"
@@ -14,7 +16,7 @@ const projectDictName = "mindforge.zh-dict.tsv"
 // at the exact place they want it (usually the project root).
 func runInit(args []string) error {
 	if len(args) == 0 || args[0] != "dict" {
-		return fmt.Errorf("用法: mindforge init dict [--lang=zh-cn] [--force]")
+		return fmt.Errorf("usage: mindforge init dict [--lang=zh-cn] [--force]")
 	}
 	fs := flag.NewFlagSet("init dict", flag.ContinueOnError)
 	lang := fs.String("lang", "zh-cn", "dictionary language (zh-cn)")
@@ -23,7 +25,7 @@ func runInit(args []string) error {
 		return err
 	}
 	if *lang != "zh-cn" {
-		return fmt.Errorf("暂只支持 --lang=zh-cn")
+		return fmt.Errorf("only --lang=zh-cn is currently supported")
 	}
 
 	cwd, err := os.Getwd()
@@ -32,28 +34,19 @@ func runInit(args []string) error {
 	}
 	target := filepath.Join(cwd, projectDictName)
 	if _, err := os.Stat(target); err == nil && !*force {
-		return fmt.Errorf("%s 已存在（--force 覆盖）", projectDictName)
+		return fmt.Errorf("%s already exists (use --force to overwrite)", projectDictName)
 	}
-	if err := os.WriteFile(target, []byte(dictTemplate()), 0o644); err != nil {
+	template, err := mf.Assets.ReadFile(mf.ProjectDictTemplatePath)
+	if err != nil {
+		return fmt.Errorf("read project dictionary template: %w", err)
+	}
+	if err := os.WriteFile(target, template, 0o644); err != nil {
 		return err
 	}
 	fmt.Printf("✓ 已生成 %s（项目级词典）\n", target)
 	fmt.Println("  优先级：内置 → 用户级 → 项目级（本文件最优先）")
-	fmt.Println("  格式：直译词<TAB>期望写法<TAB>说明[<TAB>动作]；默认 rewrite；明确同义词才标 replace")
-	fmt.Println("  提交到仓库即可让整个团队共享；mindforge tidy 可排版体检")
+	fmt.Println("  格式：词语<TAB>建议写法（可空）<TAB>含义或语境说明（可空）")
+	fmt.Println("  也可只登记词语；默认写作 hook 不读取词典或调用检查工具")
+	fmt.Println("  提交到仓库即可让整个团队共享；可用词典整理脚本排版体检")
 	return nil
-}
-
-func dictTemplate() string {
-	return `# mindforge.zh-dict.tsv — 项目级中文术语词典（MindForge）
-# 优先级：内置 → 用户级 → 本文件；放项目根随仓库共享。
-# 格式：直译词<TAB>期望写法<TAB>说明[<TAB>动作]
-# 默认 rewrite：结合原句改写，保留原意；明确同义词才标 replace。
-# re: 为正则词条，只能按语境改写；拿不准的术语保留英文。
-
-# 示例（删掉行首的 # 启用）：
-# 项目旧词	项目写法	按原句改写
-# 机械胳膊	机械臂	robot arm	replace
-# 病灶分析	分析问题原因	定位问题原因	rewrite
-`
 }

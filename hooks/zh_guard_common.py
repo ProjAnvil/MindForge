@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """zh-guard 公共库：三级词典加载与共享工具（MindForge style-rules-zh-cn 插件内）。
 
-被注入、MCP、出口检测、文件检测与显示替换入口共同引用。
+被注入、MCP、出口检测与文件检测入口共同引用。
 本模块 import 时无任何副作用；各 hook 脚本保持 fail-open 薄壳，
 错误处理（SystemExit 之外的异常一律 exit 0）留在各自脚本里。
 
@@ -23,11 +23,13 @@
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import re
 import shutil
 import sys
-from typing import Iterable, Literal, NamedTuple
+from typing import Iterable, NamedTuple
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATE_DIR = os.environ.get(
@@ -37,38 +39,34 @@ STATE_DIR = os.environ.get(
 MAX_BLOCKS_PER_WINDOW = 3
 WINDOW_SECONDS = 600
 PROJECT_DICT_NAME = "mindforge.zh-dict.tsv"
-RuleAction = Literal["replace", "rewrite"]
-REWRITE_HINTS = {"直接给结论", "直接说结论", "直接说要点", "直接用动词"}
 
 
 # dataclasses imports inspect, which would load the sibling hook script.
 class Rule:
-    def __init__(self, term: str, expected: str, note: str = "",
-                 action: str = "rewrite"):
-        if action not in ("replace", "rewrite"):
-            raise ValueError("未知词条动作：%s" % action)
-        if action == "replace" and (
-            not expected or term.startswith("re:") or " / " in expected
-            or expected in REWRITE_HINTS
-        ):
-            raise ValueError("直接替换只支持明确的字面词条：%s" % term)
+    def __init__(self, term: str, suggestion: str = "", meaning: str = ""):
+        if not term.strip() or term.lstrip().startswith(("#", "@sync")):
+            raise ValueError("term must be nonempty and must not be a comment or sync marker")
         self.term = term
-        self.expected = expected
-        self.note = note
-        self.action: RuleAction = "replace" if action == "replace" else "rewrite"
+        self.suggestion = suggestion
+        self.meaning = meaning
 
 
 class Finding(NamedTuple):
     term: str
     text: str
-    expected: str
-    action: RuleAction
-    note: str
+    suggestion: str
+    meaning: str
     start: int
     end: int
     line: int
     column: int
     context: str
+    sentence: str
+    sentence_start: int
+    sentence_end: int
+    rule_id: str
+    annotation_id: str
+    draft_id: str
 
 
 def guard_home():
@@ -129,6 +127,19 @@ def migrate_legacy_home():
         pass
 
 
+def _drop_legacy_action_column(line):
+    """旧格式的第 4 列是动作（replace/rewrite），新格式没有这一列。
+
+    升级刷新时保留用户自加词条，若原样保留旧 4 列行，
+    整本词典会因列数超限而加载失败。动作列在方案 A 下已无含义，
+    因此直接裁掉，词条和建议写法保持不变。
+    """
+    parts = [p.strip() for p in line.split("\t")]
+    if len(parts) <= 3:
+        return line
+    return "\t".join(parts[:3])
+
+
 def ensure_user_dict():
     """安装迁移 + 版本同步。
 
@@ -180,7 +191,7 @@ def ensure_user_dict():
                 continue
             key = line.split("\t")[0].strip()
             if key and key not in bundled_keys:
-                kept.append(line)
+                kept.append(_drop_legacy_action_column(line))
         text = bundled_text if bundled_text.endswith("\n") else bundled_text + "\n"
         if kept:
             text += "\n# 以下为用户自加词条（字典升级时自动保留）\n" + "\n".join(kept) + "\n"
@@ -190,25 +201,54 @@ def ensure_user_dict():
         pass
 
 
+def _project_directories(cwd):
+    directory = os.path.abspath(cwd or ".")
+    while True:
+        yield directory
+        parent = os.path.dirname(directory)
+        if os.path.exists(os.path.join(directory, ".git")) or parent == directory:
+            return
+        directory = parent
+
+
 def find_project_dict(cwd):
     """从 cwd 向上找项目级词典 mindforge.zh-dict.tsv。
 
     每层先查词典、再查 .git：含 .git 且无词典即停（项目根边界）。
     """
     try:
-        d = os.path.abspath(cwd or ".")
-        while True:
-            candidate = os.path.join(d, PROJECT_DICT_NAME)
+        for directory in _project_directories(cwd):
+            candidate = os.path.join(directory, PROJECT_DICT_NAME)
             if os.path.isfile(candidate):
                 return candidate
-            if os.path.isdir(os.path.join(d, ".git")):
-                return None
-            parent = os.path.dirname(d)
-            if parent == d:
-                return None
-            d = parent
+        return None
     except Exception:
         return None
+
+
+def init_workspace_dict(cwd: str) -> tuple[str, bool]:
+    """复用就近词典；不存在时在 Git 根或显式 workspace 目录创建，不覆盖。"""
+    if not isinstance(cwd, str) or not os.path.isabs(cwd) or not os.path.isdir(cwd):
+        raise ValueError("cwd must be the absolute path of an existing workspace directory")
+    target = os.path.join(os.path.abspath(cwd), PROJECT_DICT_NAME)
+    for directory in _project_directories(cwd):
+        candidate = os.path.join(directory, PROJECT_DICT_NAME)
+        if os.path.lexists(candidate):
+            if not os.path.isfile(candidate):
+                raise ValueError("workspace dictionary path is not a regular file: %s" % candidate)
+            return candidate, False
+        if os.path.exists(os.path.join(directory, ".git")):
+            target = candidate
+    with open(os.path.join(HERE, "project-dict-template.tsv"), encoding="utf-8") as stream:
+        template = stream.read()
+    try:
+        with open(target, "x", encoding="utf-8") as stream:
+            stream.write(template)
+    except FileExistsError:
+        if not os.path.isfile(target):
+            raise
+        return target, False
+    return target, True
 
 
 def dict_paths(cwd=None):
@@ -234,7 +274,7 @@ def dict_paths(cwd=None):
 
 
 def _iter_raw_entries(path):
-    """第四列为可选动作；旧三列词条默认交给模型按语境改写。"""
+    """词语、可空的建议写法、可空的含义；只填词语是登记而非纠错规则。"""
     with open(path, encoding="utf-8-sig") as f:
         for line in f:
             line = line.rstrip("\n").lstrip("\ufeff")
@@ -243,19 +283,18 @@ def _iter_raw_entries(path):
             parts = [p.strip() for p in line.split("\t")]
             if not parts or not parts[0]:
                 continue
-            good = parts[1] if len(parts) >= 2 else ""
-            note = parts[2] if len(parts) >= 3 else ""
-            if len(parts) > 4:
-                raise ValueError("%s：词条最多四列：%s" % (path, parts[0]))
-            action = parts[3] if len(parts) == 4 and parts[3] else "rewrite"
-            yield parts[0], good, note, action
+            suggestion = parts[1] if len(parts) >= 2 else ""
+            meaning = parts[2] if len(parts) >= 3 else ""
+            if len(parts) > 3:
+                raise ValueError("%s: entries have at most three columns: %s" % (path, parts[0]))
+            yield parts[0], suggestion, meaning
 
 
 def _merged_rules(cwd=None):
     merged, origin = {}, {}
     for level, path in enumerate(dict_paths(cwd)):
-        for term, expected, note, action in _iter_raw_entries(path):
-            merged[term] = Rule(term, expected, note, action)
+        for term, suggestion, meaning in _iter_raw_entries(path):
+            merged[term] = Rule(term, suggestion, meaning)
             origin[term] = level
     return merged, origin
 
@@ -265,45 +304,10 @@ def load_rules(cwd: str | None = None) -> list[Rule]:
     return list(merged.values())
 
 
-def load_pairs(cwd=None):
-    """合并三级词典，返回 [(bad, good, is_regex), ...]。
-
-    后加载（更具体层）覆盖先加载；re: 前缀按正则词条处理。
-    供 L2 出口检测与文件写检测使用。
-    """
-    out = []
-    for rule in load_rules(cwd):
-        bad, good = rule.term, rule.expected
-        if bad.startswith("re:"):
-            out.append((bad[3:], good, True))
-        else:
-            out.append((bad, good, False))
-    return out
-
-
-def load_display_entries(cwd=None):
-    """三级合并 + 展示排序，返回 [(term, target), ...]。
-
-    展示序：项目级 → 用户级 → 内置（越具体越靠前）；
-    同层保持文件内顺序。正则词条以 humanize 后的模式串展示。
-    供 L1 注入使用。
-    """
+def load_display_rules(cwd=None):
+    """注入时优先展示项目资料，保留建议与含义；同层维持文件内顺序。"""
     merged, origin = _merged_rules(cwd)
-    out = []
-    for rule in sorted(merged.values(), key=lambda rule: -origin[rule.term]):
-        term = rule.term
-        shown = humanize_regex(term[3:]) if term.startswith("re:") else term
-        out.append((shown, rule.expected))
-    return out
-
-
-def load_note_entries(cwd=None):
-    """合并三级词典，返回 [(term, expected, note), ...]。
-
-    保留原始 term（含 re: 前缀）与说明列，供 term-dict MCP 查询使用；
-    后加载（更具体层）覆盖先加载。
-    """
-    return [(rule.term, rule.expected, rule.note) for rule in load_rules(cwd)]
+    return sorted(merged.values(), key=lambda rule: -origin[rule.term])
 
 
 def humanize_regex(pattern):
@@ -317,7 +321,7 @@ def humanize_regex(pattern):
 
 
 def mask_protected(text: str, fence: str = "") -> tuple[str, str]:
-    """屏蔽代码与引号提及，保留原文位置；围栏状态可跨显示批次传递。"""
+    """屏蔽代码与引号提及，保留原文位置。"""
     def mask(value):
         return "".join(char if char in "\r\n" else "\0" for char in value)
 
@@ -329,7 +333,7 @@ def mask_protected(text: str, fence: str = "") -> tuple[str, str]:
         if fence:
             active = re.fullmatch(r"(>*)(`{3,}|~{3,})", fence)
             if active is None:
-                raise ValueError("无效的围栏状态")
+                raise ValueError("invalid code-fence state")
             marker = active[2]
             closing = (
                 r"[ \t]*(?:>[ \t]*){%d}" % len(active[1])
@@ -356,8 +360,37 @@ def mask_protected(text: str, fence: str = "") -> tuple[str, str]:
 
 
 def strip_code(text):
-    """兼容旧入口：屏蔽保护区但不拼接它们两侧的词语。"""
+    """屏蔽保护区但不拼接它们两侧的词语。"""
     return mask_protected(text)[0]
+
+
+def draft_id(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def sentence_context(text: str, masked: str, start: int, end: int
+                     ) -> tuple[int, int, str]:
+    # Newlines bound Markdown items; a period is a boundary only before whitespace/end.
+    boundaries = list(re.finditer(r"[。！？!?]+|[.](?=\s|$)|\r?\n", masked))
+    left, right = 0, len(text)
+    for boundary in boundaries:
+        if boundary.end() <= start:
+            left = boundary.end()
+        elif boundary.start() >= end:
+            right = boundary.end()
+            break
+    while left < start and text[left].isspace():
+        left += 1
+    while right > end and text[right - 1].isspace():
+        right -= 1
+    paragraph_left, paragraph_right = 0, len(text)
+    for boundary in re.finditer(r"\r?\n[ \t]*\r?\n", masked):
+        if boundary.end() <= start:
+            paragraph_left = boundary.end()
+        elif boundary.start() >= end:
+            paragraph_right = boundary.start()
+            break
+    return left, right, text[paragraph_left:paragraph_right].strip()
 
 
 def lint_text(text: str, rules: Iterable[Rule] | None = None,
@@ -365,28 +398,36 @@ def lint_text(text: str, rules: Iterable[Rule] | None = None,
               ) -> list[Finding]:
     masked = mask_protected(text)[0] if masked_text is None else masked_text
     if len(masked) != len(text):
-        raise ValueError("保护区屏蔽结果必须保留原文长度")
+        raise ValueError("protected-region masking must preserve the original text length")
+    version = draft_id(text)
     candidates = []
     for rule in load_rules(cwd) if rules is None else rules:
+        if not rule.suggestion and not rule.meaning:
+            continue
         pattern = rule.term[3:] if rule.term.startswith("re:") else re.escape(rule.term)
         try:
             matches = re.finditer(pattern, masked)
         except re.error as exc:
-            print("zh-guard: 无效正则 %s：%s" % (rule.term, exc), file=sys.stderr)
+            print("zh-guard: invalid regex %s: %s" % (rule.term, exc), file=sys.stderr)
             continue
         for match in matches:
             start, end = match.span()
             if start == end or "\0" in masked[start:end]:
                 continue
+            sentence_start, sentence_end, context = sentence_context(text, masked, start, end)
+            rule_id = "term-" + draft_id(rule.term)
+            annotation_id = draft_id(json.dumps(
+                [version, rule_id, rule.suggestion, rule.meaning, start, end],
+                ensure_ascii=False,
+            ))
             candidates.append(Finding(
-                rule.term, text[start:end], rule.expected, rule.action, rule.note,
+                rule.term, text[start:end], rule.suggestion, rule.meaning,
                 start, end, text.count("\n", 0, start) + 1,
                 start - text.rfind("\n", 0, start),
-                text[max(0, start - 40):min(len(text), end + 40)],
+                context, text[sentence_start:sentence_end], sentence_start, sentence_end,
+                rule_id, annotation_id, version,
             ))
-    candidates.sort(key=lambda hit: (
-        hit.start, -(hit.end - hit.start), hit.action == "replace"
-    ))
+    candidates.sort(key=lambda hit: (hit.start, -(hit.end - hit.start)))
     hits, end = [], 0
     for hit in candidates:
         if hit.start >= end:
@@ -395,24 +436,22 @@ def lint_text(text: str, rules: Iterable[Rule] | None = None,
     return hits
 
 
-def apply_replacements(text: str, findings: Iterable[Finding]) -> str:
-    """仅替换显式安全词条，基于原文偏移执行一遍，不级联替换。"""
-    for hit in sorted(findings, key=lambda hit: hit.start, reverse=True):
-        if hit.action == "replace":
-            text = text[:hit.start] + hit.expected + text[hit.end:]
-    return text
-
-
 def format_findings(findings: Iterable[Finding], limit: int = 10) -> str:
     parts = []
     for index, hit in enumerate(findings):
         if index >= limit:
             break
-        action = "可直接替换" if hit.action == "replace" else "按语境改写"
-        context = hit.context.replace("\n", "\\n")
-        parts.append("%s→%s（%s，第%d行第%d列；原句：%s）" % (
-            hit.text, hit.expected, action, hit.line, hit.column, context,
-        ))
+        details = {
+            "annotation_id": hit.annotation_id,
+            "关注表达": hit.text,
+            "位置": "第%d行第%d列" % (hit.line, hit.column),
+            "原句": hit.sentence, "段落": hit.context,
+        }
+        if hit.suggestion:
+            details["建议写法（仅参考）"] = hit.suggestion
+        if hit.meaning:
+            details["含义或语境说明"] = hit.meaning
+        parts.append(json.dumps(details, ensure_ascii=False))
     return "；".join(parts)
 
 

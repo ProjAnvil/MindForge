@@ -13,10 +13,10 @@ func TestPromptMultiSelectDefaultsOnEmptyInput(t *testing.T) {
 	picked, err := promptMultiSelect("安装到哪些平台？",
 		[]string{"claude  配置: a", "zcode  配置: b"}, "claude,zcode", in)
 	if err != nil {
-		t.Fatalf("空输入应选默认: %v", err)
+		t.Fatalf("empty input must select defaults: %v", err)
 	}
 	if len(picked) != 2 || picked[0] != "claude" || picked[1] != "zcode" {
-		t.Errorf("默认应选 claude+zcode，实际 %v", picked)
+		t.Errorf("expected default selection claude and zcode, got %v", picked)
 	}
 }
 
@@ -24,14 +24,14 @@ func TestPromptMultiSelectParsesNumbers(t *testing.T) {
 	in := bufio.NewReader(strings.NewReader("2, 1\n"))
 	picked, err := promptMultiSelect("选择", []string{"claude  x", "zcode  y"}, "claude", in)
 	if err != nil {
-		t.Fatalf("编号选择: %v", err)
+		t.Fatalf("numeric selection failed: %v", err)
 	}
 	if len(picked) != 2 || picked[0] != "zcode" || picked[1] != "claude" {
-		t.Errorf("应按输入顺序解析 zcode,claude，实际 %v", picked)
+		t.Errorf("expected selection order zcode,claude, got %v", picked)
 	}
 	in2 := bufio.NewReader(strings.NewReader("9\n"))
 	if _, err := promptMultiSelect("选择", []string{"a", "b"}, "a", in2); err == nil {
-		t.Error("越界编号应报错")
+		t.Error("out-of-range selection must return an error")
 	}
 }
 
@@ -42,12 +42,12 @@ func TestPromptSelect(t *testing.T) {
 		t.Fatal(err)
 	}
 	if picked != "en: y" {
-		t.Errorf("应选第 2 项，实际 %q", picked)
+		t.Errorf("expected the second item, got %q", picked)
 	}
 	in2 := bufio.NewReader(strings.NewReader("\n"))
 	picked2, _ := promptSelect("语言", []string{"zh-cn: x", "en: y"}, "1", in2)
 	if picked2 != "zh-cn: x" {
-		t.Errorf("空输入应取默认第 1 项，实际 %q", picked2)
+		t.Errorf("empty input must select the first default item, got %q", picked2)
 	}
 }
 
@@ -63,13 +63,13 @@ func TestInstallInteractiveFlow(t *testing.T) {
 	t.Setenv("HOME", home)
 	stdin := strings.NewReader("\n\n")
 	if err := runInstall([]string{}, stdin); err != nil {
-		t.Fatalf("交互式安装: %v", err)
+		t.Fatalf("interactive installation failed: %v", err)
 	}
 	// Defaults picked both platforms; registrations present.
 	if _, err := os.Stat(filepath.Join(home, ".claude", "settings.json")); err != nil {
-		t.Error("claude 未注册（默认应选中）")
+		t.Error("claude was not registered by the default selection")
 	}
 	if _, err := os.Stat(filepath.Join(home, ".zcode", "cli", "config.json")); err != nil {
-		t.Error("zcode 未注册（默认应选中）")
+		t.Error("zcode was not registered by the default selection")
 	}
 }

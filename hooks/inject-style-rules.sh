@@ -13,7 +13,7 @@
 # Each rules file is self-contained and a mode reads exactly one of them,
 # so no rule is ever sent twice:
 # en    -> style-rules-en.md (English rules only)
-# zh-cn -> style-rules-zh.md (Chinese rules plus the English rules)
+# zh-cn -> style-rules-zh.md (concise Chinese guidance)
 #
 # No external dependencies (no jq/python) so it runs on macOS, Linux,
 # and Windows GitBash.
@@ -55,7 +55,7 @@ else
         exit 0
     fi
     RULES="$(cat "$RULES_ZH")"
-    PREAMBLE="写作时必须遵守以下受控写作规范（中文与英文均适用）："
+    PREAMBLE="回答时遵守以下简要中文表达原则："
 fi
 
 # Read hook event name from stdin JSON; default to UserPromptSubmit.

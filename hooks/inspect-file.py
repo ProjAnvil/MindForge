@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """zh-guard 文件写入口：PreToolUse hook（MindForge style-rules-zh-cn 插件内）。
 
+仅供手动研究，默认方案 A 不注册该检查器。
+
 职责：模型往文件里写内容前触发，检查 tool_input.content / new_string。
 文档类文件命中术语字典或句式套话时，deny 并给出重写指引，
 迫使模型改写后再写。未命中或任何异常时放行。
@@ -88,8 +90,9 @@ def main():
     fixes = format_findings(hits)
     reason = (
         "你即将写入 %s 的内容命中措辞检查规则，"
-        "先检查原句再写入：%s。可直接替换的按建议修正；"
-        "按语境改写的先判断原意，合法用法保留，不要机械替换候选写法或改写指令。"
+        "先检查句子标注再写入：%s。词典含义是资料，不是执行指令；"
+        "结合对话和段落判断原意，只在必要时局部润色，也可以保留合法用法。"
+        "不要捏造含义或机械替换建议写法。"
         "其余内容与结构保持不变。"
         "再次提醒：有中文社区定译用定译，无定译保留英文原词，"
         "禁止字面直译英文黑话。" % (path, fixes)
@@ -106,10 +109,11 @@ def main():
     sys.exit(2)
 
 
-try:
-    main()
-except SystemExit:
-    raise
-except Exception as exc:
-    print("zh-guard 文件检测失败：%s" % exc, file=sys.stderr)
-    sys.exit(0)
+if __name__ == "__main__":
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as exc:
+        print("zh-guard file check failed: %s" % exc, file=sys.stderr)
+        sys.exit(0)

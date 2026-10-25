@@ -78,6 +78,7 @@ MINDFORGE_SKILLS_DIR="$MINDFORGE_DIR/skills/$LANG_CODE"
 MINDFORGE_DOCS_SRC_DIR="$MINDFORGE_DIR/docs/agents-detail/$LANG_CODE"
 MINDFORGE_USER_CLAUDE_MD_SRC="$MINDFORGE_DIR/user_claude_md/$LANG_CODE/CLAUDE.md"
 MINDFORGE_HOOKS_DIR="$MINDFORGE_DIR/hooks"
+HOOKS_FRAGMENT="$MINDFORGE_HOOKS_DIR/settings-hooks.json"
 
 # Target directories
 CLAUDE_DIR="$HOME/.claude"
@@ -119,7 +120,7 @@ fi
 
 # Hooks directory is optional (soft check) so older clones keep working
 MINDFORGE_HOOKS_AVAILABLE="yes"
-if [ ! -f "$MINDFORGE_HOOKS_DIR/inject-style-rules.sh" ] || [ ! -f "$MINDFORGE_HOOKS_DIR/style-rules-en.md" ] || [ ! -f "$MINDFORGE_HOOKS_DIR/settings-hooks.json" ]; then
+if [ ! -f "$MINDFORGE_HOOKS_DIR/inject-style-rules.sh" ] || [ ! -f "$MINDFORGE_HOOKS_DIR/style-rules-en.md" ] || [ ! -f "$HOOKS_FRAGMENT" ]; then
     MINDFORGE_HOOKS_AVAILABLE="no"
     echo -e "${YELLOW}Warning: hooks directory incomplete, skipping hooks setup: $MINDFORGE_HOOKS_DIR${NC}"
 fi
@@ -348,29 +349,13 @@ echo -e "\n${BLUE}Step 6: Linking hooks and merging settings.json${NC}"
 if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
     create_dir "$CLAUDE_HOOKS_DIR"
     create_symlink "$MINDFORGE_HOOKS_DIR/inject-style-rules.sh" "$CLAUDE_HOOKS_DIR/inject-style-rules.sh" "hooks/inject-style-rules.sh"
-    create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-zh.md" "$CLAUDE_HOOKS_DIR/style-rules-zh.md" "hooks/style-rules-zh.md"
-    create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-en.md" "$CLAUDE_HOOKS_DIR/style-rules-en.md" "hooks/style-rules-en.md"
-    create_symlink "$MINDFORGE_HOOKS_DIR/inject.py" "$CLAUDE_HOOKS_DIR/inject.py" "hooks/inject.py"
-    create_symlink "$MINDFORGE_HOOKS_DIR/inspect.py" "$CLAUDE_HOOKS_DIR/inspect.py" "hooks/inspect.py"
-    create_symlink "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$CLAUDE_HOOKS_DIR/terminology.tsv" "hooks/terminology.tsv"
-    create_symlink "$MINDFORGE_HOOKS_DIR/term-dict-server.py" "$CLAUDE_HOOKS_DIR/term-dict-server.py" "hooks/term-dict-server.py"
-
-    echo -e "${BLUE}MindForge term-dict MCP（可选，符号链接部署不自动注册）:${NC}"
-    echo "  claude mcp add term-dict -- python3 \"\$HOME/.claude/hooks/term-dict-server.py\""
-
-    # zh-guard: install-time migration of the terminology dictionary
-    # to ~/.claude/MindForge/ (user-editable, never overwritten); the
-    # legacy ~/.claude/zh-guard/ directory is migrated by the hooks on first run
-    ZH_GUARD_DIR="$CLAUDE_DIR/MindForge"
-    create_dir "$ZH_GUARD_DIR"
-    if [ ! -f "$ZH_GUARD_DIR/terminology.tsv" ] && [ -f "$MINDFORGE_HOOKS_DIR/terminology.tsv" ]; then
-        cp "$MINDFORGE_HOOKS_DIR/terminology.tsv" "$ZH_GUARD_DIR/terminology.tsv"
-        echo -e "${GREEN}+${NC} MindForge terminology.tsv (installed to ~/.claude/MindForge/)"
-    elif [ -f "$ZH_GUARD_DIR/terminology.tsv" ]; then
-        echo -e "${GREEN}✓${NC} MindForge terminology.tsv (kept existing user dictionary)"
+    if [ "$LANG_CODE" = "zh-cn" ]; then
+        create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-zh.md" "$CLAUDE_HOOKS_DIR/style-rules-zh.md" "hooks/style-rules-zh.md"
+    else
+        create_symlink "$MINDFORGE_HOOKS_DIR/style-rules-en.md" "$CLAUDE_HOOKS_DIR/style-rules-en.md" "hooks/style-rules-en.md"
     fi
 
-    # Write language marker: en -> English rules only; zh-cn -> Chinese + English
+    # Select the prompt-only guide: English ASD-STE100 or concise Chinese rules.
     printf '%s' "$LANG_CODE" > "$CLAUDE_HOOKS_DIR/style-rules.lang"
     echo -e "${GREEN}✓${NC} style-rules.lang (language: $LANG_CODE)"
 
@@ -382,14 +367,15 @@ if [ "$MINDFORGE_HOOKS_AVAILABLE" = "yes" ]; then
 
     # Merge hooks config into ~/.claude/settings.json (idempotent)
     if [ ! -f "$CLAUDE_SETTINGS_TARGET" ]; then
-        cp "$MINDFORGE_HOOKS_DIR/settings-hooks.json" "$CLAUDE_SETTINGS_TARGET"
+        cp "$HOOKS_FRAGMENT" "$CLAUDE_SETTINGS_TARGET"
         echo -e "${GREEN}+${NC} settings.json (created with hooks config)"
     elif command -v python3 >/dev/null 2>&1; then
-        if python3 - "$CLAUDE_SETTINGS_TARGET" "$MINDFORGE_HOOKS_DIR/settings-hooks.json" <<'PYEOF'
+        if python3 - "$CLAUDE_SETTINGS_TARGET" "$HOOKS_FRAGMENT" <<'PYEOF'
 import json, sys
 
 settings_path, fragment_path = sys.argv[1], sys.argv[2]
-markers = ("inject-style-rules.sh", ".claude/hooks/inject.py", ".claude/hooks/inspect.py")
+markers = ("inject-style-rules.sh", ".claude/hooks/inject.py", ".claude/hooks/inspect.py",
+           ".claude/hooks/inspect-file.py", "mindforge/hooks/")
 
 with open(settings_path, encoding="utf-8") as f:
     settings = json.load(f)
@@ -397,14 +383,19 @@ with open(fragment_path, encoding="utf-8") as f:
     fragment = json.load(f)
 
 hooks = settings.setdefault("hooks", {})
-for event, groups in fragment.get("hooks", {}).items():
+for event, groups in list(hooks.items()):
     kept = []
     for g in hooks.get(event, []):
         cmds = [h.get("command", "") for h in g.get("hooks", []) if isinstance(h, dict)]
-        if any(any(m in c for m in markers) for c in cmds):
+        if any(any(m in c.lower() for m in markers) for c in cmds):
             continue  # drop previously merged group
         kept.append(g)
-    hooks[event] = kept + groups
+    if kept:
+        hooks[event] = kept
+    else:
+        del hooks[event]
+for event, groups in fragment.get("hooks", {}).items():
+    hooks[event] = hooks.get(event, []) + groups
 
 with open(settings_path, "w", encoding="utf-8") as f:
     json.dump(settings, f, indent=2, ensure_ascii=False)
@@ -413,11 +404,11 @@ PYEOF
         then
             echo -e "${GREEN}✓${NC} settings.json (hooks config merged)"
         else
-            echo -e "${RED}✗${NC} settings.json merge failed. Merge manually from: $MINDFORGE_HOOKS_DIR/settings-hooks.json"
+            echo -e "${RED}✗${NC} settings.json merge failed. Merge manually from: $HOOKS_FRAGMENT"
         fi
     else
         echo -e "${YELLOW}⚠ python3 not found. Merge hooks manually into $CLAUDE_SETTINGS_TARGET from:${NC}"
-        echo -e "${YELLOW}  $MINDFORGE_HOOKS_DIR/settings-hooks.json${NC}"
+        echo -e "${YELLOW}  $HOOKS_FRAGMENT${NC}"
     fi
 else
     echo -e "${YELLOW}Skipping hooks setup${NC}"
@@ -498,7 +489,7 @@ else
     echo "- To remove links: ${RED}rm ~/.claude/agents/* ~/.claude/skills/* ~/.claude/docs/* ~/.claude/CLAUDE.md ~/.claude/hooks/inject-style-rules.sh ~/.claude/hooks/style-rules-zh.md ~/.claude/hooks/style-rules-en.md ~/.claude/hooks/style-rules.lang${NC}"
 fi
 echo "- Style-rules hooks take effect in NEW Claude Code sessions (restart to activate)"
-echo "- Style-rules injection language follows this script's --lang: en = English only, zh-cn = Chinese + English"
+echo "- Prompt-only guidance follows --lang: en = ASD-STE100, zh-cn = concise Chinese rules"
 echo "- To switch language, run: ${BLUE}$0 --lang=<lang>${NC}"
 echo ""
 echo -e "${GREEN}Available languages:${NC}"

@@ -48,7 +48,7 @@ func detectPlatforms(home string) []platform {
 		{
 			name:      "kimi",
 			config:    filepath.Join(home, ".kimi-code", "config.toml"),
-			supported: false, // Kimi adaptation is planned, not shipped (upstream Stop payload issue #2123)
+			supported: false, // Kimi's installation adapter is not shipped.
 		},
 	}
 }
@@ -90,7 +90,7 @@ func runInstall(args []string, stdin io.Reader) error {
 	} else {
 		supported := supportedNames(detected)
 		if len(supported) == 0 {
-			return fmt.Errorf("未检测到受支持的平台（Claude Code 或 zcode）。先安装其中一个 agent，或用 --platform 指定")
+			return fmt.Errorf("no supported platform detected; install a supported agent or specify --platform")
 		}
 		if *yesFlag {
 			names = supported
@@ -116,7 +116,7 @@ func runInstall(args []string, stdin io.Reader) error {
 		} else {
 			picked, err := promptSelect(
 				"主要工作语言？",
-				[]string{"zh-cn: 中文（注入中文+英文写作规范）", "en: 英文（仅 ASD-STE100）"},
+				[]string{"zh-cn: 中文（简要表达指导）", "en: 英文（ASD-STE100）"},
 				"1",
 				reader,
 			)
@@ -127,7 +127,7 @@ func runInstall(args []string, stdin io.Reader) error {
 		}
 	}
 	if lang != "zh-cn" && lang != "en" {
-		return fmt.Errorf("不支持的语言 %q（可选：zh-cn、en）", lang)
+		return fmt.Errorf("unsupported language %q (supported: zh-cn, en)", lang)
 	}
 
 	opts := installOptions{platforms: names, lang: lang}
@@ -146,7 +146,7 @@ func runInstall(args []string, stdin io.Reader) error {
 				return fmt.Errorf("codex: %w", err)
 			}
 		default:
-			return fmt.Errorf("未知平台 %q（可选：claude、zcode、codex）", name)
+			return fmt.Errorf("unknown platform %q (supported: claude, zcode, codex)", name)
 		}
 	}
 	printInstallSummary(home, opts)
@@ -191,11 +191,14 @@ func splitList(s string) []string {
 
 // writeRuntimeFiles extracts the embedded hook payload into hooksDir.
 // Shell scripts become executable.
-func writeRuntimeFiles(hooksDir string) error {
+func writeRuntimeFiles(hooksDir, lang string) error {
 	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
 		return err
 	}
 	for _, name := range mf.RuntimeFiles {
+		if lang == "en" && name == "hooks/style-rules-zh.md" || lang == "zh-cn" && name == "hooks/style-rules-en.md" {
+			continue
+		}
 		data, err := mf.Assets.ReadFile(name)
 		if err != nil {
 			return err
@@ -216,26 +219,6 @@ func writeRuntimeFiles(hooksDir string) error {
 // inject-style-rules.sh ($1 absent → marker file).
 func writeLangMarker(hooksDir, lang string) error {
 	return os.WriteFile(filepath.Join(hooksDir, "style-rules.lang"), []byte(lang), 0o644)
-}
-
-// seedUserDict copies the bundled dictionary to the canonical user home
-// (~/.claude/MindForge/terminology.tsv) when absent. Existing user
-// dictionaries are never touched; legacy ~/.claude/zh-guard migration is
-// handled by the hooks themselves on first run.
-func seedUserDict(home string) error {
-	userHome := filepath.Join(home, ".claude", "MindForge")
-	dict := filepath.Join(userHome, "terminology.tsv")
-	if _, err := os.Stat(dict); err == nil {
-		return nil
-	}
-	data, err := mf.Assets.ReadFile(mf.BundledDictPath)
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(userHome, 0o755); err != nil {
-		return err
-	}
-	return os.WriteFile(dict, data, 0o644)
 }
 
 // groupProbe reads just the commands (and matcher) of a hook group to
@@ -340,13 +323,10 @@ func loadTopLevel(path string) (map[string]json.RawMessage, error) {
 
 func installClaude(home, lang string) error {
 	hooksDir := filepath.Join(home, ".claude", "MindForge", "hooks")
-	if err := writeRuntimeFiles(hooksDir); err != nil {
+	if err := writeRuntimeFiles(hooksDir, lang); err != nil {
 		return err
 	}
 	if err := writeLangMarker(hooksDir, lang); err != nil {
-		return err
-	}
-	if err := seedUserDict(home); err != nil {
 		return err
 	}
 
@@ -358,7 +338,7 @@ func installClaude(home, lang string) error {
 	var eventsRaw map[string]json.RawMessage
 	if h, ok := top["hooks"]; ok {
 		if err := json.Unmarshal(h, &eventsRaw); err != nil {
-			return fmt.Errorf("settings.json 的 hooks 字段解析失败: %w", err)
+			return fmt.Errorf("failed to parse hooks in settings.json: %w", err)
 		}
 	}
 	existing, err := filterGroups(eventsRaw)
@@ -382,16 +362,10 @@ func installClaude(home, lang string) error {
 // the style-rules.lang marker file.
 func claudeGroups(hooksDir string) map[string]any {
 	bash := "bash " + filepath.Join(hooksDir, "inject-style-rules.sh")
-	inject := "python3 " + filepath.Join(hooksDir, "inject.py")
-	inspect := "python3 " + filepath.Join(hooksDir, "inspect.py")
-	fileGuard := "python3 " + filepath.Join(hooksDir, "inspect-file.py")
 	return map[string]any{
 		"SessionStart":     []any{group("", bash)},
-		"UserPromptSubmit": []any{group("", bash), group("", inject)},
+		"UserPromptSubmit": []any{group("", bash)},
 		"SubagentStart":    []any{group("", bash)},
-		"PreToolUse":       []any{group("Write|Edit|NotebookEdit", fileGuard)},
-		"Stop":             []any{group("", inspect)},
-		"SubagentStop":     []any{group("", inspect)},
 	}
 }
 
@@ -411,13 +385,10 @@ func group(matcher string, commands ...string) map[string]any {
 
 func installZcode(home, lang string) error {
 	hooksDir := filepath.Join(home, ".zcode", "mindforge", "hooks")
-	if err := writeRuntimeFiles(hooksDir); err != nil {
+	if err := writeRuntimeFiles(hooksDir, lang); err != nil {
 		return err
 	}
 	if err := writeLangMarker(hooksDir, lang); err != nil {
-		return err
-	}
-	if err := seedUserDict(home); err != nil {
 		return err
 	}
 
@@ -433,13 +404,13 @@ func installZcode(home, lang string) error {
 	hooksObj := map[string]json.RawMessage{}
 	if h, ok := top["hooks"]; ok {
 		if err := json.Unmarshal(h, &hooksObj); err != nil {
-			return fmt.Errorf("config.json 的 hooks 字段解析失败: %w", err)
+			return fmt.Errorf("failed to parse hooks in config.json: %w", err)
 		}
 	}
 	var eventsRaw map[string]json.RawMessage
 	if e, ok := hooksObj["events"]; ok {
 		if err := json.Unmarshal(e, &eventsRaw); err != nil {
-			return fmt.Errorf("config.json 的 hooks.events 解析失败: %w", err)
+			return fmt.Errorf("failed to parse hooks.events in config.json: %w", err)
 		}
 	}
 	existing, err := filterGroups(eventsRaw)
@@ -464,20 +435,12 @@ func installZcode(home, lang string) error {
 	return writeJSONFile(configPath, top)
 }
 
-// zcodeGroups is the registration template for zcode. zcode supports only
-// its 7 events (no SubagentStart/SubagentStop), and the Stop hook needs
-// --platform because user-config hooks do not receive ZCODE_PLUGIN_ROOT
-// (that env var is injected for plugin hooks only).
+// zcodeGroups registers only prompt injection; zcode has no subagent events.
 func zcodeGroups(hooksDir string) map[string]any {
 	bash := "bash " + filepath.Join(hooksDir, "inject-style-rules.sh")
-	inject := "python3 " + filepath.Join(hooksDir, "inject.py")
-	inspect := "python3 " + filepath.Join(hooksDir, "inspect.py") + " --platform"
-	fileGuard := "python3 " + filepath.Join(hooksDir, "inspect-file.py")
 	return map[string]any{
 		"SessionStart":     []any{group("", bash)},
-		"UserPromptSubmit": []any{group("", bash), group("", inject)},
-		"PreToolUse":       []any{group("Write|Edit", fileGuard)},
-		"Stop":             []any{group("", inspect)},
+		"UserPromptSubmit": []any{group("", bash)},
 	}
 }
 
@@ -489,13 +452,10 @@ func zcodeGroups(hooksDir string) map[string]any {
 // by default since codex 0.145.
 func installCodex(home, lang string) error {
 	hooksDir := filepath.Join(home, ".codex", "mindforge", "hooks")
-	if err := writeRuntimeFiles(hooksDir); err != nil {
+	if err := writeRuntimeFiles(hooksDir, lang); err != nil {
 		return err
 	}
 	if err := writeLangMarker(hooksDir, lang); err != nil {
-		return err
-	}
-	if err := seedUserDict(home); err != nil {
 		return err
 	}
 
@@ -510,7 +470,7 @@ func installCodex(home, lang string) error {
 	var eventsRaw map[string]json.RawMessage
 	if h, ok := top["hooks"]; ok {
 		if err := json.Unmarshal(h, &eventsRaw); err != nil {
-			return fmt.Errorf("hooks.json 的 hooks 字段解析失败: %w", err)
+			return fmt.Errorf("failed to parse hooks in hooks.json: %w", err)
 		}
 	}
 	existing, err := filterGroups(eventsRaw)
@@ -529,22 +489,12 @@ func installCodex(home, lang string) error {
 	return writeJSONFile(hooksPath, top)
 }
 
-// codexGroups is the registration template for Codex. Its hook engine
-// mirrors Claude Code's contract (same hooks.json shape, stdin carries
-// cwd, additionalContext honored) with platform differences: no Subagent
-// events, file edits go through apply_patch/Edit/Write, and Stop uses
-// the decision:"block" contract — same as zcode, so the Stop command
-// reuses the --platform flag.
+// codexGroups registers prompt injection without Stop or tool interception.
 func codexGroups(hooksDir string) map[string]any {
 	bash := "bash " + filepath.Join(hooksDir, "inject-style-rules.sh")
-	inject := "python3 " + filepath.Join(hooksDir, "inject.py")
-	inspect := "python3 " + filepath.Join(hooksDir, "inspect.py") + " --platform"
-	fileGuard := "python3 " + filepath.Join(hooksDir, "inspect-file.py")
 	return map[string]any{
 		"SessionStart":     []any{group("", bash)},
-		"UserPromptSubmit": []any{group("", bash), group("", inject)},
-		"PreToolUse":       []any{group("apply_patch|Edit|Write", fileGuard)},
-		"Stop":             []any{group("", inspect)},
+		"UserPromptSubmit": []any{group("", bash)},
 	}
 }
 
@@ -564,8 +514,6 @@ func printInstallSummary(home string, opts installOptions) {
 		}
 	}
 	fmt.Printf("  语言: %s（style-rules.lang 标记）\n", opts.lang)
-	fmt.Printf("  用户词典: ~/.claude/MindForge/terminology.tsv（三级加载：内置 → 用户级 → 项目级）\n")
-	fmt.Println("  项目词典: 在项目根放 mindforge.zh-dict.tsv（mindforge init dict 生成）")
-	fmt.Println("  MCP（可选）: claude mcp add term-dict -- python3 ~/.claude/MindForge/hooks/term-dict-server.py")
+	fmt.Println("  Profile: writing guidance only; no dictionary lookup, tool calls or rewrite checks.")
 	fmt.Println("  生效: 已打开的会话不热更新，新建会话后生效")
 }

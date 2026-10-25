@@ -12,9 +12,9 @@ MindForge 是一个综合性的工具集，用于管理 MCP（模型上下文协
 - **丰富的 Agent 集合**：针对 Java、Python、Go、前端和系统架构的专业 agents
 - **可复用的 Skills**：可组合和跨 agents 共享的领域专属技能
 - **MCP 服务**：可扩展的模型上下文协议服务集合
-- **多 harness 支持**：Claude Code、zcode、Codex 从同一仓库安装同一套 hook、词典和写作规范
-- **zh-guard 翻译腔防御**：每轮注入受控写作规范，出口检测、文件写检测、句式套话、小模型判官五层拦截模型输出里的机翻腔
-- **三级词典**：内置 → 用户级（`~/.claude/MindForge/`）→ 项目级（仓库里的 `mindforge.zh-dict.tsv`，团队共享）
+- **多 harness 支持**：Claude Code、zcode、Codex 从同一仓库安装写作提示 hook
+- **低成本写作指导**：中文简要表达规则、英文 ASD-STE100，只注入 prompt，不增加查词或改写轮次
+- **可选词典资料**：保留三列项目词典及手动维护工具，不默认接入回答流程
 - **MindForge CLI**：单个 Go 二进制（install / init dict / doctor），hook 载荷全部内嵌
 - **简易设置**：一键安装脚本实现 Claude Code 集成
 - **灵活的技术栈**：每个组件都可以使用自己偏好的技术栈
@@ -74,7 +74,7 @@ Agents、skills 和受控写作规范 hook 都以插件形式分发。Claude Cod
 
 # 受控写作规范 hook
 /plugin install style-rules@mindforge              # 英文规范（默认）
-/plugin install style-rules-zh-cn@mindforge        # 中文+英文规范 + 翻译腔防御（zh-guard）
+/plugin install style-rules-zh-cn@mindforge        # 中文简要写作指导
 
 # Codex（终端里）
 codex plugin marketplace add ProjAnvil/MindForge
@@ -90,49 +90,32 @@ zcode 不会加载自己不支持的事件，没有死配置。
 
 说明：
 
-- `style-rules-zh-cn` 内置 zh-guard 翻译腔防御（见下一节）。安装时词典迁移到
-  `~/.claude/MindForge/terminology.tsv`（不覆盖已有词典；旧版的
-  `~/.claude/zh-guard/` 会自动搬迁）；用户词条优先，插件升级仍会送达新词条。
+- 两个写作插件均只注入规则，不自动创建词典、注册词典 MCP 或启动模型审稿。
 - 插件内的 agents 和 skills 带命名空间（如 `/mindforge-en:git-guru`），
   不与个人或项目级的冲突。
 - 插件 hook 使用 `${CLAUDE_PLUGIN_ROOT}`（Claude Code），回退到 `${PLUGIN_ROOT}`，
   不需要符号链接或合并 settings.json。
 - 安装后重启 harness。
 
-### 🧠 zh-guard：翻译腔防御
+### 🧠 方案 A：生成前的简单规则指导
 
-大模型写的中文技术内容满是生硬直译：病灶实验（ablation study）、
-槽键（slot key）、还有「值得注意的是」这类模板腔。zh-guard 分五层拦截，
-全部 fail-open（任何异常一律放行，绝不卡死会话）：
+MindForge 只向已有模型请求注入写作规则，不制造工具往返或第二次改写请求。
+中文模式使用简短、自然、保留语境的表达原则；英文模式保留 ASD-STE100。
 
-| 层 | hook 事件 | 职责 |
-|---|---|---|
-| L1 注入 | UserPromptSubmit | 每轮注入受控写作规范 + 「直译词→期望写法」对照 |
-| L2 出口 | Stop / SubagentStop | 扫描 `last_assistant_message`，命中直译词强制用地道中文重写 |
-| 文件写检测 | PreToolUse（Write\|Edit\|apply_patch） | 模型把直译词写进文档（.md/.txt 等）之前 deny 掉 |
-| 句式套话 | 词典 `re:` 正则词条 | 拦「值得注意的是」「综上所述」「进行了…」这类模板腔 |
-| 句式判官 | Stop（Claude Code 的 prompt 型 hook） | 字典没拦住时由小模型判断是否地道中文，覆盖长尾 |
+默认只注册 SessionStart / UserPromptSubmit；Claude Code 还覆盖 SubagentStart。
+不注册 Stop / SubagentStop、文件写入拦截、模型审稿或词典 MCP。
+模型不一定完全遵守提示，但不会因 MindForge 的自动审批再读一遍完整上下文。
 
-另外有一层拉模式知识层：`term-dict` MCP 提供
-`lookup_term` / `check_text` / `add_term`——模型按需查词，
-新 bad case 当场变成词条（数据飞轮）。
-
-**三级词典**（越具体越优先）：
-
-1. 内置：`hooks/terminology.tsv`，随插件 / CLI 分发；
-2. 用户级：`~/.claude/MindForge/terminology.tsv`，安装时生成，升级保留自加词条；
-3. 项目级：项目根的 `mindforge.zh-dict.tsv`，随仓库提交、团队共享。
-   hook 从会话的 `cwd` 逐级向上发现，遇到 `.git` 即停。
-
-用 `mindforge init dict` 生成项目词典（或参照 `hooks/terminology.tsv` 的格式）。
-词条格式：`直译词<TAB>期望写法<TAB>说明`；`re:` 前缀写正则词条。
-急停开关：`export ZH_GUARD_OFF=1`，或在 `~/.claude/MindForge/` 放一个 OFF 文件。
-完整细节见 [hooks/README.md](../hooks/README.md)。
+已有词典和源代码中的手动工具保留，默认回答不读取它们。
+用户仍可显式运行 `mindforge init dict` 创建三列项目资料；
+需要手动查询或实验时再单独启用工具，详见 [hooks/README.md](../hooks/README.md)。
+升级时重新安装并新建会话；如果之前独立注册过词典 MCP，需要另行禁用。
 
 ### 🔧 MindForge CLI（Go）
 
-`mindforge` 二进制是安装器、生成器和医生，hook 载荷（脚本、内置词典、
-写作规范）全部内嵌，构建一次随身携带。直接从 GitHub 安装：
+`mindforge` 二进制是安装器、生成器和医生，默认仅安装 shell 注入器、
+选定语言的规则和语言标记；内嵌词典／模板只供显式 CLI 命令使用。
+直接从 GitHub 安装：
 
 ```bash
 # 需要 Go 1.24+
@@ -254,10 +237,10 @@ mindforge/
 │   │   └── CLAUDE.md   # 英文用户级别指令
 │   └── zh-cn/
 │       └── CLAUDE.md   # 中文用户级别指令
-├── hooks/               # style-rules-zh-cn 插件：受控写作规范 + zh-guard
+├── hooks/               # 默认只注入规则的写作插件，以及可选研究工具
 │   ├── hooks/           # hook 注册（共享 / Claude 专属变体）
 │   ├── inject.py / inspect.py / inspect-file.py   # L1 注入 / L2 出口 / 文件写检测
-│   ├── term-dict-server.py    # zh-guard MCP（lookup_term/check_text/add_term）
+│   ├── term-dict-server.py    # 带 mindforge 前缀的查词、标注、workspace 添加和初始化工具
 │   ├── zh_guard_common.py    # 三级词典加载（公共库）
 │   ├── terminology.tsv       # 内置词典（数据飞轮）
 │   └── .claude-plugin/ / .zcode-plugin/   # 各 harness 的插件 manifest

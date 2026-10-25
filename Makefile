@@ -217,6 +217,7 @@ sync-plugins:
 	@mkdir -p plugins/style-rules
 	@cp hooks/inject-style-rules.sh plugins/style-rules/inject-style-rules.sh
 	@cp hooks/style-rules-en.md plugins/style-rules/style-rules-en.md
+	@cp hooks/style-rules-zh.md plugins/style-rules/style-rules-zh.md
 	@chmod +x plugins/style-rules/inject-style-rules.sh
 	@echo "✓ plugins/style-rules synced (style-rules-zh-cn lives in hooks/ and needs no sync)"
 	@for lang in en zh-cn; do \

@@ -243,61 +243,61 @@ def table(m, turns):
     b, e, f = m["baseline"], m["empty"], m["full"]
     t, startup = m["timing"], m["startup_ms"]
     backend = f["token_backend"]
-    print("zh-guard 方案成本评测")
-    print("token 后端：%s ｜ 计时：%d 轮取均值 ｜ 裸解释器启动 %.0f ms"
+    print("zh-guard cost evaluation")
+    print("Token backend: %s | mean over %d rounds | Python startup %.0f ms"
           % (backend, t["rounds"], startup))
     print("")
-    print("%-26s %14s %14s %14s" % ("每轮输入成本", "基线(没装)", "空字典", "完整字典"))
+    print("%-26s %14s %14s %14s" % ("Input cost per turn", "No hooks", "Empty dict", "Full dict"))
     print("-" * 72)
-    print("%-26s %14s %14s %14s" % ("注入字符", b["chars"], e["chars"], f["chars"]))
-    print("%-26s %14s %14s %14s" % ("注入 token", b["tokens"], e["tokens"], f["tokens"]))
-    print("%-26s %14s %14s %14s" % ("词条数", b["entries"], e["entries"], f["entries"]))
+    print("%-26s %14s %14s %14s" % ("Injected characters", b["chars"], e["chars"], f["chars"]))
+    print("%-26s %14s %14s %14s" % ("Injected tokens", b["tokens"], e["tokens"], f["tokens"]))
+    print("%-26s %14s %14s %14s" % ("Entries", b["entries"], e["entries"], f["entries"]))
     print("%-26s %14s %14s %14s" % (
-        "字典带来的边际 token", "—", 0, f["tokens"] - e["tokens"]))
+        "Marginal dictionary tokens", "—", 0, f["tokens"] - e["tokens"]))
     print("-" * 72)
     for turns_n in turns:
         print("%-26s %14s %14s %14s" % (
-            "%d 轮对话累计 token" % turns_n,
+            "Tokens over %d turns" % turns_n,
             b["tokens"] * turns_n, e["tokens"] * turns_n, f["tokens"] * turns_n))
     print("-" * 72)
     print("%-26s %14s %14s %14s" % (
-        "L1 端到端 ms", "0.0", "%.1f" % e["ms"], "%.1f" % f["ms"]))
+        "L1 end-to-end ms", "0.0", "%.1f" % e["ms"], "%.1f" % f["ms"]))
     print("%-26s %14s %14s %14s" % (
-        "L1 净耗时 ms（扣启动时）", "0.0", "%.1f" % net_ms(e["ms"], startup),
+        "Net L1 ms (excl. startup)", "0.0", "%.1f" % net_ms(e["ms"], startup),
         "%.1f" % net_ms(f["ms"], startup)))
     print("%-26s %14s %14s %14s" % (
-        "L2 干净回复 ms", "0.0", "≈同上", "%.1f" % t["inspect_clean_ms"]))
+        "L2 clean-response ms", "0.0", "similar", "%.1f" % t["inspect_clean_ms"]))
     print("%-26s %14s %14s %14s" % (
-        "L2 命中并拦截 ms", "0.0", "≈同上", "%.1f" % t["inspect_hit_ms"]))
+        "L2 match-and-block ms", "0.0", "similar", "%.1f" % t["inspect_hit_ms"]))
     print("%-26s %14s %14s %14s" % (
-        "L2 净耗时 ms", "0.0", "≈同上",
+        "Net L2 ms", "0.0", "similar",
         "%.1f" % net_ms(t["inspect_clean_ms"], startup)))
     ic = m["interception"]
     print("-" * 72)
     print("%-26s %14s %14s %14s" % (
-        "单次拦截的重写指令 token", "0", "0", ic["instruction_tokens"]))
+        "Block instruction tokens", "0", "0", ic["instruction_tokens"]))
     print("%-26s %14s %14s %14s" % (
-        "单次拦截代价 token（重写一次回复）", "0", "0", ic["cost_per_block_tokens"]))
+        "Tokens per block + rewrite", "0", "0", ic["cost_per_block_tokens"]))
     print("%-26s %14s %14s %14s" % (
-        "最坏窗口（10 分钟 3 次）token", "0", "0", ic["worst_window_tokens"]))
+        "Worst-window tokens", "0", "0", ic["worst_window_tokens"]))
     print("")
-    print("被拦一次的代价 ≈ 那条回复白写一遍再重写一遍（%d token）+ 指令 %d token，"
-          "这是整套方案最贵的一项。"
+    print("One block costs approximately the original response plus its rewrite (%d tokens) "
+          "and %d instruction tokens; this is the largest component."
           % (2 * ic["reply_tokens"], ic["instruction_tokens"]))
-    print("每轮的额外等待：约 %.0f ms（L1）+ %.0f ms（L2）＝ %.0f ms，"
-          "其中大头是解释器启动，本地 SSD 上基本无感。"
+    print("Additional latency per turn: approximately %.0f ms (L1) + %.0f ms (L2) = %.0f ms; "
+          "interpreter startup accounts for much of it."
           % (t["inject_ms"], t["inspect_clean_ms"],
              t["inject_ms"] + t["inspect_clean_ms"]))
-    print("想省就按顺序来：先让模型少踩词（注入规则 + MCP 查词），"
-          "再砍注入文本（%d token/轮），几毫秒那个量级不值得动。" % f["tokens"])
+    print("Optimize avoidable blocks first through guidance and MCP lookup, "
+          "then reduce injected text (%d tokens/turn), before optimizing a few milliseconds." % f["tokens"])
 
 
 def main():
-    ap = argparse.ArgumentParser(description="zh-guard 方案成本评测")
-    ap.add_argument("--json", action="store_true", help="输出 JSON 指标")
-    ap.add_argument("--rounds", type=int, default=15, help="计时轮数")
+    ap = argparse.ArgumentParser(description="Evaluate zh-guard costs")
+    ap.add_argument("--json", action="store_true", help="Output JSON metrics")
+    ap.add_argument("--rounds", type=int, default=15, help="Number of timing rounds")
     ap.add_argument("--turns", type=int, nargs="*", default=[10, 50],
-                    help="折算成几轮对话的累计 token")
+                    help="Conversation lengths for cumulative token estimates")
     args = ap.parse_args()
 
     m = measure(rounds=args.rounds)

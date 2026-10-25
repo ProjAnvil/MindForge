@@ -18,35 +18,6 @@
             "command": "bash \"${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}/inject-style-rules.sh\" zh-cn"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}/inject.py\""
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Write|Edit|NotebookEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}/inspect-file.py\""
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT:-${PLUGIN_ROOT}}/inspect.py\""
-          }
-        ]
       }
     ]
   }

@@ -34,7 +34,7 @@ func loadCodexEvents(t *testing.T, path string) map[string][]groupProbe {
 	return events
 }
 
-func TestInstallCodexRegistersSevenEventSet(t *testing.T) {
+func TestInstallCodexRegistersOnlyInjection(t *testing.T) {
 	home := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(home, ".codex"), 0o755); err != nil {
 		t.Fatal(err)
@@ -46,46 +46,30 @@ func TestInstallCodexRegistersSevenEventSet(t *testing.T) {
 	hooksPath := filepath.Join(home, ".codex", "hooks.json")
 	events := loadCodexEvents(t, hooksPath)
 
-	for _, ev := range []string{"SessionStart", "UserPromptSubmit", "PreToolUse", "Stop"} {
+	for _, ev := range []string{"SessionStart", "UserPromptSubmit"} {
 		if len(events[ev]) == 0 {
-			t.Errorf("event %s 未注册", ev)
+			t.Errorf("event %s is not registered", ev)
 		}
 	}
 	// Codex has no Subagent events.
 	for _, ev := range []string{"SubagentStart", "SubagentStop"} {
 		if _, ok := events[ev]; ok {
-			t.Errorf("Codex 不支持 %s，不应注册（死配置）", ev)
+			t.Errorf("Codex does not support %s; it must not be registered", ev)
 		}
 	}
-	// File guard matches Codex tool names (apply_patch is Codex's editor).
-	var matcher string
-	for _, g := range events["PreToolUse"] {
-		matcher = g.Matcher
-	}
-	if !strings.Contains(matcher, "apply_patch") {
-		t.Errorf("PreToolUse matcher 应含 Codex 的 apply_patch 工具名，实际 %q", matcher)
-	}
-	// Stop hook uses the --platform flag: user-config hooks get no env var,
-	// and Codex's Stop contract (decision:block) matches zcode's.
-	var sawPlatform bool
-	for _, g := range events["Stop"] {
-		for _, h := range g.Hooks {
-			if strings.Contains(h.Command, "--platform") {
-				sawPlatform = true
-			}
+	for _, event := range []string{"PreToolUse", "Stop"} {
+		if len(events[event]) != 0 {
+			t.Errorf("Codex must not register %s under scheme A", event)
 		}
-	}
-	if !sawPlatform {
-		t.Error("Codex 的 Stop 命令应带 --platform（decision:block 契约）")
 	}
 	// Runtime files + language marker under ~/.codex/mindforge/hooks.
 	hooksDir := filepath.Join(home, ".codex", "mindforge", "hooks")
-	if _, err := os.Stat(filepath.Join(hooksDir, "inspect.py")); err != nil {
-		t.Errorf("脚本未安装: %v", err)
+	if _, err := os.Stat(filepath.Join(hooksDir, "inject-style-rules.sh")); err != nil {
+		t.Errorf("injection script was not installed: %v", err)
 	}
 	marker, _ := os.ReadFile(filepath.Join(hooksDir, "style-rules.lang"))
 	if strings.TrimSpace(string(marker)) != "zh-cn" {
-		t.Errorf("style-rules.lang 应为 zh-cn，实际 %q", string(marker))
+		t.Errorf("expected style-rules.lang to be zh-cn, got %q", string(marker))
 	}
 }
 
@@ -107,10 +91,10 @@ func TestInstallCodexIdempotentAndPreservesForeign(t *testing.T) {
 		}
 	}
 	events := loadCodexEvents(t, filepath.Join(codexDir, "hooks.json"))
-	if n := len(events["PreToolUse"]); n != 2 {
-		t.Errorf("PreToolUse 应为 外来1组 + mindforge1组 = 2，实际 %d", n)
+	if n := len(events["PreToolUse"]); n != 1 {
+		t.Errorf("expected only the preserved foreign PreToolUse group in English mode, got %d", n)
 	}
-	if n := len(events["Stop"]); n != 1 {
-		t.Errorf("重复安装后 Stop 应仍为 1 组，实际 %d", n)
+	if n := len(events["Stop"]); n != 0 {
+		t.Errorf("English mode must not register Stop checks, got %d groups", n)
 	}
 }

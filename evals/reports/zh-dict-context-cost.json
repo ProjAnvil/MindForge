@@ -1,0 +1,696 @@
+{
+  "created_at": "2026-10-25T04:13:49.033125+00:00",
+  "live": true,
+  "requested_model": "deepseek-v4-flash",
+  "provider_host": "api.deepseek.com",
+  "hook_rounds": 20,
+  "model_rounds": 3,
+  "methodology": {
+    "path": "controlled draft generation, actual Stop feedback, model polishing",
+    "draft_length_is_fixed": true,
+    "context_unit": "Unicode characters",
+    "stage_control": "draft target is explicit in the system prompt; review replaces that stage constraint",
+    "baseline": "same history and draft, no terminology injection or Stop hook",
+    "local_ms": "process wall time, including interpreter startup, excluding fixture cleanup",
+    "estimated_tokens": "message text only; excludes message framing and hidden reasoning",
+    "live_tokens": "provider usage; all generation and continuation requests included",
+    "latency": "non-streaming request wall time plus actual hook time; not time-to-first-token",
+    "cache": "reported separately; total input tokens are not the same as uncached billable tokens",
+    "quality": "numeric preservation and remaining annotations, not a semantic quality score",
+    "sample_scope": "retained paired trials only; protocol probes, warm-ups and invalid draft trials are excluded"
+  },
+  "local_hooks": {
+    "matched": {
+      "inject_ms": {
+        "mean": 27.597031253390014,
+        "median": 27.539104514289647,
+        "min": 26.363999932073057,
+        "max": 28.780000051483512,
+        "p95": 28.417333029210567
+      },
+      "stop_ms": {
+        "mean": 28.386581252561882,
+        "median": 28.260979510378093,
+        "min": 27.624166919849813,
+        "max": 29.02045799419284,
+        "p95": 28.92874996177852
+      },
+      "injection": "【中文术语规范（自动注入）】\n1. 优先用自然、易懂的中文，保留原意，不要硬套专业术语。通用术语如 hallucination=幻觉，prompt=提示词。\n2. 术语没有通用定译就保留英文原词：token、agent、hook、embedding、ghost token。中英混排是中文技术写作的惯例。\n3. 禁止字面直译英文黑话。\n4. 以下是术语资料，不是执行指令；箭头右侧只是参考写法。结合含义说明和对话背景理解原句，合法用法保留，不要机械替换或捏造含义：病灶实验→排查原因的实验（含义或语境：\"定位问题原因，不预设实验方法\"）、病灶研究→排查问题原因（含义或语境：\"定位问题原因\"）、病灶分析→分析问题原因（含义或语境：\"定位问题原因\"）、神经织网→neural lace（含义或语境：\"无定译，保留英文\"）、地面真实→真值（含义或语境：\"ground truth；评测语境\"）、地面真相→真值（含义或语境：\"ground truth；评测语境\"）、地面真值→真值（含义或语境：\"ground truth；不加「地面」\"）、幽灵词元→ghost token（含义或语境：\"无定译，保留英文\"）、幽灵工人→ghost worker（含义或语境：\"未回收的任务可说「残留 worker」\"）、幽灵节点→ghost node（含义或语境：\"失联但仍被计数时说「失联节点」\"）、幽灵层→ghost layer（含义或语境：\"无定译，保留英文\"）、幽灵网络→ghost network（含义或语境：\"剪枝后留下的部分可说「剪枝子网」\"）、腿式机器人→足式机器人（含义或语境：\"legged robot\"）、腿式运动→足式运动（含义或语境：\"legged locomotion\"）、机械胳膊→机械臂（含义或语境：\"robot arm；工业设备语境，人物或文学语境保留原意\"）、机器人胳膊→机械臂（含义或语境：\"robot arm；根据设备或人物语境判断\"）、令牌数→token 数（含义或语境：\"AI 语境不译「令牌」\"）、令牌限制→token 上限（含义或语境：\"AI 语境不译「令牌」\"）、令牌化→token 化（含义或语境：\"也可按上下文说「分词」\"）、大的语言模型→大语言模型（含义或语境：\"large language model\"）、引擎盖下→底层实现（含义或语境：\"under the hood\"）、健全性检查→合理性检查（含义或语境：\"sanity check；也可保留英文\"）、死因→崩溃原因（含义或语境：\"进程或服务语境\"）、病症→症状（含义或语境：\"symptom；技术语境\"）、睡（含义或语境：\"人的睡眠、睡觉是正常说法，可保留；软件工程语境可能指进程、线程的休眠机制（sleep），按上下文说明执行单元、时长及后续动作，不要把任务等待执行一律当成休眠\"）、钉死→敲定（含义或语境：\"nail down；固定版本或参数时说「锁定」\"）、钉住→敲定（含义或语境：\"nail down；固定版本或参数时说「锁定」\"）、范围守卫→作用域守卫（含义或语境：\"scope guard\"）、锚定→锁定 / 以 X 为基准（含义或语境：\"anchor；版本用「锁定」，参照值用「以 X 为基准」\"）、槽位→插槽 / slot（含义或语境：\"slot；硬件语境的「槽位」不必改\"）、槽键→slot 的 key（含义或语境：\"slot key\"）、键-值关系→key-value（含义或语境：\"「键值对」不受影响\"）、第N刀→第 N 处可以精简的部分（含义或语境：\"精简或削减语境\"）、下一刀→下一处可以精简的部分（含义或语境：\"cut；精简或削减语境\"）、下一道砍→下一处可以精简的部分（含义或语境：\"cut；精简或削减语境\"）、遗留缺口→剩下的待办（含义或语境：\"remaining gap\"）、缺口→剩下的待办（含义或语境：\"gap；任务语境\"）、结构性缺陷→设计上的问题（含义或语境：\"structural defect\"）、已初步清楚→大致了解了（含义或语境：\"have a preliminary understanding\"）、台账→清单 / 记录（含义或语境：\"ledger；任务用「清单」，过程用「记录」\"）、纯尾即就绪（含义或语境：\"任务衔接语境：等这个任务完成之后，就继续下一项；直接说明先后关系，不引入额外状态或机制\"）、已挂起等门控（含义或语境：\"任务安排语境：已经安排下一个任务，等待执行；不要据此推断进程被挂起或存在特定门控机制\"）、值得注意的是→直接给结论（含义或语境：\"删掉套话，直接说事\"）、综上所述→直接说结论（含义或语境：\"删掉套话，直接说事\"）、需要指出的是→直接说要点（含义或语境：\"删掉套话，直接说事\"）、由于.{1,12}的原因→因为 X（含义或语境：\"不要重复表达原因\"）、进行了.{0,6}(分析|修改|部署)→直接用动词（含义或语境：\"conducted an analysis；如「分析了」「改了」\"）\n5. 措辞要像人在说话：说「剩下的待办」「发现的问题」「这儿有个 bug」，别端着写成「遗留缺口」「结构性缺陷」这类从英文句型硬搬过来的词。汇报进展说「大致了解了」，别写「已初步清楚」。\n6. 英文名词短语别硬拼成中文合成词：slot key 说「slot 的 key」，key-value 就写 key-value，不写「槽键」「键-值关系」。名词叠着名词时，拆成短句直说。\n7. 正式回答前，先把完整中文草稿交给 term-dict MCP 的 mindforge_check_text 预检；有项目目录时传入绝对路径 cwd。工具不会修改原稿；按 annotations 中的句子、段落、建议和含义局部润色，或判断无需修改并保留原文。其他句子、数字、代码和结论不变。修改后再次调用复查，不要把候选列表、占位符或「直接给结论」之类指令照抄到回答里。工具不可用时自行检查，不要声称已经调用；Stop 仍会补查。\n8. 补充词典时，mindforge_add_term 默认写当前 workspace，必须传绝对路径 cwd；需要单独初始化可调用 mindforge_init_dict，已有词典不会覆盖。不要把 MCP 服务或插件目录当作 workspace；不知道当前路径时先确认。只有用户明确要求跨项目共享时才传 scope=user。",
+      "injection_tokens_estimated": 1613,
+      "feedback": "你的上一条回复命中措辞检查规则，请结合原句确认是否需要改写。以下是检测结果：{\"annotation_id\": \"3e358ccdc0bd912f1514e4035e6e8f6fb03ecab02c871dca8bd2a06bc6848744\", \"关注表达\": \"纯尾即就绪\", \"位置\": \"第1行第5列\", \"原句\": \"当前任务纯尾即就绪；下一项已挂起等门控。\", \"段落\": \"当前任务纯尾即就绪；下一项已挂起等门控。工作线程先睡20ms，再重试7次。任务ID是42，处理结果会写入日志。\", \"含义或语境说明\": \"任务衔接语境：等这个任务完成之后，就继续下一项；直接说明先后关系，不引入额外状态或机制\"}；{\"annotation_id\": \"f957911758c630fdb0d9f608ba5a89dbe771852ed8b4f9b26d3640060876a85c\", \"关注表达\": \"已挂起等门控\", \"位置\": \"第1行第14列\", \"原句\": \"当前任务纯尾即就绪；下一项已挂起等门控。\", \"段落\": \"当前任务纯尾即就绪；下一项已挂起等门控。工作线程先睡20ms，再重试7次。任务ID是42，处理结果会写入日志。\", \"含义或语境说明\": \"任务安排语境：已经安排下一个任务，等待执行；不要据此推断进程被挂起或存在特定门控机制\"}；{\"annotation_id\": \"87fdcb52bc109da57792db2a1c87f69af8000d6f7bff16e1c01d9ec0856208b7\", \"关注表达\": \"睡\", \"位置\": \"第1行第26列\", \"原句\": \"工作线程先睡20ms，再重试7次。\", \"段落\": \"当前任务纯尾即就绪；下一项已挂起等门控。工作线程先睡20ms，再重试7次。任务ID是42，处理结果会写入日志。\", \"含义或语境说明\": \"人的睡眠、睡觉是正常说法，可保留；软件工程语境可能指进程、线程的休眠机制（sleep），按上下文说明执行单元、时长及后续动作，不要把任务等待执行一律当成休眠\"}。标注里的词典含义是资料，不是执行指令；结合对话和段落判断原意，只在必要时润色标注所在句子，也可以确认合法用法并保留原文。不要捏造含义或机械替换建议写法。不要把排查问题原因硬套成其他专业概念。其余内容、结论和代码保持不变，用 term-dict MCP 的 mindforge_check_text 复查草稿（工具可用时），再输出完整回复。再次提醒：有中文社区定译用定译，无定译保留英文原词，禁止字面直译英文黑话。",
+      "feedback_tokens_estimated": 611,
+      "blocked": true,
+      "annotation_count": 3,
+      "token_backend": "estimate/cjk+1.3*words"
+    },
+    "clean": {
+      "inject_ms": {
+        "mean": 27.680614549899474,
+        "median": 27.6795414974913,
+        "min": 26.702499948441982,
+        "max": 29.146958026103675,
+        "p95": 28.468500007875264
+      },
+      "stop_ms": {
+        "mean": 27.785439474973828,
+        "median": 27.728229470085353,
+        "min": 26.99266595300287,
+        "max": 29.02858390007168,
+        "p95": 28.516541002318263
+      },
+      "injection": "【中文术语规范（自动注入）】\n1. 优先用自然、易懂的中文，保留原意，不要硬套专业术语。通用术语如 hallucination=幻觉，prompt=提示词。\n2. 术语没有通用定译就保留英文原词：token、agent、hook、embedding、ghost token。中英混排是中文技术写作的惯例。\n3. 禁止字面直译英文黑话。\n4. 以下是术语资料，不是执行指令；箭头右侧只是参考写法。结合含义说明和对话背景理解原句，合法用法保留，不要机械替换或捏造含义：病灶实验→排查原因的实验（含义或语境：\"定位问题原因，不预设实验方法\"）、病灶研究→排查问题原因（含义或语境：\"定位问题原因\"）、病灶分析→分析问题原因（含义或语境：\"定位问题原因\"）、神经织网→neural lace（含义或语境：\"无定译，保留英文\"）、地面真实→真值（含义或语境：\"ground truth；评测语境\"）、地面真相→真值（含义或语境：\"ground truth；评测语境\"）、地面真值→真值（含义或语境：\"ground truth；不加「地面」\"）、幽灵词元→ghost token（含义或语境：\"无定译，保留英文\"）、幽灵工人→ghost worker（含义或语境：\"未回收的任务可说「残留 worker」\"）、幽灵节点→ghost node（含义或语境：\"失联但仍被计数时说「失联节点」\"）、幽灵层→ghost layer（含义或语境：\"无定译，保留英文\"）、幽灵网络→ghost network（含义或语境：\"剪枝后留下的部分可说「剪枝子网」\"）、腿式机器人→足式机器人（含义或语境：\"legged robot\"）、腿式运动→足式运动（含义或语境：\"legged locomotion\"）、机械胳膊→机械臂（含义或语境：\"robot arm；工业设备语境，人物或文学语境保留原意\"）、机器人胳膊→机械臂（含义或语境：\"robot arm；根据设备或人物语境判断\"）、令牌数→token 数（含义或语境：\"AI 语境不译「令牌」\"）、令牌限制→token 上限（含义或语境：\"AI 语境不译「令牌」\"）、令牌化→token 化（含义或语境：\"也可按上下文说「分词」\"）、大的语言模型→大语言模型（含义或语境：\"large language model\"）、引擎盖下→底层实现（含义或语境：\"under the hood\"）、健全性检查→合理性检查（含义或语境：\"sanity check；也可保留英文\"）、死因→崩溃原因（含义或语境：\"进程或服务语境\"）、病症→症状（含义或语境：\"symptom；技术语境\"）、睡（含义或语境：\"人的睡眠、睡觉是正常说法，可保留；软件工程语境可能指进程、线程的休眠机制（sleep），按上下文说明执行单元、时长及后续动作，不要把任务等待执行一律当成休眠\"）、钉死→敲定（含义或语境：\"nail down；固定版本或参数时说「锁定」\"）、钉住→敲定（含义或语境：\"nail down；固定版本或参数时说「锁定」\"）、范围守卫→作用域守卫（含义或语境：\"scope guard\"）、锚定→锁定 / 以 X 为基准（含义或语境：\"anchor；版本用「锁定」，参照值用「以 X 为基准」\"）、槽位→插槽 / slot（含义或语境：\"slot；硬件语境的「槽位」不必改\"）、槽键→slot 的 key（含义或语境：\"slot key\"）、键-值关系→key-value（含义或语境：\"「键值对」不受影响\"）、第N刀→第 N 处可以精简的部分（含义或语境：\"精简或削减语境\"）、下一刀→下一处可以精简的部分（含义或语境：\"cut；精简或削减语境\"）、下一道砍→下一处可以精简的部分（含义或语境：\"cut；精简或削减语境\"）、遗留缺口→剩下的待办（含义或语境：\"remaining gap\"）、缺口→剩下的待办（含义或语境：\"gap；任务语境\"）、结构性缺陷→设计上的问题（含义或语境：\"structural defect\"）、已初步清楚→大致了解了（含义或语境：\"have a preliminary understanding\"）、台账→清单 / 记录（含义或语境：\"ledger；任务用「清单」，过程用「记录」\"）、纯尾即就绪（含义或语境：\"任务衔接语境：等这个任务完成之后，就继续下一项；直接说明先后关系，不引入额外状态或机制\"）、已挂起等门控（含义或语境：\"任务安排语境：已经安排下一个任务，等待执行；不要据此推断进程被挂起或存在特定门控机制\"）、值得注意的是→直接给结论（含义或语境：\"删掉套话，直接说事\"）、综上所述→直接说结论（含义或语境：\"删掉套话，直接说事\"）、需要指出的是→直接说要点（含义或语境：\"删掉套话，直接说事\"）、由于.{1,12}的原因→因为 X（含义或语境：\"不要重复表达原因\"）、进行了.{0,6}(分析|修改|部署)→直接用动词（含义或语境：\"conducted an analysis；如「分析了」「改了」\"）\n5. 措辞要像人在说话：说「剩下的待办」「发现的问题」「这儿有个 bug」，别端着写成「遗留缺口」「结构性缺陷」这类从英文句型硬搬过来的词。汇报进展说「大致了解了」，别写「已初步清楚」。\n6. 英文名词短语别硬拼成中文合成词：slot key 说「slot 的 key」，key-value 就写 key-value，不写「槽键」「键-值关系」。名词叠着名词时，拆成短句直说。\n7. 正式回答前，先把完整中文草稿交给 term-dict MCP 的 mindforge_check_text 预检；有项目目录时传入绝对路径 cwd。工具不会修改原稿；按 annotations 中的句子、段落、建议和含义局部润色，或判断无需修改并保留原文。其他句子、数字、代码和结论不变。修改后再次调用复查，不要把候选列表、占位符或「直接给结论」之类指令照抄到回答里。工具不可用时自行检查，不要声称已经调用；Stop 仍会补查。\n8. 补充词典时，mindforge_add_term 默认写当前 workspace，必须传绝对路径 cwd；需要单独初始化可调用 mindforge_init_dict，已有词典不会覆盖。不要把 MCP 服务或插件目录当作 workspace；不知道当前路径时先确认。只有用户明确要求跨项目共享时才传 scope=user。",
+      "injection_tokens_estimated": 1613,
+      "feedback": "",
+      "feedback_tokens_estimated": 0,
+      "blocked": false,
+      "annotation_count": 0,
+      "token_backend": "estimate/cjk+1.3*words"
+    }
+  },
+  "scenarios": [
+    {
+      "context": "short",
+      "history_chars": 2000,
+      "case": "matched",
+      "draft_chars": 55,
+      "estimated_content_tokens": {
+        "baseline_input": 2086,
+        "baseline_output": 46,
+        "dictionary_input": 8025,
+        "dictionary_output": 96
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 1386,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 1152,
+          "dictionary_input_tokens": 6360,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 5120,
+          "delta_input_tokens": 4974,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 5017,
+          "baseline_ms": 475.90091603342444,
+          "dictionary_ms": 1650.720042991452,
+          "delta_ms": 1174.8191269580275,
+          "hook_ms": 59.80929208453745,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 1386,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 1152,
+          "dictionary_input_tokens": 6360,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 6016,
+          "delta_input_tokens": 4974,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 5017,
+          "baseline_ms": 684.0005000121891,
+          "dictionary_ms": 1856.9115010323003,
+          "delta_ms": 1172.9110010201111,
+          "hook_ms": 62.118542031385005,
+          "rewrite_calls": 1,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 1386,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 1152,
+          "dictionary_input_tokens": 6360,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 6016,
+          "delta_input_tokens": 4974,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 5017,
+          "baseline_ms": 1064.524665940553,
+          "dictionary_ms": 2191.871208138764,
+          "delta_ms": 1127.346542198211,
+          "hook_ms": 62.21679109148681,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 1386,
+        "baseline_output_tokens": 41,
+        "baseline_cached_tokens": 1152,
+        "dictionary_input_tokens": 6360,
+        "dictionary_output_tokens": 84,
+        "dictionary_cached_tokens": 5717.333333333333,
+        "delta_input_tokens": 4974,
+        "delta_output_tokens": 43,
+        "delta_total_tokens": 5017,
+        "baseline_ms": 741.4753606620556,
+        "dictionary_ms": 1899.8342507208388,
+        "delta_ms": 1158.3588900587831,
+        "hook_ms": 61.38154173580309,
+        "rewrite_calls": 1,
+        "delta_ms_range": [
+          1127.346542198211,
+          1174.8191269580275
+        ],
+        "numeric_facts_preserved": true
+      }
+    },
+    {
+      "context": "short",
+      "history_chars": 2000,
+      "case": "clean",
+      "draft_chars": 59,
+      "estimated_content_tokens": {
+        "baseline_input": 2094,
+        "baseline_output": 50,
+        "dictionary_input": 3706,
+        "dictionary_output": 50
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 1378,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 0,
+          "dictionary_input_tokens": 2834,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 1408,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 763.2571669528261,
+          "dictionary_ms": 705.3442931501195,
+          "delta_ms": -57.9128738027066,
+          "hook_ms": 60.02737605012953,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 1378,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 1152,
+          "dictionary_input_tokens": 2834,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 2688,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 948.9372910466045,
+          "dictionary_ms": 965.4879999579862,
+          "delta_ms": 16.550708911381662,
+          "hook_ms": 60.02320791594684,
+          "rewrite_calls": 0,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 1378,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 1152,
+          "dictionary_input_tokens": 2834,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 2688,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 762.9341670544818,
+          "dictionary_ms": 1011.0227919649333,
+          "delta_ms": 248.08862491045147,
+          "hook_ms": 60.86637498810887,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 1378,
+        "baseline_output_tokens": 37,
+        "baseline_cached_tokens": 768,
+        "dictionary_input_tokens": 2834,
+        "dictionary_output_tokens": 37,
+        "dictionary_cached_tokens": 2261.3333333333335,
+        "delta_input_tokens": 1456,
+        "delta_output_tokens": 0,
+        "delta_total_tokens": 1456,
+        "baseline_ms": 825.0428750179708,
+        "dictionary_ms": 893.9516950243463,
+        "delta_ms": 68.9088200063755,
+        "hook_ms": 60.30565298472842,
+        "rewrite_calls": 0,
+        "delta_ms_range": [
+          -57.9128738027066,
+          248.08862491045147
+        ],
+        "numeric_facts_preserved": true
+      }
+    },
+    {
+      "context": "medium",
+      "history_chars": 16000,
+      "case": "matched",
+      "draft_chars": 55,
+      "estimated_content_tokens": {
+        "baseline_input": 14784,
+        "baseline_output": 46,
+        "dictionary_input": 33421,
+        "dictionary_output": 96
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 9362,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 9088,
+          "dictionary_input_tokens": 22312,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 20992,
+          "delta_input_tokens": 12950,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 12993,
+          "baseline_ms": 699.503832962364,
+          "dictionary_ms": 2208.3899580175057,
+          "delta_ms": 1508.8861250551417,
+          "hook_ms": 59.07408404164016,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 9362,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 9216,
+          "dictionary_input_tokens": 22312,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 21888,
+          "delta_input_tokens": 12950,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 12993,
+          "baseline_ms": 1016.7670829687268,
+          "dictionary_ms": 1807.8763759694993,
+          "delta_ms": 791.1092930007726,
+          "hook_ms": 61.67429289780557,
+          "rewrite_calls": 1,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 9362,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 9216,
+          "dictionary_input_tokens": 22312,
+          "dictionary_output_tokens": 84,
+          "dictionary_cached_tokens": 21888,
+          "delta_input_tokens": 12950,
+          "delta_output_tokens": 43,
+          "delta_total_tokens": 12993,
+          "baseline_ms": 1100.597833050415,
+          "dictionary_ms": 1597.4855840904638,
+          "delta_ms": 496.8877510400489,
+          "hook_ms": 61.96745915804058,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先休眠 20ms，再重试 7 次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 9362,
+        "baseline_output_tokens": 41,
+        "baseline_cached_tokens": 9173.333333333334,
+        "dictionary_input_tokens": 22312,
+        "dictionary_output_tokens": 84,
+        "dictionary_cached_tokens": 21589.333333333332,
+        "delta_input_tokens": 12950,
+        "delta_output_tokens": 43,
+        "delta_total_tokens": 12993,
+        "baseline_ms": 938.9562496605018,
+        "dictionary_ms": 1871.2506393591564,
+        "delta_ms": 932.2943896986544,
+        "hook_ms": 60.9052786991621,
+        "rewrite_calls": 1,
+        "delta_ms_range": [
+          496.8877510400489,
+          1508.8861250551417
+        ],
+        "numeric_facts_preserved": true
+      }
+    },
+    {
+      "context": "medium",
+      "history_chars": 16000,
+      "case": "clean",
+      "draft_chars": 59,
+      "estimated_content_tokens": {
+        "baseline_input": 14792,
+        "baseline_output": 50,
+        "dictionary_input": 16404,
+        "dictionary_output": 50
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 9354,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 9088,
+          "dictionary_input_tokens": 10810,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 10496,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 902.7253750246018,
+          "dictionary_ms": 858.2722500432283,
+          "delta_ms": -44.45312498137355,
+          "hook_ms": 60.88437500875443,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 9354,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 9216,
+          "dictionary_input_tokens": 10810,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 10624,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 835.3631249628961,
+          "dictionary_ms": 655.2800829522312,
+          "delta_ms": -180.08304201066494,
+          "hook_ms": 60.16129197087139,
+          "rewrite_calls": 0,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 9354,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 9216,
+          "dictionary_input_tokens": 10810,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 10624,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 702.0629160106182,
+          "dictionary_ms": 629.4385419460014,
+          "delta_ms": -72.62437406461686,
+          "hook_ms": 60.5561250122264,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 9354,
+        "baseline_output_tokens": 37,
+        "baseline_cached_tokens": 9173.333333333334,
+        "dictionary_input_tokens": 10810,
+        "dictionary_output_tokens": 37,
+        "dictionary_cached_tokens": 10581.333333333334,
+        "delta_input_tokens": 1456,
+        "delta_output_tokens": 0,
+        "delta_total_tokens": 1456,
+        "baseline_ms": 813.3838053327054,
+        "dictionary_ms": 714.3302916471536,
+        "delta_ms": -99.05351368555178,
+        "hook_ms": 60.53393066395074,
+        "rewrite_calls": 0,
+        "delta_ms_range": [
+          -180.08304201066494,
+          -44.45312498137355
+        ],
+        "numeric_facts_preserved": true
+      }
+    },
+    {
+      "context": "long",
+      "history_chars": 64000,
+      "case": "matched",
+      "draft_chars": 55,
+      "estimated_content_tokens": {
+        "baseline_input": 58319,
+        "baseline_output": 46,
+        "dictionary_input": 120491,
+        "dictionary_output": 96
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 36711,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 0,
+          "dictionary_input_tokens": 77010,
+          "dictionary_output_tokens": 74,
+          "dictionary_cached_tokens": 2560,
+          "delta_input_tokens": 40299,
+          "delta_output_tokens": 33,
+          "delta_total_tokens": 40332,
+          "baseline_ms": 1819.1317500313744,
+          "dictionary_ms": 3389.393291901797,
+          "delta_ms": 1570.2615418704227,
+          "hook_ms": 58.00225003622472,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项。工作线程先 sleep 20ms，再重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 36711,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 36480,
+          "dictionary_input_tokens": 77010,
+          "dictionary_output_tokens": 82,
+          "dictionary_cached_tokens": 76672,
+          "delta_input_tokens": 40299,
+          "delta_output_tokens": 41,
+          "delta_total_tokens": 40340,
+          "baseline_ms": 881.6545000299811,
+          "dictionary_ms": 2106.8498741369694,
+          "delta_ms": 1225.1953741069883,
+          "hook_ms": 61.66474905330688,
+          "rewrite_calls": 1,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先 sleep 20ms，再重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 36711,
+          "baseline_output_tokens": 41,
+          "baseline_cached_tokens": 36480,
+          "dictionary_input_tokens": 77010,
+          "dictionary_output_tokens": 82,
+          "dictionary_cached_tokens": 76672,
+          "delta_input_tokens": 40299,
+          "delta_output_tokens": 41,
+          "delta_total_tokens": 40340,
+          "baseline_ms": 638.5518329916522,
+          "dictionary_ms": 1820.3771250555292,
+          "delta_ms": 1181.825292063877,
+          "hook_ms": 61.24191603157669,
+          "rewrite_calls": 1,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后就继续下一项；下一项已经安排好，等待执行。工作线程先 sleep 20ms，再重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 36711,
+        "baseline_output_tokens": 41,
+        "baseline_cached_tokens": 24320,
+        "dictionary_input_tokens": 77010,
+        "dictionary_output_tokens": 79.33333333333333,
+        "dictionary_cached_tokens": 51968,
+        "delta_input_tokens": 40299,
+        "delta_output_tokens": 38.333333333333336,
+        "delta_total_tokens": 40337.333333333336,
+        "baseline_ms": 1113.1126943510026,
+        "dictionary_ms": 2438.873430364765,
+        "delta_ms": 1325.7607360137627,
+        "hook_ms": 60.3029717070361,
+        "rewrite_calls": 1,
+        "delta_ms_range": [
+          1181.825292063877,
+          1570.2615418704227
+        ],
+        "numeric_facts_preserved": true
+      }
+    },
+    {
+      "context": "long",
+      "history_chars": 64000,
+      "case": "clean",
+      "draft_chars": 59,
+      "estimated_content_tokens": {
+        "baseline_input": 58327,
+        "baseline_output": 50,
+        "dictionary_input": 59939,
+        "dictionary_output": 50
+      },
+      "live_trials": [
+        {
+          "baseline_input_tokens": 36703,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 1280,
+          "dictionary_input_tokens": 38159,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 2560,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 1918.1071250932291,
+          "dictionary_ms": 1487.5284160953015,
+          "delta_ms": -430.5787089979276,
+          "hook_ms": 60.84416608791798,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 36703,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 36480,
+          "dictionary_input_tokens": 38159,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 38016,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 969.7685830760747,
+          "dictionary_ms": 1059.1824590228498,
+          "delta_ms": 89.41387594677508,
+          "hook_ms": 61.849749996326864,
+          "rewrite_calls": 0,
+          "dictionary_first": true,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        },
+        {
+          "baseline_input_tokens": 36703,
+          "baseline_output_tokens": 37,
+          "baseline_cached_tokens": 36480,
+          "dictionary_input_tokens": 38159,
+          "dictionary_output_tokens": 37,
+          "dictionary_cached_tokens": 38016,
+          "delta_input_tokens": 1456,
+          "delta_output_tokens": 0,
+          "delta_total_tokens": 1456,
+          "baseline_ms": 1160.5491249356419,
+          "dictionary_ms": 687.6390839461237,
+          "delta_ms": -472.91004098951817,
+          "hook_ms": 61.505625024437904,
+          "rewrite_calls": 0,
+          "dictionary_first": false,
+          "models": [
+            "deepseek-flash"
+          ],
+          "final_text": "当前任务完成后继续下一项；已安排下一项，等待执行。工作线程休眠20ms后重试7次。任务ID是42，处理结果会写入日志。",
+          "remaining_terms": [],
+          "numeric_facts_preserved": true
+        }
+      ],
+      "summary": {
+        "baseline_input_tokens": 36703,
+        "baseline_output_tokens": 37,
+        "baseline_cached_tokens": 24746.666666666668,
+        "dictionary_input_tokens": 38159,
+        "dictionary_output_tokens": 37,
+        "dictionary_cached_tokens": 26197.333333333332,
+        "delta_input_tokens": 1456,
+        "delta_output_tokens": 0,
+        "delta_total_tokens": 1456,
+        "baseline_ms": 1349.4749443683152,
+        "dictionary_ms": 1078.116653021425,
+        "delta_ms": -271.3582913468902,
+        "hook_ms": 61.399847036227584,
+        "rewrite_calls": 0,
+        "delta_ms_range": [
+          -472.91004098951817,
+          89.41387594677508
+        ],
+        "numeric_facts_preserved": true
+      }
+    }
+  ]
+}

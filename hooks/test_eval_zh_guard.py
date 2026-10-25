@@ -41,10 +41,10 @@ def tmpdir():
 
 def test_baseline_is_zero_startup_is_positive():
     startup = eval_zh_guard.python_startup_ms(rounds=5)
-    check("python 解释器启动基准为正数（%.1f ms）" % startup, startup > 0)
+    check("Python startup baseline is positive (%.1f ms)" % startup, startup > 0)
     base = eval_zh_guard.baseline()
-    check("基线（没装 hook）注入 token 为 0", base["tokens"] == 0)
-    check("基线（没装 hook）耗时为 0", base["ms"] == 0.0)
+    check("Baseline without hooks injects zero tokens", base["tokens"] == 0)
+    check("Baseline without hooks has zero overhead", base["ms"] == 0.0)
 
 
 def test_empty_dict_still_costs_rules_text():
@@ -52,10 +52,10 @@ def test_empty_dict_still_costs_rules_text():
     try:
         empty = eval_zh_guard.empty_dict(os.path.join(d, "empty.tsv"))
         cost = eval_zh_guard.inject_cost(empty)
-        check("空字典词条数为 0", cost["entries"] == 0, str(cost))
-        check("空字典仍然注入规则文本（%d token）" % cost["tokens"],
+        check("Empty dictionary has zero entries", cost["entries"] == 0, str(cost))
+        check("Empty dictionary still injects writing rules (%d tokens)" % cost["tokens"],
               cost["tokens"] > 0, str(cost))
-        check("规则文本里含「禁止字面直译」", "禁止字面直译" in cost["ctx"],
+        check("Injected rules include translationese guidance", "禁止字面直译" in cost["ctx"],
               cost["ctx"][:200])
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -67,11 +67,11 @@ def test_dictionary_has_measurable_marginal_cost():
         empty = eval_zh_guard.empty_dict(os.path.join(d, "empty.tsv"))
         full = eval_zh_guard.full_dict(os.path.join(d, "full.tsv"))
         ce, cf = eval_zh_guard.inject_cost(empty), eval_zh_guard.inject_cost(full)
-        check("完整字典注入 token 高于空字典（%d → %d）" % (ce["tokens"], cf["tokens"]),
+        check("Full dictionary injects more tokens than empty dictionary (%d -> %d)" % (ce["tokens"], cf["tokens"]),
               cf["tokens"] > ce["tokens"])
-        check("两份字典都会被注入至少一个词条以上的清单",
+        check("Full dictionary exposes the expected entry list",
               cf["entries"] >= 30, str(cf["entries"]))
-        check("注入 hook 本身正常退出", ce["rc"] == 0 and cf["rc"] == 0)
+        check("Injection hook exits successfully", ce["rc"] == 0 and cf["rc"] == 0)
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -81,14 +81,14 @@ def test_verdicts_follow_the_dictionary():
     try:
         empty = eval_zh_guard.empty_dict(os.path.join(d, "e.tsv"))
         full = eval_zh_guard.full_dict(os.path.join(d, "f.tsv"))
-        check("空字典：不该拦的全放行",
+        check("Empty dictionary allows all tested messages",
               eval_zh_guard.verdict(empty, FLAGGED) == 0
               and eval_zh_guard.verdict(empty, CLEAN) == 0)
-        check("完整字典：命中直译词就拦",
+        check("Full dictionary blocks matching expressions",
               eval_zh_guard.verdict(full, FLAGGED) == 2)
-        check("完整字典：干净中文放行",
+        check("Full dictionary allows clean text",
               eval_zh_guard.verdict(full, CLEAN) == 0)
-        check("完整字典：引号提及豁免",
+        check("Full dictionary exempts quoted mentions",
               eval_zh_guard.verdict(full, EXEMPT) == 0)
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -99,10 +99,10 @@ def test_interception_cost_is_measured():
     try:
         full = eval_zh_guard.full_dict(os.path.join(d, "f.tsv"))
         ic = eval_zh_guard.interception_cost(full)
-        check("完整字典确实会拦截（用于量代价）", ic["blocked"] is True, str(ic))
-        check("单次拦截代价含重写回复的 token（%d）" % ic["cost_per_block_tokens"],
+        check("Full dictionary blocks the cost-measurement sample", ic["blocked"] is True, str(ic))
+        check("Block cost includes response regeneration (%d tokens)" % ic["cost_per_block_tokens"],
               ic["cost_per_block_tokens"] > ic["instruction_tokens"] > 0)
-        check("最坏窗口按 10 分钟 3 次折算",
+        check("Worst-case window includes three blocks per ten minutes",
               ic["worst_window_tokens"] == 3 * ic["cost_per_block_tokens"])
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -115,9 +115,9 @@ def test_timing_splits_startup_from_logic():
         timing = eval_zh_guard.timing(full, rounds=5)
         startup = eval_zh_guard.python_startup_ms(rounds=5)
         for key in ("inject_ms", "inspect_clean_ms", "inspect_hit_ms"):
-            check("%s 为正数（%.1f ms）" % (key, timing[key]), timing[key] > 0)
+            check("%s is positive (%.1f ms)" % (key, timing[key]), timing[key] > 0)
         net = eval_zh_guard.net_ms(timing["inspect_hit_ms"], startup)
-        check("扣掉解释器启动后净耗时更小且非负（%.1f ms）" % net,
+        check("Net timing excludes startup and remains nonnegative (%.1f ms)" % net,
               0 <= net < timing["inspect_hit_ms"])
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -129,12 +129,12 @@ def main():
         try:
             t()
         except Exception as exc:
-            check(t.__name__ + "（异常）", False, repr(exc))
+            check(t.__name__ + " (exception)", False, repr(exc))
     print("")
     if FAILURES:
-        print("失败 %d 项：%s" % (len(FAILURES), ", ".join(FAILURES)))
+        print("Failed %d checks: %s" % (len(FAILURES), ", ".join(FAILURES)))
         sys.exit(1)
-    print("全部通过（%d 项测试）" % len(tests))
+    print("All passed (%d tests)" % len(tests))
     sys.exit(0)
 
 

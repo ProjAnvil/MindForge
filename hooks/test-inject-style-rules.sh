@@ -50,19 +50,19 @@ print("ok")
     rm -rf "$tmp"
 }
 
-# --- zh-cn mode: Chinese + English ---
+# --- zh-cn mode: concise Chinese guidance ---
 
 validate "zh-cn marker, UserPromptSubmit" "zh-cn" \
     '{"session_id":"abc","hook_event_name":"UserPromptSubmit","prompt":"hi"}' \
-    "UserPromptSubmit" "yes" "yes"
+    "UserPromptSubmit" "yes" "no"
 
 validate "zh-cn marker, SubagentStart" "zh-cn" \
     '{"hook_event_name":"SubagentStart","agent_type":"general-purpose"}' \
-    "SubagentStart" "yes" "yes"
+    "SubagentStart" "yes" "no"
 
 validate "zh-cn marker, SessionStart" "zh-cn" \
     '{"hook_event_name":"SessionStart","source":"startup"}' \
-    "SessionStart" "yes" "yes"
+    "SessionStart" "yes" "no"
 
 # --- en mode: English only ---
 
@@ -87,7 +87,7 @@ validate "unknown marker defaults to en" "fr" \
 validate "marker with whitespace/newline" "zh-cn
 " \
     '{"hook_event_name":"UserPromptSubmit"}' \
-    "UserPromptSubmit" "yes" "yes"
+    "UserPromptSubmit" "yes" "no"
 
 # --- robustness ---
 
@@ -117,7 +117,7 @@ check "single-line JSON output (repo dir, no marker -> en)" "0" "$lines"
 
 validate "arg zh-cn overrides en marker" "en" \
     '{"hook_event_name":"UserPromptSubmit"}' \
-    "UserPromptSubmit" "yes" "yes" "zh-cn"
+    "UserPromptSubmit" "yes" "no" "zh-cn"
 
 validate "arg en overrides zh-cn marker" "zh-cn" \
     '{"hook_event_name":"UserPromptSubmit"}' \
