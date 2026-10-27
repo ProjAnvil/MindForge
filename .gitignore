@@ -96,3 +96,6 @@ evals/.env
 # Go build outputs
 .build/
 bin/
+
+# Local worktrees (superpowers isolation)
+.worktrees/
