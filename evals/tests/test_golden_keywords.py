@@ -18,7 +18,7 @@ pytestmark = [pytest.mark.llm, requires_llm]
 # (skill, {lang: trigger}, expected fragments)
 # Fragments are chosen to be near-deterministic for the skill's domain:
 # code constructs (@RestController, useState), product names (PostgreSQL,
-# Pinia), and format conventions ("As a", "作为") survive paraphrasing.
+# Pinia), and the conventional user-story opener survive paraphrasing.
 CASES = [
     (
         "testing",
@@ -115,7 +115,7 @@ CASES = [
             "en": "Write a one-sentence user story for a password reset feature",
             "zh-cn": "为密码重置功能写一条用户故事",
         },
-        ("As a",),  # zh-cn answer conventionally starts “作为……”, checked below
+        ("As a",),  # Chinese answers use a fixed opener, checked below
     ),
     (
         "session-summary",
@@ -168,7 +168,7 @@ CASES = [
 ]
 
 # Language-specific fragment overrides: a few conventions differ by language
-# (e.g. user stories open with "As a" in English but "作为" in Chinese).
+# (e.g. user stories open with "As a" in English but a fixed opener in Chinese).
 LANG_FRAGMENTS = {
     ("product-management", "zh-cn"): ("作为",),
 }
