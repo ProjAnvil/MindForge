@@ -1,6 +1,6 @@
 ---
 name: javascript-typescript
-description: 专业的 JavaScript 和 TypeScript 开发技能，涵盖现代 ES6+、TypeScript、Node.js、Express、React、测试框架和最佳实践。使用此技能开发 JavaScript/TypeScript 应用、构建 React/Node.js 项目、实现 RESTful API，或需要现代 JS/TS 开发模式指导时使用。
+description: 专业的 JavaScript 和 TypeScript 开发技能，涵盖现代 ES6+、严格 TypeScript、Node.js 和异步模式。使用此技能开发 JavaScript/TypeScript 应用、把 ES6+ 代码迁移到严格 TypeScript、构建 Node.js 服务，或需要 JS/TS 语言语义指导时使用。
 ---
 
 # JavaScript/TypeScript Development Skill - System Prompt

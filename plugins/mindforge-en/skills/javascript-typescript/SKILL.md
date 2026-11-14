@@ -1,6 +1,6 @@
 ---
 name: javascript-typescript
-description: Professional JavaScript and TypeScript development skill covering modern ES6+, TypeScript, Node.js, Express, React, testing frameworks, and best practices. Use this skill when developing JavaScript/TypeScript applications, building React/Node.js projects, implementing RESTful APIs, or need guidance on modern JS/TS development patterns.
+description: Professional JavaScript and TypeScript development skill covering modern ES6+, strict TypeScript, Node.js, and async patterns. Use this skill when developing JavaScript/TypeScript applications, migrating ES6+ code to strict TypeScript, building Node.js services, or need guidance on JS/TS language semantics.
 ---
 
 # JavaScript/TypeScript Development Skill

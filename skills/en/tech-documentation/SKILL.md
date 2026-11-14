@@ -1,6 +1,6 @@
 ---
 name: tech-documentation
-description: Technical documentation writing skill covering API docs, architecture documentation, deployment guides, and various technical writing best practices. Use this skill when creating technical documentation, writing API documentation, creating architecture design documents, or need templates for deployment and operations manuals.
+description: Technical documentation writing skill covering API reference guides, architecture documents, deployment guides, and operations manuals. Use this skill when creating technical documentation, writing API reference guides, drafting deployment guides, or need templates for operations manuals.
 ---
 
 # Tech Documentation Skill

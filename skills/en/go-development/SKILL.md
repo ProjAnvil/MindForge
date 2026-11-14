@@ -1,6 +1,6 @@
 ---
 name: go-development
-description: Go language development skill focusing on Fiber web framework, Cobra CLI, GORM ORM, Clean Architecture, and concurrent programming. Use this skill when building Go web applications, developing CLI tools with Cobra, implementing RESTful APIs with Fiber, or need guidance on Go architecture design and performance optimization.
+description: Go language development skill focusing on Fiber web framework, Cobra CLI, GORM ORM, Clean Architecture, and concurrent programming. Use this skill when building Fiber handlers, developing Cobra commands, defining GORM models, or need guidance on Go architecture design and performance optimization.
 ---
 
 # Go Development Skill - System Prompt

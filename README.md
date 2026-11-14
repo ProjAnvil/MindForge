@@ -161,13 +161,14 @@ mindforge doctor                                         # runtimes, registratio
 
 - **api-design** - API design (REST, GraphQL, gRPC)
 - **database-design** - Database design and optimization
+- **design-pattern** - GoF patterns, SOLID principles, and code smell detection
 - **enterprise-java** - Enterprise Java development (Spring Boot, microservices)
 - **frontend-react** - React ecosystem (Next.js, Server Components, Tailwind)
 - **frontend-svelte** - Svelte ecosystem (SvelteKit, shadcn-svelte)
 - **frontend-vue** - Vue ecosystem (Nuxt, Composition API, Pinia)
 - **git-guru** - Advanced Git operations and version control mastery
 - **go-development** - Go development (Fiber, Cobra, GORM)
-- **javascript-typescript** - JavaScript/TypeScript development (Node.js, Express, React)
+- **javascript-typescript** - JavaScript/TypeScript language work (ES6+, strict TypeScript, Node.js)
 - **product-management** - Product management and strategy
 - **python-development** - Python development (FastAPI, Django, Flask, asyncio)
 - **session-summary** - Summarize current session context for seamless handover
@@ -203,32 +204,8 @@ mindforge/
 │       ├── python-test-engineer.md
 │       └── system-architect.md
 ├── skills/              # Claude Code format Skills (multi-language)
-│   ├── en/             # English versions
-│   │   ├── testing/SKILL.md
-│   │   ├── enterprise-java/SKILL.md
-│   │   ├── go-development/SKILL.md
-│   │   ├── python-development/SKILL.md
-│   │   ├── javascript-typescript/SKILL.md
-│   │   ├── system-architecture/SKILL.md
-│   │   ├── api-design/SKILL.md
-│   │   ├── database-design/SKILL.md
-│   │   ├── tech-documentation/SKILL.md
-│   │   ├── frontend-development/SKILL.md
-│   │   ├── git-guru/SKILL.md
-│   │   └── xcode-management/SKILL.md
-│   ├── zh-cn/          # Chinese versions
-│   │   ├── testing/SKILL.md
-│   │   ├── enterprise-java/SKILL.md
-│   │   ├── go-development/SKILL.md
-│   │   ├── python-development/SKILL.md
-│   │   ├── javascript-typescript/SKILL.md
-│   │   ├── system-architecture/SKILL.md
-│   │   ├── api-design/SKILL.md
-│   │   ├── database-design/SKILL.md
-│   │   ├── tech-documentation/SKILL.md
-│   │   ├── frontend-development/SKILL.md
-│   │   ├── git-guru/SKILL.md
-│   │   └── xcode-management/SKILL.md
+│   ├── en/             # 19 English skills; see Available Skills above
+│   ├── zh-cn/          # 19 Chinese skills; see Available Skills above
 │   └── scripts/        # Shared executable scripts for skills
 │       └── xcode-management/
 │           └── add_files_to_xcode.py  # Automated Xcode file addition
