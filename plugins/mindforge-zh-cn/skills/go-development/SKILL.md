@@ -1,304 +1,110 @@
 ---
 name: go-development
-description: Go 语言开发技能，专注于 Fiber Web 框架、Cobra CLI、GORM ORM、整洁架构和并发编程。使用此技能编写 Fiber handler、开发 Cobra 命令、定义 GORM 模型，或需要 Go 架构设计和性能优化指导时使用。
+description: 使用此技能处理协程泄漏、通道死锁、context.Context 取消失效、sync.WaitGroup 卡死、竞态检测报告，或 Go memory model 与语言语义存疑，以及任何 Go 语言层面疑问（哪怕只有一段代码、哪怕没有点名任何框架）时使用。
 ---
 
 # Go 开发技能
 
-你是一名专家级 Go 开发者，拥有 10 年以上使用现代 Go 实践构建高性能、可扩展应用的经验，专精于 Fiber Web 框架、Cobra CLI 开发和 GORM ORM。
+以语言本身为核心：Go 语法、并发与惯用法。框架相关代码放在 `references/` 并在下方给出链接；语言层面的回答保持框架无关。
 
-## 何时使用
+## Gotchas
 
-触发场景：当用户提出以下请求时，使用本 skill：
+每条陷阱按「现象 → 原因 → 修复」组织。写任何并发代码前先过一遍。
 
-- 当需要用 Go 构建 Web 应用或 REST API 时
-- 当需要开发 Cobra CLI 工具时
-- 当用户要求使用 GORM、整洁架构或并发模式时
+### 1. 数据竞争与 Go memory model（DRF-SC）
+- 现象：`go test -race` 报出 DATA RACE；多次运行结果不一致。
+- 原因：没有 happens-before 边（通道收发、sync.Mutex、sync/atomic）时，并发读写就是数据竞争。go.dev/ref/mem 只保证 DRF-SC：无数据竞争的程序表现为顺序一致，有竞争的程序行为未定义，编译器与 CPU 可自由重排。
+- 修复：用 sync.Mutex/RWMutex 或 sync/atomic 保护共享状态，或通过通道转移所有权；绝不要用 time.Sleep「修复」。用 `go test -race` 验证（go.dev/blog/race-detector）。
 
-## 你的专业领域
+### 2. 忽略 context.Context 取消与超时
+- 现象：请求已超时但工作仍在跑；"context deadline exceeded" 出现得太晚；资源不断堆积。
+- 原因：context 是取消信号树，不是值容器；忽略 ctx.Done() 会让 goroutine 没有停止条件，而 deadline 只有在每个下游调用都接收并遵守 ctx 时才有意义（go.dev/blog/context）。
+- 修复：把 ctx 作为第一个参数，select 监听 <-ctx.Done()，用 context.WithCancel/WithTimeout/WithDeadline 派生，defer 调用 cancel()，并把 ctx 透传给每个阻塞调用。
 
-### 技术栈
-- **Go**: 1.21+ 最新特性和最佳实践
-- **Web 框架**: Fiber v2 - 受 Express 启发，速度超快
-- **CLI 框架**: Cobra - 强大的命令行应用
-- **ORM**: GORM v2 - 功能丰富且对开发者友好
-- **架构**: 整洁架构、DDD、分层架构
-- **测试**: testify、gomock、表驱动测试
-- **工具**: golangci-lint、pprof、delve
+### 3. Goroutine 泄漏
+- 现象：pprof 里 goroutine 数量无限增长；内存持续上升；父函数返回后 worker 永不退出。
+- 原因：阻塞在通道收发且不会再有配对方、或没有 ctx.Done() 的死循环，都没有退出路径；运行时不会回收阻塞中的 goroutine（go.dev/blog/pipelines）。
+- 修复：给每个 goroutine 一个停止条件（select 中的 ctx.Done()），用 close 广播完成，并让持有者通过 sync.WaitGroup / errgroup 等待，使泄漏可见。
 
-### 核心能力
-- 使用 Fiber 构建 RESTful API
-- 使用 Cobra 开发 CLI 工具
-- 使用 GORM 进行数据库操作
-- 整洁架构设计
-- 并发编程（goroutines、channels）
-- 错误处理模式
-- 性能优化
-- 测试策略
+### 4. 闭包捕获循环变量（Go 1.22 之前）
+- 现象：每个 goroutine 都打印最后一个元素；所有回调看到同一个值。
+- 原因：Go 1.22 之前 range 变量在迭代间复用，闭包捕获的是同一个地址，且往往在循环推进后才执行。
+- 修复：把值作为参数传入（go func(v T){...}(v)）或用 v := v 遮蔽；Go 1.22+ 的循环变量按迭代独立，但面向旧版本仍保留该写法。按 [modern-go.md](modern-go.md) 判断版本。
 
-## 代码生成标准
+### 5. 循环里写 defer
+- 现象：文件描述符或锁一直累积到函数返回；长循环内存飙升；close() 执行得太晚。
+- 原因：defer 在函数返回时执行，而非迭代结束，所以每次迭代都会再压入一个延迟调用。
+- 修复：把循环体抽到带自己 defer 的辅助函数，或在每次迭代末尾显式释放/关闭。
 
-### 项目结构（整洁架构）
+### 6. 错误包装让 errors.Is / errors.As 失效
+- 现象：包装之后 `err == ErrNotFound` 为 false；哨兵错误判断静默失败。
+- 原因：相等比较的是外层包装而非根因；fmt.Errorf("%w") 会构建链，"%v" 会丢掉链。
+- 修复：用 fmt.Errorf("...: %w", err) 包装，用 errors.Is(err, target) / errors.As(err, &t) 检查；绝不比较 err.Error() 字符串。标准库 HTTP 用 w.WriteHeader(http.StatusNotFound) 表示 404，不用框架常量。
 
-始终使用以下结构：
+### 7. interface 里的 typed nil
+- 现象：具体值是 nil，但 `if err != nil` 仍为 true；方法内空指针 panic。
+- 原因：interface 是 (type, value) 二元组；把 (*T)(nil) 作为 error 返回时，type 字段非空，整个 interface 就非 nil。
+- 修复：错误路径直接返回字面量 nil，在边界处检查 typed nil；绝不把 typed nil 当作 error 返回。
 
-```
-project/
-├── cmd/                    # 入口点
-│   ├── api/               # API 服务器
-│   └── cli/               # CLI 工具
-├── internal/              # 私有应用代码
-│   ├── domain/           # 领域层（实体、接口）
-│   │   └── user/
-│   │       ├── entity.go      # 领域实体
-│   │       ├── repository.go  # 仓储接口
-│   │       └── service.go     # 服务接口
-│   ├── usecase/          # 用例层（业务逻辑）
-│   │   └── user/
-│   │       └── service.go     # 服务实现
-│   ├── adapter/          # 适配器层
-│   │   ├── handler/      # HTTP 处理器
-│   │   └── repository/   # 仓储实现
-│   ├── infrastructure/   # 基础设施
-│   │   ├── database/
-│   │   ├── logger/
-│   │   └── config/
-│   └── dto/              # 数据传输对象
-├── pkg/                  # 公共可重用包
-│   ├── errors/
-│   ├── middleware/
-│   └── validator/
-├── config/
-├── migrations/
-└── test/
-```
+### 8. 无缓冲通道死锁
+- 现象："all goroutines are asleep - deadlock!"；发送与接收在同一个 goroutine 上永久阻塞。
+- 原因：无缓冲通道的发送要等到接收方就绪才返回；若收发都在同一 goroutine，或根本不存在接收方，就谁也无法推进。
+- 修复：在一个 goroutine 发送、另一个接收；生产者不该阻塞时加缓冲；用带 ctx.Done()/default 的 select；只由发送方 close 通道。
 
-### 标准文件模板
+## Language Core
 
-> **标准文件模板**（领域实体、仓储接口/实现、服务接口/实现、Fiber HTTP处理器、DTO、Cobra CLI命令）：参见 [references/file-templates.md](references/file-templates.md)
+语言层面决策的速查。刻意保持框架无关；版本相关特性见 [modern-go.md](modern-go.md)。
 
-## 你始终遵循的最佳实践
+- **语法与类型特性**：复合字面量、有用的零值、:= 类型推断、range 语义、defer/panic/recover、方法集、内嵌、rune 与 byte、字符串不可变。
+- **泛型**：类型参数 `[T any]`、约束（~、comparable）、类型推断；方法不能有类型参数；用于类型安全的容器/算法，而非替代接口。
+- **接口**：隐式实现、小的单方法接口、接受接口/返回结构体、type switch 与类型断言、谨慎使用 `any`。
+- **并发与同步原语**：goroutine（轻量、M:N 调度）、通道（有/无缓冲、单向、close、range）、select（default + 取消）、sync.Mutex/RWMutex、sync.Once、sync.WaitGroup、sync.Cond、sync/atomic、sync.Map、context.Context。
+- **同步/异步模式**：Go 没有 async/await —— 并发就是显式的 goroutine 加通道；fan-out/fan-in、worker pool、pipeline（阶段由通道相连）、errgroup 式 ctx 取消、生成器模式、用信号量通道限制并发。
+- **错误处理**：error 即值、哨兵错误、fmt.Errorf("%w")、errors.Is/As/Join、自定义错误类型、在边界包装且只处理一次。
+- **惯用的包设计**：小而按职责命名的包、internal/、导出标识符写文档、不要 util/common 大杂烩、接受接口、避免 init() 副作用、让零值可用。
 
-### 1. 错误处理
+仅使用标准库的示例（无框架类型、无 ORM 标签）：
 
 ```go
-// ✅ 好：使用上下文包装错误
-func (s *service) GetUser(ctx context.Context, id string) (*User, error) {
-    user, err := s.repo.GetByID(ctx, id)
-    if err != nil {
-        return nil, errors.Wrap(err, "failed to get user from repository")
-    }
-    return user, nil
+// A plain struct: no ORM tags in language-level examples.
+type User struct {
+    ID   string
+    Mail string
 }
 
-// ✅ 好：使用 errors.Is 进行比较
-if errors.Is(err, user.ErrNotFound) {
-    return c.Status(fiber.StatusNotFound).JSON(...)
-}
-
-// ❌ 差：忽略错误
-func (s *service) DoSomething() {
-    _ = s.repo.Save(user)  // 不要忽略错误！
-}
-
-// ❌ 差：字符串比较
-if err.Error() == "user not found" {  // 脆弱！
-    // ...
-}
+// Signal 404 with the standard library, not a framework constant.
+w.WriteHeader(http.StatusNotFound)
 ```
 
-### 2. Context 使用
+## Framework Selection
 
-```go
-// ✅ 好：始终传递和检查 context
-func (s *service) ProcessOrder(ctx context.Context, orderID string) error {
-    // Check if context is cancelled
-    select {
-    case <-ctx.Done():
-        return ctx.Err()
-    default:
-    }
+仅当任务需要框架脚手架时才查对应参考；上面的语言问题与框架无关。
 
-    // Pass context downstream
-    order, err := s.repo.GetOrder(ctx, orderID)
-    if err != nil {
-        return err
-    }
+| 框架 / 技术栈 | 参考文件 | 何时阅读 |
+| --- | --- | --- |
+| 无框架（标准库，`net/http`） | [modern-go.md](modern-go.md) | 最先看，任何代码都适用 —— 写之前先确定与目标版本匹配的语法和现代内置包（slices、maps、cmp）。 |
+| Fiber（HTTP handler）、Cobra（CLI 命令）、GORM（模型）、整洁架构脚手架 | [references/file-templates.md](references/file-templates.md) | 仅在需要产出框架专属文件时：Fiber handler、Cobra 命令、带 GORM 标签的实体、DTO、repository/service 分层，或整洁架构目录。 |
 
-    // Use timeout context for external calls
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-    defer cancel()
+## Response Patterns
 
-    return s.externalAPI.Process(ctx, order)
-}
+面向任何 Go 语言请求的框架无关工作流：
 
-// ❌ 差：不传递 context
-func (s *service) GetUser(id string) (*User, error) {
-    return s.repo.GetByID(id)  // 缺少 context！
-}
-```
+1. 先分类：语言层面（语法、类型、并发、错误）还是框架脚手架；语言层面用 Gotchas / Language Core 回答。
+2. 写并发代码前，先点明 happens-before 边和停止条件（ctx.Done()），再用 `go test -race` 与 `go vet` 验证。
+3. 优先写标准库代码；只有经由 Framework Selection 表及其链接的参考才引入框架。
+4. 宁可给一个能编译的小例子，也不要长篇大论；说明目标 Go 版本并用 [modern-go.md](modern-go.md) 约束特性。
+5. 结尾点出具体命中的陷阱（循环变量捕获、typed nil、无缓冲通道），把「为什么」讲透。
 
-### 3. 并发编程
+框架专属请求（仅一行指针，不内联具体做法）：
 
-```go
-// ✅ 好：使用 errgroup 处理多个 goroutine
-import "golang.org/x/sync/errgroup"
+- 被要求创建 Web API 或 REST handler：见 [references/file-templates.md](references/file-templates.md)。
+- 被要求创建 CLI 工具或命令：见 [references/file-templates.md](references/file-templates.md)。
 
-func (s *service) FetchMultiple(ctx context.Context, ids []string) ([]*User, error) {
-    g, ctx := errgroup.WithContext(ctx)
-    results := make([]*User, len(ids))
+## Remember
 
-    for i, id := range ids {
-        i, id := i, id  // Capture loop variables
-        g.Go(func() error {
-            user, err := s.repo.GetByID(ctx, id)
-            if err != nil {
-                return err
-            }
-            results[i] = user
-            return nil
-        })
-    }
-
-    if err := g.Wait(); err != nil {
-        return nil, err
-    }
-    return results, nil
-}
-
-// ✅ 好：使用 sync.WaitGroup 进行不需要返回值的操作
-func (s *service) NotifyUsers(users []*User) {
-    var wg sync.WaitGroup
-    for _, u := range users {
-        wg.Add(1)
-        go func(user *User) {
-            defer wg.Done()
-            s.notifier.Send(user.Email, "message")
-        }(u)
-    }
-    wg.Wait()
-}
-
-// ❌ 差：goroutine 泄漏
-func (s *service) Subscribe() {
-    go func() {
-        for {  // 没有办法停止！
-            s.processMessages()
-        }
-    }()
-}
-```
-
-### 4. GORM 最佳实践
-
-```go
-// ✅ 好：使用 preload 避免 N+1 查询
-users, err := r.db.Preload("Orders").Find(&users).Error
-
-// ✅ 好：使用事务处理多个操作
-err := r.db.Transaction(func(tx *gorm.DB) error {
-    if err := tx.Create(&user).Error; err != nil {
-        return err
-    }
-    if err := tx.Create(&profile).Error; err != nil {
-        return err
-    }
-    return nil
-})
-
-// ✅ 好：使用批量插入
-r.db.CreateInBatches(users, 100)
-
-// ❌ 差：N+1 查询问题
-users, _ := r.db.Find(&users).Error
-for _, user := range users {
-    orders, _ := r.db.Where("user_id = ?", user.ID).Find(&orders).Error  // N 次查询！
-}
-```
-
-### 5. 依赖注入
-
-```go
-// ✅ 好：构造函数注入接口
-type UserService struct {
-    repo   user.Repository  // 接口，不是具体类型
-    cache  cache.Cache
-    logger logger.Logger
-}
-
-func NewUserService(
-    repo user.Repository,
-    cache cache.Cache,
-    logger logger.Logger,
-) *UserService {
-    return &UserService{
-        repo:   repo,
-        cache:  cache,
-        logger: logger,
-    }
-}
-
-// ❌ 差：内部直接实例化
-type UserService struct {
-    repo *PostgresRepo  // 具体类型！
-}
-
-func NewUserService() *UserService {
-    return &UserService{
-        repo: &PostgresRepo{},  // 紧耦合！
-    }
-}
-```
-
-## 响应模式
-
-### 被要求创建 Web API 时
-
-1. **理解需求**：询问端点、认证、数据库需求
-2. **设计架构**：提议整洁架构结构
-3. **生成完整代码**：
-   - 带 GORM 标签的领域实体
-   - 仓储接口和实现
-   - 服务接口和实现
-   - 带验证的 Fiber 处理器
-   - 请求/响应的 DTO
-   - 需要的中间件
-   - 带路由设置的主入口点
-4. **包含**：错误处理、日志、验证、测试
-
-### 被要求创建 CLI 工具时
-
-1. **理解命令**：需要哪些命令和子命令？
-2. **设计命令结构**：根命令 → 子命令 → 标志
-3. **生成完整代码**：
-   - 带持久标志的根命令
-   - 带特定标志的子命令
-   - 使用 Viper 加载配置
-   - 业务逻辑集成
-   - 帮助文本和示例
-4. **包含**：输入验证、错误消息、使用示例
-
-### 被要求优化性能时
-
-1. **识别瓶颈**：数据库？CPU？内存？
-2. **提出解决方案**：
-   - 数据库：索引、查询优化、连接池
-   - 内存：sync.Pool、避免分配、性能分析
-   - CPU：并发、算法优化
-3. **提供基准测试**：优化前后对比
-4. **实现**：带注释的完整优化代码
-
-## 记住
-
-- **接口在领域层，实现在适配器层**
-- **始终使用 context.Context 作为第一个参数**
-- **错误包装增加有价值的调试上下文**
-- **表驱动测试实现全面覆盖**
-- **golangci-lint 捕获大多数常见问题**
-- **优先使用组合而不是继承**
-- **保持函数小而专注（< 50 行）**
-- **使用能揭示意图的有意义的名称**
-
-## 更多资源
-
-- 对于基于项目 Go 版本的现代 Go 语法指南，请参阅 [modern-go.md](modern-go.md) - 包含从 Go 1.0 到 Go 1.26+ 的版本特性
+- 先查 Gotchas：多数 Go bug 是竞争、泄漏或 interface nil。
+- 始终尊重 context.Context；给每个 goroutine 一个停止条件。
+- 用 `go test -race` 验证并发；`go vet` 能抓到循环变量捕获。
+- 用 `%w` 包装，用 errors.Is / errors.As 检查，绝不比较错误字符串。
+- 这里的回答保持框架无关；框架模板放在 `references/`。
+- 用 [modern-go.md](modern-go.md) 确认项目的 Go 版本后再用新语法。

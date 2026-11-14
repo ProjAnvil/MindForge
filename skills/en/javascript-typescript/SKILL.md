@@ -1,331 +1,134 @@
 ---
 name: javascript-typescript
-description: Professional JavaScript and TypeScript development skill covering modern ES6+, strict TypeScript, Node.js, and async patterns. Use this skill when developing JavaScript/TypeScript applications, migrating ES6+ code to strict TypeScript, building Node.js services, or need guidance on JS/TS language semantics.
+description: Use this skill when TypeScript type narrowing misfires, when Promise or async/await ordering and rejection handling go wrong, or when ES6+ / JavaScript module and generics semantics are in doubt. Claim ANY language-level JS/TS question proactively — even a single snippet, even when no framework is named.
 ---
 
-# JavaScript/TypeScript Development Skill
+# JavaScript & TypeScript — Language Skill
 
-You are an expert JavaScript and TypeScript developer with 10+ years of experience building modern, scalable applications using the latest ECMAScript standards, TypeScript, Node.js ecosystem, and frontend frameworks.
+Language-first guidance: JS/TS syntax, the type system, concurrency, and idioms. Framework-specific code lives in `references/` and is linked below; keep language answers framework-neutral.
 
-## When to Use
+## Gotchas
 
-Trigger scenarios — use this skill when the user asks to:
+Each trap is written as Symptom -> Why -> Fix. Scan these before writing any async or typed code.
 
-- Develop JavaScript / TypeScript applications
-- Build Express / Node.js APIs or React projects
-- Set up testing frameworks or modern ES6+ patterns
+### 1. `any` propagation
+- Symptom: One `any` (e.g. from untyped JSON) silently strips types from everything downstream; checks and autocomplete vanish.
+- Why: `any` opts out of checking and is contagious — it propagates through inference, assignments, and return types.
+- Fix: Type external data as `unknown` and narrow at the boundary; keep `any` out of public signatures.
 
-## Your Expertise
+### 2. `as` assertions vs narrowing
+- Symptom: `const u = data as User` compiles, then `u.name` throws because the runtime shape differs.
+- Why: `as` only silences the compiler — there is no runtime check. Narrowing (`typeof`, `in`, discriminant unions, type guards) actually proves the shape; `satisfies` validates literals without widening.
+- Fix: Replace assertions with a type guard or control-flow narrowing; reserve `as` for uncheckable cases such as `as const`.
 
-### Technical Stack
-- **Languages**: JavaScript (ES6+), TypeScript 5+
-- **Runtime**: Node.js 18+, Deno, Bun
-- **Backend**: Express.js, Fastify, NestJS, Koa
-- **Frontend**: React 18+, Next.js 14+, Vue 3, Svelte
-- **Testing**: Jest, Vitest, Playwright, Cypress
-- **Build Tools**: Vite, Webpack, esbuild, Rollup
-- **Package Managers**: npm, yarn, pnpm
+### 3. Unhandled promise rejection
+- Symptom: An async failure is swallowed, or the process reports an opaque unhandled rejection with no useful stack.
+- Why: A rejected promise with no `catch`/`try` escapes; `await` outside try/catch rethrows into the caller chain.
+- Fix: Wrap `await` in try/catch, attach `.catch()`, or use `Promise.allSettled`; never leave a rejection unobserved.
 
-### Core Competencies
-- Modern JavaScript (async/await, destructuring, modules)
-- TypeScript advanced types (generics, conditional types, mapped types)
-- RESTful API development with Express/Fastify
-- React development with hooks and context
-- State management (Redux Toolkit, Zustand, Jotai)
-- Testing strategies (unit, integration, e2e)
-- Performance optimization
-- Security best practices
+### 4. Sequential `await` vs `Promise.all`
+- Symptom: Three independent async calls take the sum of their latencies instead of the maximum.
+- Why: Back-to-back or in-loop `await` serializes — the next promise is created only after the previous resolves.
+- Fix: Start them together and `await Promise.all([...])`; use `allSettled` when partial failures are acceptable.
 
-## Code Generation Standards
+### 5. Floating promises
+- Symptom: Fire-and-forget work sometimes never completes and its errors disappear without a log.
+- Why: Calling an `async` function without `await`, `return`, or `.catch()` detaches it from the caller's lifecycle.
+- Fix: `await` it, or explicitly `void` it with a `.catch()`; enable a no-floating-promises lint rule.
 
-### Project Structure (Backend - Express + TypeScript)
+### 6. `unknown` vs `any`
+- Symptom: `JSON.parse(raw).id` "works" until the payload is not an object, then throws with no compile-time warning.
+- Why: `any` permits every operation; `unknown` forbids all of them until narrowed, forcing an explicit check.
+- Fix: Treat parsed/dynamic values as `unknown`, then narrow with `typeof`/`in`/guards before access.
 
-```
-project/
-├── src/
-│   ├── controllers/          # Route controllers
-│   ├── services/             # Business logic
-│   ├── repositories/         # Data access layer
-│   ├── models/               # Data models (TypeScript interfaces/types)
-│   ├── middleware/           # Express middleware
-│   ├── routes/               # Route definitions
-│   ├── utils/                # Utility functions
-│   ├── config/               # Configuration
-│   ├── types/                # TypeScript type definitions
-│   └── index.ts              # Entry point
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-├── package.json
-├── tsconfig.json
-├── jest.config.js
-└── .env.example
-```
+### 7. `==` coercion
+- Symptom: `[] == false`, `"" == 0`, and `null == undefined` behave unexpectedly; coercion bugs hide in conditionals.
+- Why: `==` applies the abstract equality algorithm with implicit type conversion; `===` compares type and value directly.
+- Fix: Default to `===`; the one tolerated exception is `x == null` to test for both null and undefined.
 
-### Project Structure (Frontend - React + TypeScript)
+### 8. ES module cycles
+- Symptom: An imported binding is `undefined` or throws "Cannot access before initialization" (TDZ).
+- Why: ESM uses live bindings evaluated once; a cycle can read a binding before its module body has initialized it.
+- Fix: Move shared constants/helpers into a third module, avoid top-level side effects, and import functions rather than evaluated values across a cycle.
 
-```
-project/
-├── src/
-│   ├── components/           # React components
-│   │   ├── common/          # Reusable components
-│   │   └── features/        # Feature-specific components
-│   ├── hooks/               # Custom React hooks
-│   ├── contexts/            # React contexts
-│   ├── services/            # API services
-│   ├── store/               # State management
-│   ├── types/               # TypeScript types
-│   ├── utils/               # Utility functions
-│   ├── styles/              # Global styles
-│   ├── App.tsx
-│   └── main.tsx
-├── public/
-├── tests/
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-└── .env.example
-```
+### 9. `this` binding
+- Symptom: `const f = obj.method; f()` fails because `this` is `undefined` or the wrong object.
+- Why: `this` is set by the call site, not the definition; in strict mode and ESM a bare call leaves it `undefined`.
+- Fix: Use arrow functions for callbacks, `.bind(obj)`, or call as `obj.method()`; pass context explicitly when extracting handlers.
 
-## Standard File Templates
+### 10. Structural typing surprises
+- Symptom: An object with extra properties is accepted where a narrower type is expected, and two nominally different interfaces are interchangeable.
+- Why: TypeScript is structural — compatibility is by shape, not declared name; excess property checks apply only to fresh object literals.
+- Fix: Add a brand (unique symbol or private field) for nominal-like distinctions, and use `satisfies` to validate literals while keeping their narrow type.
 
-### TypeScript Configuration
+## Language Core
 
-```json
-// tsconfig.json (Backend - Node.js)
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "lib": ["ES2022"],
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
-}
+Concise reference for language-level decisions. Framework-neutral by design; see the Framework Selection table for scaffolding. Grounded in the TypeScript Handbook (narrowing, satisfies, unknown vs any), MDN Promise / async-await, and ECMAScript module semantics.
 
-// tsconfig.json (Frontend - React)
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
-}
-```
+- **Type system and narrowing**: structural typing, `unknown` vs `any`, control-flow narrowing (`typeof`, `in`, `instanceof`, discriminated unions), user-defined guards (`x is T`), `satisfies` vs `as const`, excess property checks.
+- **Generics**: `function first<T>(xs: readonly T[]): T | undefined`, constraints (`T extends { id: string }`), defaults, inference, `keyof`/mapped/conditional types — parameterize types, not values.
+- **ES6+ syntax and module semantics**: destructuring, spread/rest, optional chaining (`?.`), nullish coalescing (`??`), template literals, `for...of`; ESM static imports are hoisted with live read-only bindings and a single module instance, `export`/`export default`, top-level `await` — no `require` here.
+- **Event loop and async/await**: one call stack; macrotasks (timers, I/O) vs microtasks (promise jobs, `queueMicrotask`); `await` yields and resumes as a microtask; async is not parallel — CPU-bound work still blocks.
+- **Promise combinators**: `Promise.all` (fail-fast), `allSettled` (all outcomes), `race` (first settle), `any` (first fulfil); choose by failure semantics, not habit.
+- **Error handling**: `try/catch/finally`, `catch (e)` is `unknown` under `strict`, typed error guards, `cause` for wrapping, reject with `Error` not strings; handle once at the boundary.
+- **Immutability and idiom**: prefer `const` and `as const`, copy with spread/`map`/`filter`, avoid in-place mutation, compare with `===`, small pure functions.
 
-> **Express API patterns** (Model, Repository, Service, Controller, Routes, Middleware): see [references/express-api-patterns.md](references/express-api-patterns.md)
-> **React Components with TypeScript** (Custom Hook, React Component, Context API): see [references/react-patterns.md](references/react-patterns.md)
-> **Testing patterns** (Jest config, Unit tests, Integration tests): see [references/testing-patterns.md](references/testing-patterns.md)
-## Best Practices You Always Apply
-
-### 1. TypeScript Type Safety
+Standard-library-only example (no framework types, no runtime globals):
 
 ```typescript
-// ✅ GOOD: Strong typing
-interface User {
-  id: string;
-  email: string;
-  name: string;
-}
-
-function getUser(id: string): Promise<User> {
-  // ...
-}
-
-// ✅ GOOD: Type guards
-function isUser(obj: unknown): obj is User {
+// A type guard narrows `unknown` to a concrete shape at the boundary.
+function isUser(value: unknown): value is { id: string; name: string } {
   return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'id' in obj &&
-    'email' in obj &&
-    'name' in obj
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'name' in value
   );
 }
 
-// ❌ BAD: Using any
-function getUser(id: any): any {
-  // Loses type safety
-}
-```
-
-### 2. Async/Await Error Handling
-
-```typescript
-// ✅ GOOD: Proper error handling
-async function fetchData(): Promise<Data> {
-  try {
-    const response = await fetch('/api/data');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    logger.error('Failed to fetch data:', error);
-    throw error;
-  }
+// A generic function preserves the element type without `any`.
+function first<T>(items: readonly T[]): T | undefined {
+  return items[0];
 }
 
-// ❌ BAD: Unhandled promise rejection
-async function fetchData() {
-  const response = await fetch('/api/data');
-  return await response.json(); // No error handling!
-}
+// `satisfies` validates a literal while keeping its narrow type.
+const config = { retries: 3, mode: 'strict' } satisfies Record<string, number | string>;
+
+// Plain config object, never a runtime-specific global.
+const retries = config.retries ?? 0;
 ```
 
-### 3. Immutability
+## Framework Selection
 
-```typescript
-// ✅ GOOD: Immutable operations
-const users = [user1, user2, user3];
-const updatedUsers = users.map(u =>
-  u.id === targetId ? { ...u, name: newName } : u
-);
+Pick a reference only when the task needs framework scaffolding; language questions above are framework-neutral.
 
-// ✅ GOOD: Const for non-reassignable values
-const MAX_RETRIES = 3;
-const config = { timeout: 5000 } as const;
-
-// ❌ BAD: Mutating state directly
-users[0].name = 'New Name'; // Direct mutation
-```
-
-### 4. Modern ES6+ Features
-
-```typescript
-// ✅ GOOD: Destructuring
-const { id, name, email } = user;
-const [first, second, ...rest] = items;
-
-// ✅ GOOD: Spread operator
-const newUser = { ...user, name: 'New Name' };
-const combined = [...array1, ...array2];
-
-// ✅ GOOD: Optional chaining
-const userName = user?.profile?.name ?? 'Anonymous';
-
-// ✅ GOOD: Nullish coalescing
-const port = process.env.PORT ?? 3000;
-```
-
-### 5. Proper Module Organization
-
-```typescript
-// ✅ GOOD: Named exports for multiple items
-export class UserService {}
-export interface User {}
-export const USER_ROLES = ['admin', 'user'] as const;
-
-// ✅ GOOD: Default export for main module export
-export default class App {}
-
-// ❌ BAD: Mixing named and default exports randomly
-```
-
-### 6. Promise Handling
-
-```typescript
-// ✅ GOOD: Promise.all for parallel operations
-const [users, posts, comments] = await Promise.all([
-  fetchUsers(),
-  fetchPosts(),
-  fetchComments(),
-]);
-
-// ✅ GOOD: Promise.allSettled for handling failures
-const results = await Promise.allSettled([
-  fetchData1(),
-  fetchData2(),
-  fetchData3(),
-]);
-results.forEach(result => {
-  if (result.status === 'fulfilled') {
-    console.log(result.value);
-  } else {
-    console.error(result.reason);
-  }
-});
-
-// ❌ BAD: Sequential when could be parallel
-const users = await fetchUsers();
-const posts = await fetchPosts(); // Could run in parallel!
-```
+| Framework / runtime | Reference file | When to read |
+| --- | --- | --- |
+| Express (REST API backend: controllers, services, routes, middleware) | [references/express-api-patterns.md](references/express-api-patterns.md) | Only when emitting a backend REST API — project structure, controllers, repository/service layers, or middleware scaffolding. |
+| React (components, custom hooks, context) | [references/react-patterns.md](references/react-patterns.md) | Only when writing React components, custom hooks, or Context-based state with TypeScript. |
+| Jest / testing utilities | [references/testing-patterns.md](references/testing-patterns.md) | Only when writing unit/integration tests or test configuration for JS/TS utilities. |
 
 ## Response Patterns
 
-### When Asked to Create a Backend API
+Framework-neutral workflow for any JS/TS language request:
 
-1. **Understand Requirements**: Endpoints, database, authentication
-2. **Design Architecture**: Controllers → Services → Repositories
-3. **Generate Complete Code**:
-   - TypeScript interfaces and types
-   - Repository with data access methods
-   - Service with business logic
-   - Controller with route handlers
-   - Middleware (auth, validation, error handling)
-   - Routes configuration
-4. **Include**: Error handling, logging, validation, tests
+1. Classify: language-level (syntax, types, async, modules) vs framework scaffolding; language-level is answered from Gotchas / Language Core.
+2. For async code, name the concurrency shape first — independent work via `Promise.all`, partial failures via `allSettled` — and confirm every promise is awaited or handled.
+3. Write standard-library-only code; reach for frameworks only through the Framework Selection table and its linked reference.
+4. Prefer one small typed example (with `<T>` where generics apply) over prose; state whether the target is ESM or CommonJS.
+5. Close by naming the specific gotcha that applies (`any`, `as`, `==`, `this`, cycles) so the "why" is explicit.
 
-### When Asked to Create a React Component
+Framework-specific requests (one-line pointers, no inline recipes):
 
-1. **Understand Requirements**: Props, state, side effects
-2. **Design Component Structure**: Hooks, context, children
-3. **Generate Complete Code**:
-   - TypeScript interface for props
-   - Functional component with hooks
-   - Custom hooks if needed
-   - Proper event handlers
-   - Loading and error states
-4. **Include**: Type safety, accessibility, performance optimization
-
-### When Asked to Optimize Performance
-
-1. **Identify Bottleneck**: Rendering, network, computation
-2. **Propose Solutions**:
-   - React: useMemo, useCallback, React.memo, lazy loading
-   - Backend: Caching, database indexing, connection pooling
-   - General: Code splitting, compression, CDN
-3. **Provide Benchmarks**: Before/after comparison
-4. **Implementation**: Optimized code with comments
+- Asked to create a backend REST API / Express project structure: see [references/express-api-patterns.md](references/express-api-patterns.md).
+- Asked to create a React component or custom hook: see [references/react-patterns.md](references/react-patterns.md).
+- Asked to set up tests or a test configuration: see [references/testing-patterns.md](references/testing-patterns.md).
 
 ## Remember
 
-- **Type everything**: Use TypeScript's full power
-- **Async/await over callbacks**: Modern async patterns
-- **Immutability**: Don't mutate state or objects
-- **Error handling**: Always handle errors properly
-- **Testing**: Unit, integration, and e2e tests
-- **DRY principle**: Extract reusable logic into functions/hooks
-- **Single responsibility**: Each function/component does one thing
-- **Meaningful names**: Clear, descriptive variable and function names
-- **Modern syntax**: Use ES6+ features consistently
+- Check Gotchas first: most JS/TS bugs are `any`, `as`, unhandled rejections, `==`, or `this`.
+- Narrow `unknown` at boundaries; keep `any` out of signatures; prefer `satisfies` and `as const` over `as`.
+- `await` every promise you start; `Promise.all` for independent work, `allSettled` for partial failures.
+- Default to `===`, `const`, and immutable copies.
+- Keep answers framework-neutral here; framework templates live in `references/`.
+- Read the linked reference before emitting framework scaffolding; language questions never need it.

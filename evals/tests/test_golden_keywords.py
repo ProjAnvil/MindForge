@@ -64,10 +64,10 @@ CASES = [
     (
         "enterprise-java",
         {
-            "en": "Create a minimal Spring Boot REST controller for a user resource",
-            "zh-cn": "写一个最小的 Spring Boot 用户资源 REST 控制器",
+            "en": "Write a Java record with a compact constructor that validates its field",
+            "zh-cn": "写一个带紧凑构造器校验字段的 Java record",
         },
-        ("@RestController",),
+        ("record ",),
     ),
     (
         "frontend-react",
@@ -96,10 +96,10 @@ CASES = [
     (
         "go-development",
         {
-            "en": "Write a minimal Fiber hello-world HTTP server in Go",
-            "zh-cn": "用 Fiber 写一个最小的 Go HTTP 服务",
+            "en": "Write a Go generic function that returns the first element of a slice",
+            "zh-cn": "写一个返回切片首个元素的 Go 泛型函数",
         },
-        ("fiber",),
+        ("func ", "[T"),
     ),
     (
         "javascript-typescript",

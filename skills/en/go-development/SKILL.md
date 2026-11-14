@@ -1,302 +1,110 @@
 ---
 name: go-development
-description: Go language development skill focusing on Fiber web framework, Cobra CLI, GORM ORM, Clean Architecture, and concurrent programming. Use this skill when building Fiber handlers, developing Cobra commands, defining GORM models, or need guidance on Go architecture design and performance optimization.
+description: Use this skill when a goroutine leaks or a channel deadlocks, when context.Context cancellation or sync.WaitGroup hangs, when the race detector reports a race, or when the Go memory model and language semantics are in doubt. Claim ANY language-level Go question proactively — even one snippet, even when no framework is named.
 ---
 
-# Go Development Skill - System Prompt
+# Go Development Skill
 
-You are an expert Go developer with 10+ years of experience building high-performance, scalable applications using modern Go practices, specializing in Fiber web framework, Cobra CLI development, and GORM ORM.
+Language-first guidance: Go syntax, concurrency, and idioms. Framework-specific code lives in `references/` and is linked below; keep language answers framework-neutral.
 
-## When to Use
+## Gotchas
 
-Trigger scenarios — use this skill when the user asks to:
+Each trap is written as Symptom -> Why -> Fix. Scan these before writing any concurrent code.
 
-- Build Go web applications with Fiber or REST APIs
-- Develop CLI tools with Cobra
-- Apply GORM, Clean Architecture, or concurrency patterns
+### 1. Data races and the Go memory model (DRF-SC)
+- Symptom: `go test -race` prints a DATA RACE report; results change between runs.
+- Why: Without a happens-before edge (channel send/receive, sync.Mutex, sync/atomic), a concurrent read/write is a data race. go.dev/ref/mem guarantees only DRF-SC: data-race-free programs behave sequentially consistent; racy ones are undefined, so the compiler and CPU may reorder freely.
+- Fix: Guard shared state with sync.Mutex/RWMutex or sync/atomic, or transfer ownership through a channel; never "fix" it with time.Sleep. Confirm with `go test -race` (go.dev/blog/race-detector).
 
-## Your Expertise
+### 2. context.Context cancellation and deadlines ignored
+- Symptom: a request times out but work keeps running; "context deadline exceeded" surfaces too late; resources pile up.
+- Why: context is a cancellation-signal tree, not a value bag; ignoring ctx.Done() leaves the goroutine with no stop condition, and a deadline helps only if every downstream call receives and honors ctx (go.dev/blog/context).
+- Fix: Take ctx as the first parameter, select on <-ctx.Done(), derive with context.WithCancel/WithTimeout/WithDeadline, call cancel() via defer, and propagate ctx to every blocking call.
 
-### Technical Stack
-- **Go**: 1.21+ with latest features and best practices
-- **Web Framework**: Fiber v2 - Express-inspired, blazing fast
-- **CLI Framework**: Cobra - powerful command-line applications
-- **ORM**: GORM v2 - feature-rich and developer-friendly
-- **Architecture**: Clean Architecture, DDD, Layered Architecture
-- **Testing**: testify, gomock, table-driven tests
-- **Tools**: golangci-lint, pprof, delve
+### 3. Goroutine leaks
+- Symptom: goroutine count grows without bound in pprof; memory climbs; a worker never exits after its parent returns.
+- Why: A goroutine blocked on a channel send/receive with no future partner, or an infinite loop with no ctx.Done(), has no exit path; the runtime never garbage-collects blocked goroutines (go.dev/blog/pipelines).
+- Fix: Give every goroutine a stop condition (ctx.Done() in select), close channels to broadcast completion, and let the owner wait via sync.WaitGroup / errgroup so leaks become visible.
 
-### Core Competencies
-- Building RESTful APIs with Fiber
-- Developing CLI tools with Cobra
-- Database operations with GORM
-- Clean architecture design
-- Concurrent programming (goroutines, channels)
-- Error handling patterns
-- Performance optimization
-- Testing strategies
+### 4. Loop variable capture in closures (pre-Go 1.22)
+- Symptom: every goroutine prints the last element; all callbacks see the same value.
+- Why: Before Go 1.22 the range variable was reused across iterations, so closures captured one address and often ran after the loop advanced.
+- Fix: Pass the value as a parameter (go func(v T){...}(v)) or shadow it (v := v); Go 1.22+ makes loop vars per-iteration, but keep the pattern for older targets. Gate by version with [modern-go.md](modern-go.md).
 
-## Code Generation Standards
+### 5. defer inside loops
+- Symptom: file descriptors or locks accumulate until the function returns; memory spikes in a long loop; close() runs far too late.
+- Why: defer executes at function return, not at iteration end, so each iteration stacks another deferred call.
+- Fix: Move the loop body into a helper func with its own defer, or release/close explicitly at the end of each iteration.
 
-### Project Structure (Clean Architecture)
+### 6. Error wrapping breaks errors.Is / errors.As
+- Symptom: `err == ErrNotFound` is false after wrapping; sentinel checks silently fail.
+- Why: Equality compares the outer wrapper, not the cause; fmt.Errorf("%w") builds a chain while "%v" discards it.
+- Fix: Wrap with fmt.Errorf("...: %w", err) and inspect with errors.Is(err, target) / errors.As(err, &t); never string-compare err.Error(). Standard-library HTTP signals 404 with w.WriteHeader(http.StatusNotFound), not a framework constant.
 
-Always use this structure:
+### 7. Typed nil in an interface
+- Symptom: `if err != nil` is true even though the concrete value is nil; a nil pointer panics inside a method.
+- Why: An interface is a (type, value) pair; returning (*T)(nil) as error yields a non-nil interface because its type word is set.
+- Fix: Return a literal nil on the error path and check typed nils at boundaries; never return a typed nil as an error.
 
-```
-project/
-├── cmd/                    # Entry points
-│   ├── api/               # API server
-│   └── cli/               # CLI tool
-├── internal/              # Private application code
-│   ├── domain/           # Domain layer (entities, interfaces)
-│   │   └── user/
-│   │       ├── entity.go      # Domain entity
-│   │       ├── repository.go  # Repository interface
-│   │       └── service.go     # Service interface
-│   ├── usecase/          # Use case layer (business logic)
-│   │   └── user/
-│   │       └── service.go     # Service implementation
-│   ├── adapter/          # Adapter layer
-│   │   ├── handler/      # HTTP handlers
-│   │   └── repository/   # Repository implementations
-│   ├── infrastructure/   # Infrastructure
-│   │   ├── database/
-│   │   ├── logger/
-│   │   └── config/
-│   └── dto/              # Data transfer objects
-├── pkg/                  # Public reusable packages
-│   ├── errors/
-│   ├── middleware/
-│   └── validator/
-├── config/
-├── migrations/
-└── test/
-```
+### 8. Unbuffered channel deadlock
+- Symptom: "all goroutines are asleep - deadlock!"; a send and its receive block forever on one goroutine.
+- Why: An unbuffered channel send blocks until a receiver is ready; if both live in the same goroutine, or no receiver ever exists, nothing can proceed.
+- Fix: Send from one goroutine and receive in another; add a buffer when the producer must not block; use select with ctx.Done()/default; close channels from the sender only.
 
-### Standard File Templates
-> **Standard File Templates** (Domain Entity, Repository Interface/Implementation, Service Interface/Implementation, Fiber HTTP Handler, DTO, Cobra CLI Command): see [references/file-templates.md](references/file-templates.md)
-## Best Practices You Always Apply
+## Language Core
 
-### 1. Error Handling
+Concise reference for language-level decisions. Framework-neutral by design; see [modern-go.md](modern-go.md) for version-gated features.
+
+- **Syntax and type features**: composite literals, useful zero values, := inference, range semantics, defer/panic/recover, method sets, embedding, rune vs byte, string immutability.
+- **Generics**: type parameters `[T any]`, constraints (~, comparable), inference; no type parameters on methods; use them for type-safe containers/algorithms, not as a replacement for interfaces.
+- **Interfaces**: implicit satisfaction, small single-method interfaces, accept interfaces / return structs, type switches and assertions, use `any` sparingly.
+- **Concurrency and synchronization primitives**: goroutine (cheap, M:N scheduled), channel (buffered/unbuffered, directional, close, range), select (default + cancellation), sync.Mutex/RWMutex, sync.Once, sync.WaitGroup, sync.Cond, sync/atomic, sync.Map, context.Context.
+- **sync/async patterns**: Go has no async/await — concurrency is explicit goroutines plus channels; fan-out/fan-in, worker pools, pipelines (stages joined by channels), cancellation via errgroup-style ctx, generator pattern, bounded concurrency with a semaphore channel.
+- **Error handling**: error as a value, sentinel errors, fmt.Errorf("%w"), errors.Is/As/Join, custom error types, wrap at boundaries and handle once.
+- **Idiomatic package design**: small packages named for what they provide, internal/, documented exports, no util/common grab-bags, accept interfaces, avoid init() side effects, keep the zero value useful.
+
+Standard-library-only example (no framework types, no ORM tags):
 
 ```go
-// ✅ GOOD: Wrap errors with context
-func (s *service) GetUser(ctx context.Context, id string) (*User, error) {
-    user, err := s.repo.GetByID(ctx, id)
-    if err != nil {
-        return nil, errors.Wrap(err, "failed to get user from repository")
-    }
-    return user, nil
+// A plain struct: no ORM tags in language-level examples.
+type User struct {
+    ID   string
+    Mail string
 }
 
-// ✅ GOOD: Use errors.Is for comparison
-if errors.Is(err, user.ErrNotFound) {
-    return c.Status(fiber.StatusNotFound).JSON(...)
-}
-
-// ❌ BAD: Swallow errors
-func (s *service) DoSomething() {
-    _ = s.repo.Save(user)  // Don't ignore errors!
-}
-
-// ❌ BAD: String comparison
-if err.Error() == "user not found" {  // Fragile!
-    // ...
-}
+// Signal 404 with the standard library, not a framework constant.
+w.WriteHeader(http.StatusNotFound)
 ```
 
-### 2. Context Usage
+## Framework Selection
 
-```go
-// ✅ GOOD: Always pass and check context
-func (s *service) ProcessOrder(ctx context.Context, orderID string) error {
-    // Check if context is cancelled
-    select {
-    case <-ctx.Done():
-        return ctx.Err()
-    default:
-    }
-    
-    // Pass context downstream
-    order, err := s.repo.GetOrder(ctx, orderID)
-    if err != nil {
-        return err
-    }
-    
-    // Use timeout context for external calls
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-    defer cancel()
-    
-    return s.externalAPI.Process(ctx, order)
-}
+Pick a reference only when the task needs framework scaffolding; language questions above are framework-neutral.
 
-// ❌ BAD: Not passing context
-func (s *service) GetUser(id string) (*User, error) {
-    return s.repo.GetByID(id)  // Missing context!
-}
-```
-
-### 3. Concurrent Programming
-
-```go
-// ✅ GOOD: Use errgroup for multiple goroutines
-import "golang.org/x/sync/errgroup"
-
-func (s *service) FetchMultiple(ctx context.Context, ids []string) ([]*User, error) {
-    g, ctx := errgroup.WithContext(ctx)
-    results := make([]*User, len(ids))
-    
-    for i, id := range ids {
-        i, id := i, id  // Capture loop variables
-        g.Go(func() error {
-            user, err := s.repo.GetByID(ctx, id)
-            if err != nil {
-                return err
-            }
-            results[i] = user
-            return nil
-        })
-    }
-    
-    if err := g.Wait(); err != nil {
-        return nil, err
-    }
-    return results, nil
-}
-
-// ✅ GOOD: Use sync.WaitGroup for fire-and-forget
-func (s *service) NotifyUsers(users []*User) {
-    var wg sync.WaitGroup
-    for _, u := range users {
-        wg.Add(1)
-        go func(user *User) {
-            defer wg.Done()
-            s.notifier.Send(user.Email, "message")
-        }(u)
-    }
-    wg.Wait()
-}
-
-// ❌ BAD: Goroutine leak
-func (s *service) Subscribe() {
-    go func() {
-        for {  // No way to stop this!
-            s.processMessages()
-        }
-    }()
-}
-```
-
-### 4. GORM Best Practices
-
-```go
-// ✅ GOOD: Use preload to avoid N+1 queries
-users, err := r.db.Preload("Orders").Find(&users).Error
-
-// ✅ GOOD: Use transactions for multiple operations
-err := r.db.Transaction(func(tx *gorm.DB) error {
-    if err := tx.Create(&user).Error; err != nil {
-        return err
-    }
-    if err := tx.Create(&profile).Error; err != nil {
-        return err
-    }
-    return nil
-})
-
-// ✅ GOOD: Use batch insert
-r.db.CreateInBatches(users, 100)
-
-// ❌ BAD: N+1 query problem
-users, _ := r.db.Find(&users).Error
-for _, user := range users {
-    orders, _ := r.db.Where("user_id = ?", user.ID).Find(&orders).Error  // N queries!
-}
-```
-
-### 5. Dependency Injection
-
-```go
-// ✅ GOOD: Constructor injection with interfaces
-type UserService struct {
-    repo   user.Repository  // Interface, not concrete type
-    cache  cache.Cache
-    logger logger.Logger
-}
-
-func NewUserService(
-    repo user.Repository,
-    cache cache.Cache,
-    logger logger.Logger,
-) *UserService {
-    return &UserService{
-        repo:   repo,
-        cache:  cache,
-        logger: logger,
-    }
-}
-
-// ❌ BAD: Direct instantiation inside
-type UserService struct {
-    repo *PostgresRepo  // Concrete type!
-}
-
-func NewUserService() *UserService {
-    return &UserService{
-        repo: &PostgresRepo{},  // Tightly coupled!
-    }
-}
-```
+| Framework / stack | Reference file | When to read |
+| --- | --- | --- |
+| No framework (standard library, `net/http`) | [modern-go.md](modern-go.md) | First, for any code — choose version-appropriate syntax and modern built-ins (slices, maps, cmp) before writing. |
+| Fiber (HTTP handlers), Cobra (CLI commands), GORM (models), Clean Architecture scaffolding | [references/file-templates.md](references/file-templates.md) | Only when emitting framework-specific files: a Fiber handler, a Cobra command, a GORM-tagged entity, DTOs, repository/service layers, or a Clean Architecture layout. |
 
 ## Response Patterns
 
-### When Asked to Create a Web API
+Framework-neutral workflow for any Go language request:
 
-1. **Understand Requirements**: Ask about endpoints, authentication, database needs
-2. **Design Architecture**: Propose Clean Architecture structure
-3. **Generate Complete Code**:
-   - Domain entities with GORM tags
-   - Repository interface and implementation
-   - Service interface and implementation
-   - Fiber handlers with validation
-   - DTOs for requests/responses
-   - Middleware if needed
-   - Main entry point with router setup
-4. **Include**: Error handling, logging, validation, tests
+1. Classify: language-level (syntax, types, concurrency, errors) vs framework scaffolding. Language-level is answered from Gotchas / Language Core.
+2. For concurrent code, name the happens-before edges and the stop condition (ctx.Done()) before writing; verify with `go test -race` and `go vet`.
+3. Write standard-library-first code; reach for frameworks only through the Framework Selection table and its linked reference.
+4. Prefer one small compiling example over prose; state the target Go version and gate features with [modern-go.md](modern-go.md).
+5. Close by naming the specific gotcha that applies (loop capture, typed nil, unbuffered channel) so the "why" is explicit.
 
-### When Asked to Create a CLI Tool
+Framework-specific requests (one-line pointers, no inline recipes):
 
-1. **Understand Commands**: What commands and subcommands are needed?
-2. **Design Command Structure**: Root command → subcommands → flags
-3. **Generate Complete Code**:
-   - Root command with persistent flags
-   - Subcommands with specific flags
-   - Config loading with Viper
-   - Business logic integration
-   - Help text and examples
-4. **Include**: Input validation, error messages, usage examples
-
-### When Asked to Optimize Performance
-
-1. **Identify Bottleneck**: Database? CPU? Memory?
-2. **Propose Solutions**:
-   - Database: Indexes, query optimization, connection pooling
-   - Memory: sync.Pool, avoid allocations, profiling
-   - CPU: Concurrency, algorithm optimization
-3. **Provide Benchmarks**: Before/after comparison
-4. **Implementation**: Complete optimized code with comments
+- Asked to create a Web API or REST handler: see [references/file-templates.md](references/file-templates.md).
+- Asked to create a CLI tool or commands: see [references/file-templates.md](references/file-templates.md).
 
 ## Remember
 
-- **Interfaces in domain layer, implementations in adapter layer**
-- **Always use context.Context as first parameter**
-- **Error wrapping adds valuable debugging context**
-- **Table-driven tests for comprehensive coverage**
-- **golangci-lint catches most common issues**
-- **Prefer composition over inheritance**
-- **Keep functions small and focused (< 50 lines)**
-- **Use meaningful names that reveal intent**
-
-## Additional Resources
-
-- For modern Go syntax guidelines based on project's Go version, see [modern-go.md](modern-go.md) - includes version-specific features from Go 1.0 to Go 1.26+
+- Check Gotchas first: most Go bugs are races, leaks, or interface nils.
+- Always honor context.Context; give every goroutine a stop condition.
+- Verify concurrency with `go test -race`; `go vet` catches loop-variable capture.
+- Wrap with `%w`, inspect with errors.Is / errors.As, never compare error strings.
+- Keep answers framework-neutral here; framework templates live in `references/`.
+- Confirm the project's Go version via [modern-go.md](modern-go.md) before using newer syntax.

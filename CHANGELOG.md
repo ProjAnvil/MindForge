@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [skills-v0.9.8] - 2026-11-15
+
+Patch release for `mindforge-en` and `mindforge-zh-cn`, both at 0.9.8.
+The style plugins remain at 0.9.10 and the CLI remains at 0.10.2.
+This skills tag does not publish new CLI binaries.
+
+### Changed
+
+- **Four language skills now describe the language, not a framework stack.**
+  `go-development`, `javascript-typescript`, `python-development` and
+  `enterprise-java` have trigger-only descriptions in English and Chinese.
+  Their bodies lead with language-level gotchas (data races and DRF-SC,
+  context cancellation, type narrowing, unhandled rejections, asyncio and
+  the GIL, virtual thread pinning, the Java Memory Model), then cover
+  syntax, concurrency, sync/async, error handling and idioms. Framework
+  material stays in `references/` and is reached through a one-level
+  `Framework Selection` table in each SKILL.md.
+- **Framework names no longer act as skill triggers.** A deterministic
+  guard rejects Fiber, Cobra, GORM, Express, React, Node.js, FastAPI,
+  Django, Flask, Spring Boot and related names in the four language
+  descriptions. Frontend skills stay framework-bound by design.
+- **Five skills gained exclusive trigger anchors.** `frontend-svelte`,
+  `javascript-typescript`, `go-development`, `tech-documentation` and
+  `database-design` no longer share generic phrases such as "modern web
+  applications", "React/Node.js projects", "RESTful APIs" or "API
+  documentation".
+- **The Chinese enterprise-java skill matches the English one.** About 184
+  lines of inline response templates moved into a new
+  `references/response-patterns.md`, leaving both SKILL.md files symmetric.
+- **Golden-keyword and full-library routing cases now use language-level
+  prompts.** Two framework-bound golden cases were replaced with Go generics
+  and Java records. Reference-reading cases keep their framework prompts
+  because they test `references/` discoverability, not description routing.
+
+### Added
+
+- `evals/tests/test_skill_trigger_disambiguation.py`: deterministic guards
+  for trigger-clause anchors, anchor leakage, generic trigger phrases,
+  framework-free language descriptions, direct reference links, the
+  on-disk skill roster, declared skill counts, listing budget and plugin
+  copy parity.
+- `evals/tests/test_skill_full_library_routing.py`: real-model routing
+  cases with all 19 descriptions visible at once. Requires
+  `SMELT_API_KEY`; skipped in deterministic CI.
+
+### Fixed
+
+- Both plugin manifests and the README now declare 19 skills. The README
+  skill list missed `design-pattern` and named a `frontend-development`
+  directory that does not exist.
+- Plugin skill copies match their sources byte for byte.
+- All eval comments, docstrings and fenced-code comments are English.
+
+### Notes
+
+- Motivation: arXiv 2605.24050v2 reports up to 21 pass-rate points lost
+  when a skill library grows, mainly through skill shadowing rather than
+  context overhead. Anthropic's skill authoring guidance says descriptions
+  state triggering conditions only and that framework variants belong in
+  `references/`. The library stays at 19 skills per language.
+- Deterministic suite: 327 passed, 223 real-model cases deselected.
+
 ## [style-v0.9.10] - 2026-10-25
 
 Patch release for `style-rules-zh-cn` and `style-rules`, both at 0.9.10.

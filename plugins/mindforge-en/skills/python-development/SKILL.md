@@ -1,316 +1,182 @@
 ---
 name: python-development
-description: Professional Python development skill covering modern Python 3.10+, FastAPI, Django, Flask, async programming, data processing, and best practices. Use this skill when developing Python web applications, building FastAPI/Django projects, implementing async programming, or need guidance on Python architecture design and performance optimization.
+description: Use this skill when a generator is exhausted or lazy, when asyncio task cancellation or GIL-bound CPU work confuses, or when type hints or a context manager misbehave. Claim ANY language-level Python question proactively — even one snippet, even when no framework is named.
 ---
 
-# Python Development Skill - System Prompt
+# Python Development — Language Core
 
-You are an expert Python developer with 10+ years of experience building scalable, maintainable applications using modern Python practices, specializing in FastAPI, Django, Flask, async programming, and data processing.
+This skill is about the Python language itself: its syntax, type system, concurrency and async model, the GIL, generators, context managers, and the idioms and gotchas that follow from the data model. It is deliberately framework-neutral. App-level and framework recipes live in `references/`; see the Framework Selection section below.
 
-## When to Use
+## Gotchas
 
-Trigger scenarios — use this skill when the user asks to:
+Each trap is written as symptom → why → fix, because the *why* is the part worth remembering.
 
-- Write Python application code or data models
-- Build Django or FastAPI services
-- Write pytest tests with fixtures
-
-## Your Expertise
-
-### Technical Stack
-- **Python**: 3.10+ with latest features (type hints, dataclasses, pattern matching)
-- **Web Frameworks**: FastAPI, Django 4+, Flask 3+
-- **Async**: asyncio, aiohttp, async/await patterns
-- **ORM**: SQLAlchemy 2.0, Django ORM, Tortoise ORM
-- **Testing**: pytest, pytest-asyncio, unittest, hypothesis
-- **Data**: Pandas, NumPy, Pydantic, dataclasses
-- **Tools**: Poetry, pip-tools, ruff, mypy, black
-
-### Core Competencies
-- Building RESTful APIs with FastAPI/Django/Flask
-- Async programming with asyncio
-- Database operations with SQLAlchemy and Django ORM
-- Type hints and static type checking
-- Data validation with Pydantic
-- Testing strategies (unit, integration, property-based)
-- Performance optimization
-- Clean code and SOLID principles
-
-## Code Generation Standards
-
-### Project Structure (FastAPI)
-
-```
-project/
-├── app/
-│   ├── api/                  # API routes
-│   │   ├── v1/
-│   │   │   ├── endpoints/
-│   │   │   └── router.py
-│   │   └── deps.py          # Dependencies
-│   ├── models/              # SQLAlchemy models
-│   ├── schemas/             # Pydantic schemas
-│   ├── services/            # Business logic
-│   ├── repositories/        # Data access layer
-│   ├── core/                # Core functionality
-│   │   ├── config.py
-│   │   ├── security.py
-│   │   └── database.py
-│   ├── middleware/
-│   ├── utils/
-│   └── main.py             # Entry point
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
-├── alembic/                # Database migrations
-├── pyproject.toml
-├── poetry.lock
-└── .env.example
-```
-
-### Project Structure (Django)
-
-```
-project/
-├── config/                  # Project configuration
-│   ├── settings/
-│   │   ├── base.py
-│   │   ├── development.py
-│   │   └── production.py
-│   ├── urls.py
-│   └── wsgi.py
-├── apps/
-│   └── users/
-│       ├── models.py
-│       ├── views.py
-│       ├── serializers.py
-│       ├── urls.py
-│       ├── services.py
-│       ├── admin.py
-│       └── tests.py
-├── requirements/
-│   ├── base.txt
-│   ├── development.txt
-│   └── production.txt
-├── manage.py
-└── .env.example
-```
-
-## Reference Documentation
-
-> **FastAPI application patterns** (Schemas, Models, Repository, Service, Router, Main app): see [references/fastapi-patterns.md](references/fastapi-patterns.md)
-
-> **Django application patterns** (Models, DRF Serializers, Views): see [references/django-patterns.md](references/django-patterns.md)
-
-> **Testing patterns** (pytest config, Unit tests, Integration tests): see [references/testing-patterns.md](references/testing-patterns.md)
-
-## Best Practices You Always Apply
-
-### 1. Type Hints
-
+### 1. Mutable default arguments
+- Symptom: a function "remembers" data across calls; `def add(x, bucket=[])` keeps growing.
+- Why: default values are evaluated once, when the `def` executes, and that one object is reused.
+- Fix: default to `None` and build the object inside the body.
 ```python
-# ✅ GOOD: Complete type hints
-from typing import List, Optional, Dict, Any
-
-def get_users(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100
-) -> List[User]:
-    return db.query(User).offset(skip).limit(limit).all()
-
-# ✅ GOOD: Type hints with generics
-from typing import TypeVar, Generic
-
-T = TypeVar('T')
-
-class Repository(Generic[T]):
-    def get(self, id: int) -> Optional[T]:
-        ...
-
-# ❌ BAD: No type hints
-def get_users(db, skip=0, limit=100):
-    return db.query(User).offset(skip).limit(limit).all()
+def add(x, bucket=None):
+    if bucket is None:            # a fresh object on every call
+        bucket = []
+    bucket.append(x)
+    return bucket
 ```
 
-### 2. Async/Await
-
+### 2. Late-binding closures in loops
+- Symptom: a list of lambdas all return the last loop value.
+- Why: closures capture the *variable*, not its value, and resolve it when called — after the loop ends.
+- Fix: freeze the value now with a default argument.
 ```python
-# ✅ GOOD: Proper async/await
-async def fetch_user(user_id: int) -> User:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"/users/{user_id}") as response:
-            data = await response.json()
-            return User(**data)
-
-# ✅ GOOD: Gather for parallel operations
-async def fetch_multiple_users(user_ids: List[int]) -> List[User]:
-    tasks = [fetch_user(user_id) for user_id in user_ids]
-    return await asyncio.gather(*tasks)
-
-# ❌ BAD: Blocking I/O in async function
-async def fetch_user_bad(user_id: int) -> User:
-    response = requests.get(f"/users/{user_id}")  # Blocking!
-    return User(**response.json())
+funcs = [lambda i=i: i for i in range(3)]  # bind i at definition time
 ```
 
-### 3. Pydantic for Validation
+### 3. GIL and CPU-bound work
+- Symptom: adding threads does not speed up a CPU-heavy loop; it can even be slower.
+- Why: the GIL lets one thread execute bytecode at a time, so CPU-bound threads serialize.
+- Fix: use processes (`concurrent.futures.ProcessPoolExecutor`) for CPU work; reserve threads and `asyncio` for I/O-bound waits.
 
+### 4. Blocking calls inside `async def`
+- Symptom: one coroutine freezes the whole event loop; unrelated tasks stall.
+- Why: `time.sleep`, blocking I/O and CPU loops never `await`, so control never returns to the loop.
+- Fix: `await asyncio.sleep(...)` for delays and `await asyncio.to_thread(...)` for blocking calls.
 ```python
-# ✅ GOOD: Pydantic models with validation
-from pydantic import BaseModel, EmailStr, Field, validator
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    name: str = Field(..., min_length=2, max_length=100)
-    age: int = Field(..., ge=0, le=150)
-
-    @validator('name')
-    def name_must_not_be_empty(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError('Name cannot be empty')
-        return v.strip()
-
-# ❌ BAD: Manual validation
-def validate_user(data: dict) -> bool:
-    if 'email' not in data:
-        return False
-    if len(data.get('name', '')) < 2:
-        return False
-    # ... more manual checks
+result = await asyncio.to_thread(blocking_read, path)  # run off the loop
 ```
 
-### 4. Context Managers
+### 5. Generator laziness and exhaustion
+- Symptom: a second iteration yields nothing, or a "computed" value never appears.
+- Why: generators are lazy and single-use; once exhausted they stay empty. `map`/`filter` and generator expressions behave the same.
+- Fix: call `list(...)` if you need to reuse the data, or recreate the generator; never assume it "holds" results.
 
+### 6. `is` vs `==`
+- Symptom: `x is 1000` works in one place and fails in another; small ints/strings seem fine.
+- Why: `is` compares identity, `==` compares value; interning and caching hide the bug until they don't.
+- Fix: use `is` only for singletons (`None`, `True`, `False`, `...`); use `==` for values.
+
+### 7. Broad `except`
+- Symptom: real bugs disappear; `except Exception: pass` hides errors.
+- Why: a bare or broad catch swallows everything, including typos and your own logic errors (`KeyboardInterrupt`/`SystemExit` derive from `BaseException`, not `Exception`).
+- Fix: catch the narrowest type, bind `as exc`, and re-raise or log; never silently `pass`.
+
+### 8. `asyncio` task cancellation and shielding
+- Symptom: `task.cancel()` does not stop a critical section, or cancellation lands mid-`await` and corrupts state.
+- Why: cancellation is delivered as `CancelledError` at the next `await`, and it propagates into whatever you are awaiting.
+- Fix: protect with `await asyncio.shield(critical())`, clean up in `finally`, and let `CancelledError` propagate after cleanup.
+
+### 9. Context manager `__exit__` return value
+- Symptom: an exception vanishes with no traceback.
+- Why: `__exit__` returning a truthy value suppresses the in-flight exception; `None`/`False` propagates it.
+- Fix: return `False`/`None` by default; in `@contextmanager` wrap `yield` in `try/finally` and suppress only deliberately (or use `contextlib.suppress`).
+
+## Language Core
+
+A map of the language surface — enough to pick the right tool, not a tutorial. Keep examples standard-library-only.
+
+### Type hints and typing features
+Builtin generics (`list[T]`, `dict[K, V]`), `TypeVar`, `Union`/`|`, `Optional`, `Literal`, `Annotated`, `TypedDict` and `Self` come from `typing` and PEP 585/604. Annotations are not enforced at runtime; run a static checker, and use `from __future__ import annotations` to postpone evaluation.
 ```python
-# ✅ GOOD: Use context managers
-async def process_file(file_path: str) -> None:
-    async with aiofiles.open(file_path, 'r') as f:
-        content = await f.read()
-        # Process content
+from typing import TypeVar
 
-# ✅ GOOD: Custom context manager
-from contextlib import asynccontextmanager
+T = TypeVar("T")
 
-@asynccontextmanager
-async def get_db_session():
-    session = SessionLocal()
-    try:
-        yield session
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
-
-# ❌ BAD: Manual resource management
-async def process_file_bad(file_path: str) -> None:
-    f = await aiofiles.open(file_path, 'r')
-    content = await f.read()
-    await f.close()  # Easy to forget!
+def first(items: list[T]) -> T:          # parametrized, framework-free
+    return items[0]
 ```
 
-### 5. Proper Exception Handling
-
+### Dataclasses and protocols
+`@dataclass` generates `__init__`/`__repr__`/`__eq__`; `frozen=True` gives value objects, `slots=True` saves memory. `Protocol` provides structural subtyping (duck typing checked statically) with no inheritance.
 ```python
-# ✅ GOOD: Specific exceptions
-from fastapi import HTTPException
+from dataclasses import dataclass
+from typing import Protocol
 
-async def get_user(user_id: int) -> User:
-    user = await db.get(User, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=f"User {user_id} not found"
-        )
-    return user
+class Sized(Protocol):
+    def __len__(self) -> int: ...
 
-# ✅ GOOD: Custom exceptions
-class UserNotFoundError(Exception):
-    """Raised when user is not found."""
-    pass
-
-class DuplicateEmailError(Exception):
-    """Raised when email already exists."""
-    pass
-
-# ❌ BAD: Catch-all exceptions
-try:
-    user = await get_user(user_id)
-except Exception:  # Too broad!
-    pass
+@dataclass(frozen=True, slots=True)
+class Config:                            # a plain object, no ORM session
+    retries: int = 3
+    timeout: float = 1.0
 ```
 
-### 6. List Comprehensions and Generators
-
+### async/await and asyncio task semantics
+`async def` returns a coroutine that does nothing until awaited or scheduled. `asyncio.create_task` schedules concurrently, `await asyncio.gather` joins them, and `TaskGroup` (3.11+) gives structured concurrency. Only `await` points yield to the loop.
 ```python
-# ✅ GOOD: List comprehension
-squared = [x**2 for x in range(10)]
+import asyncio
 
-# ✅ GOOD: Generator for memory efficiency
-def read_large_file(file_path: str):
-    with open(file_path) as f:
+async def fetch_all(urls: list[str]) -> list[str]:
+    async def one(url: str) -> str:      # stdlib only, no third-party client
+        await asyncio.sleep(0)           # a yield point
+        return url
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(one(u)) for u in urls]
+    return [t.result() for t in tasks]
+```
+
+### Generators and iterators
+`yield` turns a function into a lazy iterator; `yield from` delegates. Iterators are single-pass, generators are lazy, and `itertools` covers the combinators. Prefer a generator for large or infinite data.
+```python
+def read_lines(path: str):
+    with open(path, encoding="utf-8") as f:
         for line in f:
-            yield line.strip()
-
-# ✅ GOOD: Dictionary comprehension
-user_dict = {user.id: user.name for user in users}
-
-# ❌ BAD: Manual loop when comprehension works
-squared = []
-for x in range(10):
-    squared.append(x**2)
+            yield line.rstrip()          # nothing is materialized in memory
 ```
+
+### Context managers
+`with` calls `__enter__`/`__exit__` and guarantees cleanup; `contextlib.contextmanager` builds one from a generator, and `closing`/`suppress`/`ExitStack` cover common cases. The object from `__enter__` is the `as` target.
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def open_upper(path: str):
+    with open(path, encoding="utf-8") as f:   # builtins.open, not an async file lib
+        yield (line.upper() for line in f)    # a plain stdlib context manager
+```
+
+### Error handling and exception chaining
+Catch narrow types, use `raise NewError(...) from exc` to preserve the cause and `from None` to hide it; bare `raise` re-raises. Custom exceptions should subclass a sensible builtin (`ValueError`, not an HTTP layer). Validate manually when no schema library is involved.
+```python
+class NotFoundError(ValueError):
+    pass
+
+def require(condition: bool, message: str) -> None:   # manual validation
+    if not condition:
+        raise NotFoundError(message)                   # plain ValueError subclass
+try:
+    require(user is not None, "user not found")
+except ValueError as exc:
+    raise RuntimeError("load failed") from exc         # chaining preserves the cause
+```
+
+### Packaging and imports
+Prefer absolute imports inside packages; keep relative imports (`.`, `..`) within a package. `__init__.py` marks a package, `__all__` controls `from x import *`, and `if __name__ == "__main__":` guards scripts. Avoid circular and wildcard imports, and keep import-time side effects out (PEP 8).
+
+### Idioms
+Prefer EAFP (`try`/`except`) over LBYL for racy checks, comprehensions over manual `append` loops, `enumerate`/`zip` over index juggling, f-strings for formatting, unpacking and `*_` for flexible assignment, and `with` for any resource. Reach for `pathlib`, `itertools`, `functools` and `collections` before writing custom code.
+
+## Framework Selection
+
+Framework and testing recipes are **not** language material — read the matching file *before* writing app-level code. Each is linked directly, one level deep.
+
+| Framework / library | Reference file | When to read |
+| --- | --- | --- |
+| Django | [django-patterns.md](references/django-patterns.md) | Building models, views, or a Django app |
+| FastAPI | [fastapi-patterns.md](references/fastapi-patterns.md) | Creating endpoints or request validation |
+| pytest / testing | [testing-patterns.md](references/testing-patterns.md) | Writing tests with fixtures |
 
 ## Response Patterns
 
-### When Asked to Create a FastAPI Application
-
-1. **Understand Requirements**: Endpoints, database, authentication
-2. **Design Architecture**: Routes → Services → Repositories → Models
-3. **Generate Complete Code**:
-   - Pydantic schemas for validation
-   - SQLAlchemy models
-   - Repository layer for data access
-   - Service layer for business logic
-   - FastAPI routers with dependencies
-   - Middleware and error handling
-4. **Include**: Type hints, async/await, logging, tests
-
-### When Asked to Create a Django Application
-
-1. **Understand Requirements**: Models, views, serializers
-2. **Design Architecture**: Models → Serializers → Views → URLs
-3. **Generate Complete Code**:
-   - Django models with proper fields
-   - DRF serializers with validation
-   - ViewSets or APIViews
-   - URL configuration
-   - Admin configuration
-4. **Include**: Migrations, permissions, tests
-
-### When Asked to Optimize Performance
-
-1. **Identify Bottleneck**: Database queries, CPU, I/O
-2. **Propose Solutions**:
-   - Database: Indexes, query optimization, connection pooling
-   - Async: Use asyncio for I/O-bound operations
-   - Caching: Redis, in-memory caching
-   - Profiling: cProfile, line_profiler
-3. **Provide Benchmarks**: Before/after comparison
-4. **Implementation**: Optimized code with explanations
+- For a language-level question, answer here with stdlib code; explain the *why* before the fix.
+- If the request is really for a full app, service, endpoint, or test suite, it is a framework task: read the linked reference in Framework Selection instead of generating it inline.
+- Compare options (threads vs processes vs `asyncio`) by the workload (CPU vs I/O), not by taste, and cite the relevant gotcha.
+- Prefer a minimal runnable snippet over boilerplate; state the Python version when a feature is version-gated (e.g. `TaskGroup` on 3.11+).
 
 ## Remember
 
-- **Type everything**: Use type hints consistently
-- **Async for I/O**: Use async/await for I/O-bound operations
-- **Pydantic for validation**: Leverage Pydantic's power
-- **Follow PEP 8**: Use black and ruff for formatting
-- **Test everything**: Unit, integration, and e2e tests
-- **DRY principle**: Extract reusable code
-- **Single responsibility**: Each function does one thing
-- **Meaningful names**: Clear, descriptive names
-- **Docstrings**: Document public APIs with Google or NumPy style
-- **Context managers**: Always use them for resources
+- The language and its data model come first; frameworks are downstream choices.
+- `is` is identity, `==` is value; defaults are evaluated once; closures capture variables, not values.
+- `asyncio` helps I/O, the GIL limits CPU threads; never block inside `async def`.
+- Generators are lazy and single-use; context managers guarantee cleanup.
+- Catch narrow exceptions, chain with `from`, and let `CancelledError` propagate after cleanup.
+- Keep examples standard-library-only; push framework specifics into `references/`.
+- When unsure, reason from the why (PEP 8, the data model, asyncio/typing docs) rather than a rule of thumb.

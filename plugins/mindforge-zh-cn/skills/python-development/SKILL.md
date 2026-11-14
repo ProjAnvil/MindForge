@@ -1,316 +1,182 @@
 ---
 name: python-development
-description: 专业的 Python 开发技能，涵盖现代 Python 3.10+、FastAPI、Django、Flask、异步编程、数据处理和最佳实践。使用此技能开发 Python Web 应用、构建 FastAPI/Django 项目、实现异步编程，或需要 Python 架构设计和性能优化指导时使用。
+description: 使用此技能处理生成器惰性求值或被耗尽、GIL 与 CPU 密集任务、类型提示或上下文管理器行为异常，以及任何 Python 语言层面疑问（哪怕只有一段代码、哪怕没有点名任何框架）时使用。
 ---
 
-# Python 开发技能
+# Python 开发 —— 语言核心
 
-你是一位拥有 10 年以上经验的 Python 专家开发者，擅长使用现代 Python 实践构建可扩展、可维护的应用程序，专注于 FastAPI、Django、Flask、异步编程和数据处理。
+本技能聚焦 Python 语言本身：语法、类型系统、并发与 async 模型、GIL、generator、context manager，以及源自数据模型的惯用法与陷阱。刻意保持框架中立。应用与框架相关的范例放在 `references/`，见下文的 Framework Selection。
 
-## 何时使用
+## Gotchas
 
-触发场景：当用户提出以下请求时，使用本 skill：
+每条陷阱按「症状 → 原因 → 修复」组织，因为真正值得记住的是「原因」。
 
-- 当需要编写 Python 应用代码或数据模型时
-- 当需要构建 Django 或 FastAPI 服务时
-- 当用户要求用 fixture 编写 pytest 测试时
-
-## 你的专业领域
-
-### 技术栈
-- **Python**: 3.10+ 及最新特性（类型提示、dataclasses、模式匹配）
-- **Web 框架**: FastAPI、Django 4+、Flask 3+
-- **异步编程**: asyncio、aiohttp、async/await 模式
-- **ORM**: SQLAlchemy 2.0、Django ORM、Tortoise ORM
-- **测试**: pytest、pytest-asyncio、unittest、hypothesis
-- **数据处理**: Pandas、NumPy、Pydantic、dataclasses
-- **工具**: Poetry、pip-tools、ruff、mypy、black
-
-### 核心能力
-- 使用 FastAPI/Django/Flask 构建 RESTful API
-- 使用 asyncio 进行异步编程
-- 使用 SQLAlchemy 和 Django ORM 进行数据库操作
-- 类型提示和静态类型检查
-- 使用 Pydantic 进行数据验证
-- 测试策略（单元测试、集成测试、基于属性的测试）
-- 性能优化
-- 整洁代码和 SOLID 原则
-
-## 代码生成标准
-
-### 项目结构（FastAPI）
-
-```
-project/
-├── app/
-│   ├── api/                  # API 路由
-│   │   ├── v1/
-│   │   │   ├── endpoints/
-│   │   │   └── router.py
-│   │   └── deps.py          # 依赖项
-│   ├── models/              # SQLAlchemy 模型
-│   ├── schemas/             # Pydantic schemas
-│   ├── services/            # 业务逻辑
-│   ├── repositories/        # 数据访问层
-│   ├── core/                # 核心功能
-│   │   ├── config.py
-│   │   ├── security.py
-│   │   └── database.py
-│   ├── middleware/
-│   ├── utils/
-│   └── main.py             # 入口点
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
-├── alembic/                # 数据库迁移
-├── pyproject.toml
-├── poetry.lock
-└── .env.example
-```
-
-### 项目结构（Django）
-
-```
-project/
-├── config/                  # 项目配置
-│   ├── settings/
-│   │   ├── base.py
-│   │   ├── development.py
-│   │   └── production.py
-│   ├── urls.py
-│   └── wsgi.py
-├── apps/
-│   └── users/
-│       ├── models.py
-│       ├── views.py
-│       ├── serializers.py
-│       ├── urls.py
-│       ├── services.py
-│       ├── admin.py
-│       └── tests.py
-├── requirements/
-│   ├── base.txt
-│   ├── development.txt
-│   └── production.txt
-├── manage.py
-└── .env.example
-```
-
-## 标准文件模板
-
-> **FastAPI 应用模式**（Schemas、Models、Repository、Service、Router、主应用）：参见 [references/fastapi-patterns.md](references/fastapi-patterns.md)
-> 
-> **Django 应用模式**（Models、DRF Serializers、Views）：参见 [references/django-patterns.md](references/django-patterns.md)
-> 
-> **测试模式**（pytest 配置、单元测试、集成测试）：参见 [references/testing-patterns.md](references/testing-patterns.md)
-
-## 你始终应用的最佳实践
-
-### 1. 类型提示
-
+### 1. Mutable default arguments
+- 症状：函数在多次调用之间「记住」了数据；`def add(x, bucket=[])` 里的列表不断增长。
+- 原因：默认值在 `def` 执行时求值一次，之后一直复用同一个对象。
+- 修复：默认设为 `None`，在函数体内新建对象。
 ```python
-# ✅ 好的做法：完整的类型提示
-from typing import List, Optional, Dict, Any
-
-def get_users(
-    db: Session,
-    skip: int = 0,
-    limit: int = 100
-) -> List[User]:
-    return db.query(User).offset(skip).limit(limit).all()
-
-# ✅ 好的做法：带泛型的类型提示
-from typing import TypeVar, Generic
-
-T = TypeVar('T')
-
-class Repository(Generic[T]):
-    def get(self, id: int) -> Optional[T]:
-        ...
-
-# ❌ 坏的做法：没有类型提示
-def get_users(db, skip=0, limit=100):
-    return db.query(User).offset(skip).limit(limit).all()
+def add(x, bucket=None):
+    if bucket is None:            # a fresh object on every call
+        bucket = []
+    bucket.append(x)
+    return bucket
 ```
 
-### 2. 异步/等待
-
+### 2. Late-binding closures in loops
+- 症状：一组 lambda 全部返回循环的最后一个值。
+- 原因：闭包捕获的是「变量」而非「值」，并在调用时才解析——此时循环早已结束。
+- 修复：用默认参数在定义时把值固定下来。
 ```python
-# ✅ 好的做法：正确的异步/等待
-async def fetch_user(user_id: int) -> User:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"/users/{user_id}") as response:
-            data = await response.json()
-            return User(**data)
-
-# ✅ 好的做法：使用 gather 进行并行操作
-async def fetch_multiple_users(user_ids: List[int]) -> List[User]:
-    tasks = [fetch_user(user_id) for user_id in user_ids]
-    return await asyncio.gather(*tasks)
-
-# ❌ 坏的做法：在异步函数中使用阻塞 I/O
-async def fetch_user_bad(user_id: int) -> User:
-    response = requests.get(f"/users/{user_id}")  # 阻塞！
-    return User(**response.json())
+funcs = [lambda i=i: i for i in range(3)]  # bind i at definition time
 ```
 
-### 3. 使用 Pydantic 进行验证
+### 3. GIL and CPU-bound work
+- 症状：加线程并不能加速 CPU 密集循环，甚至更慢。
+- 原因：GIL 同一时刻只允许一个线程执行字节码，CPU 密集的线程会串行化。
+- 修复：CPU 密集用进程（`concurrent.futures.ProcessPoolExecutor`）；线程与 `asyncio` 留给 I/O 等待。
 
+### 4. Blocking calls inside `async def`
+- 症状：一个协程卡住整个事件循环，其他任务全部停滞。
+- 原因：`time.sleep`、阻塞 I/O 与 CPU 循环从不 `await`，控制权不会交回事件循环。
+- 修复：延迟用 `await asyncio.sleep(...)`，阻塞调用用 `await asyncio.to_thread(...)`。
 ```python
-# ✅ 好的做法：带验证的 Pydantic 模型
-from pydantic import BaseModel, EmailStr, Field, validator
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    name: str = Field(..., min_length=2, max_length=100)
-    age: int = Field(..., ge=0, le=150)
-
-    @validator('name')
-    def name_must_not_be_empty(cls, v: str) -> str:
-        if not v.strip():
-            raise ValueError('Name cannot be empty')
-        return v.strip()
-
-# ❌ 坏的做法：手动验证
-def validate_user(data: dict) -> bool:
-    if 'email' not in data:
-        return False
-    if len(data.get('name', '')) < 2:
-        return False
-    # ... 更多手动检查
+result = await asyncio.to_thread(blocking_read, path)  # run off the loop
 ```
 
-### 4. 上下文管理器
+### 5. Generator laziness and exhaustion
+- 症状：第二次迭代什么都没有，或「算好的」值从未出现。
+- 原因：generator 惰性且一次性；一旦耗尽便一直为空。`map`/`filter` 与生成器表达式同理。
+- 修复：需要复用就 `list(...)`，或重新创建 generator；别假设它「存着」结果。
 
+### 6. `is` vs `==`
+- 症状：`x is 1000` 有时成立有时不成立；小整数/字符串看起来没问题。
+- 原因：`is` 比较身份，`==` 比较值；interning 与缓存会掩盖这个 bug，直到不再掩盖。
+- 修复：`is` 只用于单例（`None`、`True`、`False`、`...`）；值比较一律用 `==`。
+
+### 7. Broad `except`
+- 症状：真正的 bug 凭空消失；`except Exception: pass` 把错误吞掉。
+- 原因：裸捕获或过宽捕获会吞下一切，包括拼写错误与自身逻辑错误（`KeyboardInterrupt`/`SystemExit` 继承自 `BaseException`，不是 `Exception`）。
+- 修复：捕获最窄的类型，用 `as exc` 绑定后重新抛出或记录；绝不静默 `pass`。
+
+### 8. `asyncio` task cancellation and shielding
+- 症状：`task.cancel()` 停不掉关键区段，或取消落在某个 `await` 中途而破坏状态。
+- 原因：取消以 `CancelledError` 的形式在下一个 `await` 处投递，并传播到正在等待的对象。
+- 修复：用 `await asyncio.shield(critical())` 保护，在 `finally` 里清理，清理后让 `CancelledError` 继续传播。
+
+### 9. Context manager `__exit__` return value
+- 症状：异常悄无声息地消失，没有 traceback。
+- 原因：`__exit__` 返回真值会抑制进行中的异常；返回 `None`/`False` 才会让它继续传播。
+- 修复：默认返回 `False`/`None`；在 `@contextmanager` 里把 `yield` 包进 `try/finally`，只在明确要抑制时才抑制（或用 `contextlib.suppress`）。
+
+## Language Core
+
+语言全景——够用来选对工具，不是教程。示例一律只用标准库。
+
+### Type hints and typing features
+内建泛型（`list[T]`、`dict[K, V]`）、`TypeVar`、`Union`/`|`、`Optional`、`Literal`、`Annotated`、`TypedDict` 与 `Self` 来自 `typing` 及 PEP 585/604。注解在运行时并不强制；请交给静态检查器，并用 `from __future__ import annotations` 延迟求值。
 ```python
-# ✅ 好的做法：使用上下文管理器
-async def process_file(file_path: str) -> None:
-    async with aiofiles.open(file_path, 'r') as f:
-        content = await f.read()
-        # 处理内容
+from typing import TypeVar
 
-# ✅ 好的做法：自定义上下文管理器
-from contextlib import asynccontextmanager
+T = TypeVar("T")
 
-@asynccontextmanager
-async def get_db_session():
-    session = SessionLocal()
-    try:
-        yield session
-        await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await session.close()
-
-# ❌ 坏的做法：手动资源管理
-async def process_file_bad(file_path: str) -> None:
-    f = await aiofiles.open(file_path, 'r')
-    content = await f.read()
-    await f.close()  # 容易忘记！
+def first(items: list[T]) -> T:          # parametrized, framework-free
+    return items[0]
 ```
 
-### 5. 正确的异常处理
-
+### Dataclasses and protocols
+`@dataclass` 自动生成 `__init__`/`__repr__`/`__eq__`；`frozen=True` 得到值对象，`slots=True` 省内存。`Protocol` 提供结构化子类型（静态检查的 duck typing），无需继承。
 ```python
-# ✅ 好的做法：特定异常
-from fastapi import HTTPException
+from dataclasses import dataclass
+from typing import Protocol
 
-async def get_user(user_id: int) -> User:
-    user = await db.get(User, user_id)
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=f"User {user_id} not found"
-        )
-    return user
+class Sized(Protocol):
+    def __len__(self) -> int: ...
 
-# ✅ 好的做法：自定义异常
-class UserNotFoundError(Exception):
-    """当用户未找到时抛出。"""
-    pass
-
-class DuplicateEmailError(Exception):
-    """当邮箱已存在时抛出。"""
-    pass
-
-# ❌ 坏的做法：捕获所有异常
-try:
-    user = await get_user(user_id)
-except Exception:  # 太宽泛！
-    pass
+@dataclass(frozen=True, slots=True)
+class Config:                            # a plain object, no ORM session
+    retries: int = 3
+    timeout: float = 1.0
 ```
 
-### 6. 列表推导式和生成器
-
+### async/await and asyncio task semantics
+`async def` 返回 coroutine，在被 await 或调度之前什么都不做。`asyncio.create_task` 并发调度，`await asyncio.gather` 汇合结果，`TaskGroup`（3.11+）提供结构化并发。只有 `await` 点才会把控制权交回事件循环。
 ```python
-# ✅ 好的做法：列表推导式
-squared = [x**2 for x in range(10)]
+import asyncio
 
-# ✅ 好的做法：使用生成器提高内存效率
-def read_large_file(file_path: str):
-    with open(file_path) as f:
+async def fetch_all(urls: list[str]) -> list[str]:
+    async def one(url: str) -> str:      # stdlib only, no third-party client
+        await asyncio.sleep(0)           # a yield point
+        return url
+    async with asyncio.TaskGroup() as tg:
+        tasks = [tg.create_task(one(u)) for u in urls]
+    return [t.result() for t in tasks]
+```
+
+### Generators and iterators
+`yield` 把函数变成惰性迭代器；`yield from` 用于委托。迭代器是单次的，generator 是惰性的，`itertools` 覆盖各类组合子。数据大或无限时优先用 generator。
+```python
+def read_lines(path: str):
+    with open(path, encoding="utf-8") as f:
         for line in f:
-            yield line.strip()
-
-# ✅ 好的做法：字典推导式
-user_dict = {user.id: user.name for user in users}
-
-# ❌ 坏的做法：当推导式可以工作时使用手动循环
-squared = []
-for x in range(10):
-    squared.append(x**2)
+            yield line.rstrip()          # nothing is materialized in memory
 ```
 
-## 响应模式
+### Context managers
+`with` 调用 `__enter__`/`__exit__` 并保证清理；`contextlib.contextmanager` 可用 generator 构造一个，`closing`/`suppress`/`ExitStack` 覆盖常见场景。`__enter__` 返回的对象就是 `as` 的目标。
+```python
+from contextlib import contextmanager
 
-### 当被要求创建 FastAPI 应用时
+@contextmanager
+def open_upper(path: str):
+    with open(path, encoding="utf-8") as f:   # builtins.open, not an async file lib
+        yield (line.upper() for line in f)    # a plain stdlib context manager
+```
 
-1. **理解需求**：端点、数据库、认证
-2. **设计架构**：路由 → 服务 → Repository → 模型
-3. **生成完整代码**：
-   - 用于验证的 Pydantic schemas
-   - SQLAlchemy 模型
-   - 数据访问的 Repository 层
-   - 业务逻辑的 Service 层
-   - 带依赖的 FastAPI 路由
-   - 中间件和错误处理
-4. **包含**：类型提示、异步/等待、日志记录、测试
+### Error handling and exception chaining
+捕获最窄的类型，用 `raise NewError(...) from exc` 保留 cause，`from None` 隐藏它；裸 `raise` 重新抛出。自定义异常应继承合适内建类型（`ValueError`，而非 HTTP 层）。没有 schema 库时手动校验。
+```python
+class NotFoundError(ValueError):
+    pass
 
-### 当被要求创建 Django 应用时
+def require(condition: bool, message: str) -> None:   # manual validation
+    if not condition:
+        raise NotFoundError(message)                   # plain ValueError subclass
+try:
+    require(user is not None, "user not found")
+except ValueError as exc:
+    raise RuntimeError("load failed") from exc         # chaining preserves the cause
+```
 
-1. **理解需求**：模型、视图、serializers
-2. **设计架构**：模型 → Serializers → 视图 → URL
-3. **生成完整代码**：
-   - 带适当字段的 Django 模型
-   - 带验证的 DRF serializers
-   - ViewSets 或 APIViews
-   - URL 配置
-   - Admin 配置
-4. **包含**：迁移、权限、测试
+### Packaging and imports
+包内优先绝对导入；相对导入（`.`、`..`）只在包内使用。`__init__.py` 标记包，`__all__` 控制 `from x import *`，`if __name__ == "__main__":` 保护脚本。避免循环导入与通配导入，别在导入时产生副作用（PEP 8）。
 
-### 当被要求优化性能时
+### Idioms
+对有竞态的检查优先 EAFP（`try`/`except`）而非 LBYL，推导式优先于手写 `append` 循环，`enumerate`/`zip` 优先于下标，格式化用 f-string，灵活赋值用解包与 `*_`，任何资源都用 `with`。先想到 `pathlib`、`itertools`、`functools`、`collections`，再写自定义代码。
 
-1. **识别瓶颈**：数据库查询、CPU、I/O
-2. **提出解决方案**：
-   - 数据库：索引、查询优化、连接池
-   - 异步：对 I/O 密集型操作使用 asyncio
-   - 缓存：Redis、内存缓存
-   - 性能分析：cProfile、line_profiler
-3. **提供基准测试**：前后对比
-4. **实现**：带解释的优化代码
+## Framework Selection
 
-## 记住
+框架与测试范例**不是**语言内容——在写应用级代码*之前*先读对应文件。每个文件都直接链接，只有一层深度。
 
-- **类型化一切**：始终使用类型提示
-- **I/O 使用异步**：对 I/O 密集型操作使用 async/await
-- **使用 Pydantic 验证**：利用 Pydantic 的强大功能
-- **遵循 PEP 8**：使用 black 和 ruff 进行格式化
-- **测试一切**：单元测试、集成测试和端到端测试
-- **DRY 原则**：提取可重用的代码
-- **单一职责**：每个函数只做一件事
-- **有意义的命名**：清晰、描述性的名称
-- **文档字符串**：用 Google 或 NumPy 风格记录公共 API
-- **上下文管理器**：始终使用它们管理资源
+| Framework / library | Reference file | When to read |
+| --- | --- | --- |
+| Django | [django-patterns.md](references/django-patterns.md) | 构建 model、view 或 Django 应用 |
+| FastAPI | [fastapi-patterns.md](references/fastapi-patterns.md) | 创建 endpoint 或请求校验 |
+| pytest / testing | [testing-patterns.md](references/testing-patterns.md) | 用 fixture 编写测试 |
+
+## Response Patterns
+
+- 语言层面的问题，就在这里用标准库代码回答；先讲「原因」再给修复。
+- 如果请求其实是完整应用、服务、endpoint 或测试套件，那是框架任务：去读 Framework Selection 里链接的对应文件，而不要在此内联生成。
+- 比较方案（线程 vs 进程 vs `asyncio`）时按工作负载（CPU vs I/O）而非偏好，并引用对应的陷阱条目。
+- 优先最小可运行片段而非样板；遇到版本相关特性（如 3.11+ 的 `TaskGroup`）要注明 Python 版本。
+
+## Remember
+
+- 语言及其数据模型优先；框架是下游选择。
+- `is` 比较身份，`==` 比较值；默认值只求值一次；闭包捕获变量而非值。
+- `asyncio` 帮 I/O，GIL 限制 CPU 线程；绝不在 `async def` 里阻塞。
+- generator 惰性且一次性；context manager 保证清理。
+- 捕获最窄异常，用 `from` 链接，清理后让 `CancelledError` 继续传播。
+- 示例只用标准库；框架细节推到 `references/`。
+- 拿不准时从「原因」（PEP 8、数据模型、asyncio/typing 文档）推理，而非凭经验法则。

@@ -162,15 +162,15 @@ mindforge doctor                                         # runtimes, registratio
 - **api-design** - API design (REST, GraphQL, gRPC)
 - **database-design** - Database design and optimization
 - **design-pattern** - GoF patterns, SOLID principles, and code smell detection
-- **enterprise-java** - Enterprise Java development (Spring Boot, microservices)
+- **enterprise-java** - Java language and JVM (virtual threads, memory model, structured concurrency)
 - **frontend-react** - React ecosystem (Next.js, Server Components, Tailwind)
 - **frontend-svelte** - Svelte ecosystem (SvelteKit, shadcn-svelte)
 - **frontend-vue** - Vue ecosystem (Nuxt, Composition API, Pinia)
 - **git-guru** - Advanced Git operations and version control mastery
-- **go-development** - Go development (Fiber, Cobra, GORM)
-- **javascript-typescript** - JavaScript/TypeScript language work (ES6+, strict TypeScript, Node.js)
+- **go-development** - Go language and concurrency (goroutines, channels, context, race detector)
+- **javascript-typescript** - JavaScript/TypeScript language (type narrowing, async, ES6+)
 - **product-management** - Product management and strategy
-- **python-development** - Python development (FastAPI, Django, Flask, asyncio)
+- **python-development** - Python language (asyncio, GIL, type hints, generators)
 - **session-summary** - Summarize current session context for seamless handover
 - **swift-development** - Core Swift 6+ development (Concurrency, Macros, Testing)
 - **swiftui-development** - Modern SwiftUI development (NavigationStack, Observation, SwiftData)

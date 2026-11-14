@@ -26,15 +26,19 @@ LATIN_ANCHORS: dict[str, tuple[str, ...]] = {
                    "RESTful API", "API documentation"),
     "database-design": ("ER diagram", "normalization", "sharding"),
     "design-pattern": ("GoF", "SOLID", "code smells"),
-    "enterprise-java": ("Spring Boot", "microservices"),
+    "enterprise-java": ("virtual threads", "Java Memory Model",
+                        "CompletableFuture", "structured concurrency"),
     "frontend-react": ("React", "Next.js", "shadcn/ui"),
     "frontend-svelte": ("Svelte", "SvelteKit", ".svelte", "shadcn-svelte"),
     "frontend-vue": ("Vue", "Nuxt", "Pinia", "shadcn-vue"),
     "git-guru": ("interactive rebase", "worktree", "reflog", "bisect"),
-    "go-development": ("Fiber", "Cobra", "GORM"),
-    "javascript-typescript": ("ES6+", "JavaScript", "TypeScript", "Node.js"),
+    "go-development": ("goroutine", "channel", "context.Context",
+                       "sync.WaitGroup", "race detector", "Go memory model"),
+    "javascript-typescript": ("type narrowing", "Promise", "async/await",
+                              "ES6+", "TypeScript", "JavaScript"),
     "product-management": ("PRD", "MVP", "user story", "competitive analysis"),
-    "python-development": ("FastAPI", "Django", "Flask"),
+    "python-development": ("asyncio", "GIL", "type hints",
+                           "context manager", "generator"),
     "session-summary": ("handover document",),
     "swift-development": ("Swift 6", "data race"),
     "swiftui-development": ("SwiftUI", "NavigationStack", "SwiftData"),
@@ -48,9 +52,12 @@ CJK_ANCHORS: dict[str, tuple[str, ...]] = {
     "api-design": ("幂等", "API 版本"),
     "database-design": ("ER 图", "分片"),
     "design-pattern": ("代码异味",),
-    "enterprise-java": ("微服务",),
+    "enterprise-java": ("虚拟线程", "内存模型", "结构化并发"),
     "git-guru": ("交互式变基", "工作树"),
+    "go-development": ("协程", "通道"),
+    "javascript-typescript": ("类型收窄", "泛型", "类型守卫"),
     "product-management": ("用户故事", "竞品分析"),
+    "python-development": ("类型提示", "上下文管理器", "生成器"),
     "session-summary": ("交接文档", "会话总结"),
     "swift-development": ("数据竞争",),
     "system-architecture": ("架构决策记录", "分布式系统"),
@@ -87,6 +94,20 @@ FORBIDDEN_GENERIC_PHRASES: dict[str, tuple[str, ...]] = {
         "规划数据架构",
     ),
 }
+
+# Language skills trigger on language-level problems, not framework catalogs.
+# Framework material belongs in references/ and is selected inside SKILL.md.
+LANGUAGE_SKILLS = (
+    "go-development", "javascript-typescript",
+    "python-development", "enterprise-java",
+)
+FRAMEWORK_NAMES = (
+    "Fiber", "Cobra", "GORM", "Viper", "Express", "React", "Node.js",
+    "Jest", "Vite", "FastAPI", "Django", "Flask", "Pydantic",
+    "SQLAlchemy", "pytest", "Spring Boot", "Spring", "JPA",
+    "Hibernate", "Lombok", "Redis",
+)
+_LANGUAGE_CASES = [(lang, skill) for lang in LANGS for skill in LANGUAGE_SKILLS]
 
 TRIGGER_MARKERS = {
     "en": ("Use this skill when", "Use this skill for"),
@@ -217,6 +238,24 @@ def test_generic_trigger_phrase_is_gone(lang, phrase):
         if _contains(_trigger_clause(_description(lang, skill), lang), phrase)
     ]
     assert hits == [], f"{lang}: generic phrase {phrase!r} is back in {hits}"
+
+
+@pytest.mark.parametrize(("lang", "skill"), _LANGUAGE_CASES)
+def test_language_skill_description_has_no_framework_name(lang, skill):
+    text = _description(lang, skill)
+    hits = [name for name in FRAMEWORK_NAMES if _contains(text, name)]
+    assert hits == [], f"{lang}/{skill}: framework names in description: {hits}"
+
+
+@pytest.mark.parametrize(("lang", "skill"), _LANGUAGE_CASES)
+def test_language_skill_links_every_reference(lang, skill):
+    body = (SKILL_ROOTS[lang] / skill / "SKILL.md").read_text(encoding="utf-8")
+    ref_dir = SKILL_ROOTS[lang] / skill / "references"
+    assert ref_dir.is_dir(), f"{lang}/{skill}: references/ is missing"
+    for path in sorted(ref_dir.glob("*.md")):
+        assert f"references/{path.name}" in body, (
+            f"{lang}/{skill}: SKILL.md does not link references/{path.name}"
+        )
 
 
 @pytest.mark.parametrize("lang", LANGS)
