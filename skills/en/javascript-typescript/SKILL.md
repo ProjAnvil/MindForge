@@ -1,6 +1,6 @@
 ---
 name: javascript-typescript
-description: Use this skill when TypeScript type narrowing misfires, when Promise or async/await ordering and rejection handling go wrong, or when ES6+ / JavaScript module and generics semantics are in doubt. Claim ANY language-level JS/TS question proactively — even a single snippet, even when no framework is named.
+description: Use this skill when TypeScript type narrowing misfires, when Promise or async/await ordering and rejection handling go wrong, or when ES6+ / JavaScript module and generics semantics are in doubt. Claim ANY language-level JS/TS question proactively — even a single snippet, even when no framework is named. Trigger on "type narrowing", "unhandled promise" or "ES6+ module".
 ---
 
 # JavaScript & TypeScript — Language Skill

@@ -1,6 +1,6 @@
 ---
 name: python-development
-description: Use this skill when a generator is exhausted or lazy, when asyncio task cancellation or GIL-bound CPU work confuses, or when type hints or a context manager misbehave. Claim ANY language-level Python question proactively — even one snippet, even when no framework is named.
+description: Use this skill when a generator is exhausted or lazy, when asyncio task cancellation or GIL-bound CPU work confuses, or when type hints or a context manager misbehave. Claim ANY language-level Python question proactively — even one snippet, even when no framework is named. Trigger on "generator exhausted", "asyncio cancellation" or "type hints".
 ---
 
 # Python Development — Language Core

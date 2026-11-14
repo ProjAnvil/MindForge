@@ -1,6 +1,6 @@
 ---
 name: go-development
-description: Use this skill when a goroutine leaks or a channel deadlocks, when context.Context cancellation or sync.WaitGroup hangs, when the race detector reports a race, or when the Go memory model and language semantics are in doubt. Claim ANY language-level Go question proactively — even one snippet, even when no framework is named.
+description: Use this skill when a goroutine leaks or a channel deadlocks, when context.Context cancellation or sync.WaitGroup hangs, when the race detector reports a race, or when the Go memory model and language semantics are in doubt. Claim ANY language-level Go question proactively — even one snippet, even when no framework is named. Trigger on "goroutine leak", "channel deadlock" or "race detector".
 ---
 
 # Go Development Skill

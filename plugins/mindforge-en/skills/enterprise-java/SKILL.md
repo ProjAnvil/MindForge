@@ -1,6 +1,6 @@
 ---
 name: enterprise-java
-description: Use this skill when virtual threads pin or stall under synchronized, when CompletableFuture work silently lands on the common pool, or when the Java Memory Model and structured concurrency are in doubt. Claim ANY language-level Java question proactively — even one snippet, even when no framework is named.
+description: Use this skill when virtual threads pin or stall under synchronized, when CompletableFuture work silently lands on the common pool, or when the Java Memory Model and structured concurrency are in doubt. Claim ANY language-level Java question proactively — even one snippet, even when no framework is named. Trigger on "virtual thread pinning", "CompletableFuture" or "memory model".
 ---
 
 # Enterprise Java — Language Skill
