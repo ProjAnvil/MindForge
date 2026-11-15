@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),  
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [skills-v0.10.0] - 2026-11-15
+
+Minor release for `mindforge-en` and `mindforge-zh-cn`, both at 0.10.0.
+The style plugins remain at 0.9.10 and the CLI remains at 0.10.2.
+No new CLI binaries in this tag.
+
+This minor supersedes `skills-v0.9.8`. It carries the same language-skill
+decoupling, plus the trigger-coverage fix committed after that tag
+(`27ab3c8`) which `skills-v0.9.8` does not contain.
+
+### Changed
+
+- All eight rewritten language-skill descriptions now state explicit
+  trigger formulations. English entries add a `Trigger on ...` phrase;
+  Chinese entries add a Chinese when-to-trigger clause. Before the fix,
+  two Chinese skills scored 78.6 (C) with trigger coverage at zero.
+  All eight now score 100.0 (A) under smelt static lint, and the full
+  19-skill library is grade A in both languages.
+
+### Notes
+
+- smelt 0.6.0 static lint: the four language skills rose from 83.4-86.3
+  (B) at `skills-v0.9.7` to 100.0 (A), a gain of 13.7-16.6 points.
+- Composite `smelt.evaluate_skill` scores with 17 real-model behavior
+  cases: overall 82.8-95.75, mean 89.9, four A and four B. Reference
+  coverage stayed above zero for every skill, so framework references
+  remain reachable after the decoupling.
+- Deterministic suite: 327 passed, 223 real-model cases deselected.
+- Motivation: arXiv 2605.24050v2 attributes most large-library
+  degradation to skill shadowing rather than context overhead.
+  Anthropic's skill authoring guidance recommends trigger-only
+  descriptions and framework variants under `references/`.
+
 ## [skills-v0.9.8] - 2026-11-15
 
 Patch release for `mindforge-en` and `mindforge-zh-cn`, both at 0.9.8.

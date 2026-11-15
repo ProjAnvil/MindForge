@@ -8,13 +8,13 @@
       "name": "mindforge-en",
       "source": "./plugins/mindforge-en",
       "description": "MindForge agents and skills (English): 9 subagents and 19 skills covering code review, frontend/backend/mobile engineering, architecture, testing, and product management.",
-      "version": "0.9.8"
+      "version": "0.10.0"
     },
     {
       "name": "mindforge-zh-cn",
       "source": "./plugins/mindforge-zh-cn",
       "description": "MindForge 中文版：9 个子代理和 19 个技能，覆盖代码评审、前端/后端/移动端工程、架构、测试与产品管理。",
-      "version": "0.9.8"
+      "version": "0.10.0"
     },
     {
       "name": "style-rules",
