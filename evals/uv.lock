@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.12' and sys_platform == 'emscripten'",
@@ -62,7 +62,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "smelt", extras = ["json", "openai"], git = "https://github.com/ProjAnvil/Smelt.git?tag=v0.6.0" }]
+requires-dist = [{ name = "smelt", extras = ["json", "openai"], git = "https://github.com/ProjAnvil/Smelt.git?tag=v0.7.0" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -94,8 +94,8 @@ name = "httpcore2"
 version = "2.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "h11", marker = "python_full_version < '3.12' or sys_platform != 'emscripten'" },
-    { name = "truststore", marker = "python_full_version < '3.12' or sys_platform != 'emscripten'" },
+    { name = "h11" },
+    { name = "truststore" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/cb/f3/1db7aa2bc2524062192bb0e0323969492d1883152a232fe36eea65f4e35c/httpcore2-2.13.1.tar.gz", hash = "sha256:e0aa977abe17e69a3b820a24542a6fa88702676d83880b8d194dcd18408e5103", size = 68071, upload-time = "2026-09-23T07:47:22.372Z" }
 wheels = [
@@ -703,8 +703,8 @@ wheels = [
 
 [[package]]
 name = "smelt"
-version = "0.6.0"
-source = { git = "https://github.com/ProjAnvil/Smelt.git?tag=v0.6.0#a3ea52ab80adf7b8ecdb138e6645fab2bd68db69" }
+version = "0.7.0"
+source = { git = "https://github.com/ProjAnvil/Smelt.git?tag=v0.7.0#b8baa719a7107613fd6e041eb52b44d0ed14897f" }
 dependencies = [
     { name = "markdown-it-py" },
 ]
