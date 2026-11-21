@@ -225,6 +225,26 @@ remains 0.10.1; this style tag does not publish new CLI binaries.
 - Sentence-level contextual annotations are under investigation and are
   not part of this release.
 
+## [0.10.3] - 2026-11-21
+
+CLI patch release (`v0.10.3`, plain semver so `go install ...@latest`
+resolves). No CLI behavior changed; the binary is rebuilt so the version
+string matches the tag. Plugin versions are unchanged: skills stay at
+0.10.0 and style stays at 0.9.10, because no plugin content changed.
+
+### Changed
+
+- The evaluation harness now tracks Smelt `v0.7.0` instead of `v0.6.0`.
+- Full-library routing cases now cover every skill in both languages:
+  19 skills per language, 38 cases total, up from 10 per language.
+- A deterministic guard fails the eval suite when the routing table
+  falls out of sync with the skills on disk.
+
+### Validation
+
+- Deterministic suite: 329 passed, 241 real-model cases deselected.
+- Full-library routing: 38 passed, including all 19 English skills.
+
 ## [0.10.2] - 2026-10-25
 
 CLI patch release (`v0.10.2`, plain semver so `go install ...@latest`
