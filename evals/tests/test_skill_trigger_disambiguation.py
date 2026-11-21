@@ -15,6 +15,7 @@ from functools import lru_cache
 import pytest
 
 from conftest import PROJECT_ROOT, SKILL_ROOTS, skill_description
+from test_skill_full_library_routing import TRIGGERS
 
 LANGS = ("en", "zh-cn")
 
@@ -193,6 +194,14 @@ def _trigger_clause(description: str, lang: str) -> str:
 def test_anchor_table_matches_disk(lang):
     assert set(LATIN_ANCHORS) == set(_disk_skills(lang)), (
         f"{lang}: anchor table is out of sync with skills/{lang}"
+    )
+
+
+@pytest.mark.parametrize("lang", LANGS)
+def test_routing_table_covers_every_disk_skill(lang):
+    routed = {skill for skill, _ in TRIGGERS[lang]}
+    assert routed == set(_disk_skills(lang)), (
+        f"{lang}: routing table is out of sync with skills/{lang}"
     )
 
 
