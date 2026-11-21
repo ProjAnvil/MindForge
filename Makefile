@@ -1,7 +1,7 @@
 # MindForge Makefile
 # Manage MCP services, Agents, and Skills
 
-.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm sync-plugins cli cli-test
+.PHONY: help list-mcp list-agents list-skills init-mcp init-agent init-skill add-skill build build-all test-all clean-all eval eval-llm eval-discovery sync-plugins cli cli-test
 
 # Default target
 help:
@@ -36,6 +36,7 @@ help:
 	@echo "  Skill & Agent Evaluation (smelt):"
 	@echo "    make eval                            Deterministic evals (lint + plumbing, no LLM key)"
 	@echo "    make eval-llm                        Full evals incl. agent routing/behavior cases (needs SMELT_API_KEY)"
+	@echo "    make eval-discovery                  L1 discovery suite: catalog, metrics, gates (needs SMELT_API_KEY)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make init-agent AGENT=my-agent LANG=en"
@@ -291,3 +292,10 @@ eval-llm:
 	@echo "Running full skill evals incl. LLM behavior cases..."
 	@cd evals && uv sync --quiet && uv run pytest
 	@echo "✓ All evals passed"
+
+# L1 discovery metrics: full catalog, hard distractors, IR gates.
+# Needs SMELT_API_KEY (shell env or evals/.env).
+eval-discovery:
+	@echo "Running L1 skill discovery suite..."
+	@cd evals && uv sync --quiet && uv run pytest tests/test_skill_discovery_llm.py -s
+	@echo "✓ Discovery evals passed"
